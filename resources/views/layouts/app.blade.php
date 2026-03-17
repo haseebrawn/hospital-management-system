@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -115,7 +116,6 @@
             color: #ffffff;
             font-weight: 600;
             font-size: 16px;
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.55);
         }
 
         .profile-dropdown {
@@ -226,27 +226,30 @@
         }
     </style>
 </head>
+
 <body>
     <div class="shell">
         <header class="topbar">
             <div class="brand">
-                <div class="brand-logo">+</div>
+                <div class="auth-logo" style="padding: 2px 0px 2px 0px;">
+                    <img src="{{ asset('images/HMS logo.png') }}" alt="Hospital HMS Logo" style="width: 70px; height: 55px; padding: 2px 0px 2px 0px;">
+                </div>
                 <div class="brand-text">
                     <div class="brand-title">Hospital HMS</div>
-                    <div class="brand-sub">Admin Dashboard</div>
+                    <!-- <div class="brand-sub">Admin Dashboard</div> -->
                 </div>
             </div>
 
             <div class="profile-area">
                 @auth
-                    <div class="profile-name">
-                        {{ auth()->user()->name }}
-                    </div>
+                <!-- <div class="profile-name">
+                    {{ auth()->user()->name }}
+                </div> -->
                 @endauth
 
                 <button class="profile-avatar-btn" id="profileAvatarButton" type="button">
                     @php
-                        $initial = auth()->check() ? mb_substr(auth()->user()->name, 0, 1) : 'A';
+                    $initial = auth()->check() ? mb_substr(auth()->user()->name, 0, 1) : 'A';
                     @endphp
                     <div class="profile-avatar">
                         {{ mb_strtoupper($initial) }}
@@ -255,24 +258,20 @@
 
                 <div class="profile-dropdown" id="profileDropdown">
                     @auth
-                        <div class="dropdown-header">
-                            <div class="dropdown-avatar">
-                                {{ mb_strtoupper($initial) }}
-                            </div>
-                            <div>
-                                <div class="dropdown-name">{{ auth()->user()->name }}</div>
-                                <div class="dropdown-role">
-                                    {{ optional(auth()->user()->department)->name ?? 'Staff Member' }}
-                                </div>
+                    <div class="dropdown-header">
+                        <div class="dropdown-avatar">
+                            {{ mb_strtoupper($initial) }}
+                        </div>
+                        <div>
+                            <div class="dropdown-name">{{ auth()->user()->name }}</div>
+                            <div class="dropdown-role">
+                                {{ optional(auth()->user()->department)->name ?? 'Staff Member' }}
                             </div>
                         </div>
+                    </div>
                     @endauth
 
                     <div class="dropdown-divider"></div>
-
-                    <div class="dropdown-item">
-                        Logout from your current session.
-                    </div>
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -290,18 +289,18 @@
     </div>
 
     <script>
-        (function () {
+        (function() {
             const avatarButton = document.getElementById('profileAvatarButton');
             const dropdown = document.getElementById('profileDropdown');
 
             if (!avatarButton || !dropdown) return;
 
-            avatarButton.addEventListener('click', function (event) {
+            avatarButton.addEventListener('click', function(event) {
                 event.stopPropagation();
                 dropdown.classList.toggle('visible');
             });
 
-            document.addEventListener('click', function (event) {
+            document.addEventListener('click', function(event) {
                 if (!dropdown.contains(event.target) && !avatarButton.contains(event.target)) {
                     dropdown.classList.remove('visible');
                 }
@@ -309,5 +308,5 @@
         })();
     </script>
 </body>
-</html>
 
+</html>

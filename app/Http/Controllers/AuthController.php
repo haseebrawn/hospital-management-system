@@ -61,28 +61,18 @@ class AuthController extends Controller
 
         $user->assignRole($roleName);
 
-        // API flow (kept same as before)
-        if ($request->expectsJson() || $request->is('api/*')) {
+        if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
-                'message' => 'User registered successfully',
+                'status' => 'ok',
+                'message' => 'User registered successfully.',
+                'redirect' => route('login'),
                 'user' => new UserResource($user->load('roles')),
                 'assigned_role' => $roleName,
                 'assigned_department' => $department,
             ], 201);
         }
 
-        // AJAX web request: return JSON with redirect to login
-        if ($request->ajax()) {
-            return response()->json([
-                'status' => 'ok',
-                'message' => 'User registered successfully.',
-                'redirect' => route('login'),
-            ]);
-        }
-
-        // Normal web form submit
-        return redirect()
-            ->route('login')
+        return redirect()->route('login')
             ->with('status', 'User registered successfully. Please log in.');
     }
 
@@ -90,11 +80,11 @@ class AuthController extends Controller
     {
         $data = $request->validated();
 
-        // If the request is coming from the API, keep existing token-based logic
-        if ($request->expectsJson() || $request->is('api/*')) {
+        // === API login ONLY ===
+        if ($request->is('api/*')) {
             $user = User::where('email', $data['email'])->first();
 
-            if (! $user || ! Hash::check($data['password'], $user->password)) {
+            if (!$user || !Hash::check($data['password'], $user->password)) {
                 return response()->json(['message' => 'Invalid credentials'], 401);
             }
 
@@ -107,13 +97,10 @@ class AuthController extends Controller
             ]);
         }
 
-        // Web-based login using session guard
-        $credentials = [
-            'email' => $data['email'],
-            'password' => $data['password'],
-        ];
+        // === Web login (session-based) ===
+        $credentials = ['email' => $data['email'], 'password' => $data['password']];
 
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (!Auth::guard('web')->attempt($credentials, $request->boolean('remember'))) {
             if ($request->ajax()) {
                 return response()->json([
                     'status' => 'error',
@@ -121,11 +108,11 @@ class AuthController extends Controller
                 ], 422);
             }
 
-            return back()
-                ->withErrors(['email' => 'The provided credentials do not match our records.'])
+            return back()->withErrors(['email' => 'The provided credentials do not match our records.'])
                 ->withInput($request->only('email', 'remember'));
         }
 
+        // regenerate session
         $request->session()->regenerate();
 
         if ($request->ajax()) {
@@ -157,18 +144,9 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        if (! $user) {
-            if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'message' => 'Unauthorized - No active session'
-                ], 401);
-            }
-
-            return redirect()->route('login');
-        }
-
+        // API logout
         if ($request->expectsJson() || $request->is('api/*')) {
-            if ($request->user()->currentAccessToken()) {
+            if ($request->user() && $request->user()->currentAccessToken()) {
                 $request->user()->currentAccessToken()->delete();
             }
 
@@ -177,7 +155,8 @@ class AuthController extends Controller
             ], 200);
         }
 
-        Auth::logout();
+        // Web logout: force web guard
+        Auth::guard('web')->logout();  // ← use web guard explicitly
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

@@ -3,86 +3,68 @@
 @section('title', 'Admin Login - Hospital HMS')
 
 @section('content')
-    <div class="auth-grid">
-        <div>
-            <div class="auth-card">
-                <div class="auth-brand">
-                    <div class="auth-logo">+</div>
-                    <div class="auth-brand-text">
-                        <span class="auth-brand-title">Hospital HMS</span>
-                        <span class="auth-brand-sub">Admin Login</span>
-                    </div>
+<div class="auth-grid">
+    <div>
+        <div class="auth-card">
+            <div class="auth-brand">
+                <div class="auth-logo">
+                    <img src="{{ asset('images/HMS logo.png') }}" alt="Hospital HMS Logo" style="width: 55px; height: 55px;">
                 </div>
+                <div class="auth-brand-text">
+                    <span class="auth-brand-title">Hospital HMS</span>
+                </div>
+            </div>
 
-                <!-- <div class="auth-card-title">Admin Login</div>
-                <div class="auth-card-caption">Sign in to manage hospital operations.</div> -->
+            <div class="alert alert-danger js-form-error" style="display: none;"></div>
 
-                <div class="alert alert-danger js-form-error" style="display: none;"></div>
+            @if (session('status'))
+            <div class="alert alert-success">{{ session('status') }}</div>
+            @endif
 
-                @if (session('status'))
-                    <div class="alert alert-success">
-                        {{ session('status') }}
-                    </div>
-                @endif
+            @if ($errors->any())
+            <div class="alert alert-danger">
+                {{ __('There were some problems with your input.') }}
+            </div>
+            @endif
 
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        {{ __('There were some problems with your input.') }}
-                    </div>
-                @endif
-
+            <div class="auth-card-form">
+                <div class="auth-card-title auth-card-title-center">Login to Your Account</div>
                 <form method="POST" action="{{ route('login.post') }}" data-ajax="true">
                     @csrf
 
                     <div class="form-group">
-                        <label class="form-label" for="email">Email</label>
-                        <input
-                            id="email"
-                            type="email"
-                            name="email"
-                            value="{{ old('email') }}"
-                            class="form-input"
-                            placeholder="admin@example.com"
-                            required
-                            autofocus
-                        >
-                        @error('email')
-                            <div class="text-danger">{{ $message }}</div>
-                        @enderror
+                        <input type="email" name="email" placeholder="Email" class="form-input" required>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="password">Password</label>
-                        <input
-                            id="password"
-                            type="password"
-                            name="password"
-                            class="form-input"
-                            placeholder="••••••••"
-                            required
-                        >
-                        @error('password')
-                            <div class="text-danger">{{ $message }}</div>
-                        @enderror
+                        <input type="password" name="password" placeholder="Password" class="form-input" required>
+                    </div>
+
+                    <!-- ✅ Remember + Forgot Password -->
+                    <div class="form-group remember-me" style="display: flex; justify-content: space-between; align-items: center;">
+                        <label>
+                            <input type="checkbox" name="remember"> Remember me
+                        </label>
+
+                        <a href="#" style="font-size: 12px; color: #1e88e5; text-decoration: none;">
+                            Forgot Password?
+                        </a>
                     </div>
 
                     <div class="form-actions">
-                        <label class="remember-me">
-                            <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}>
-                            <span>Remember me</span>
-                        </label>
-
-                        <button type="submit" class="btn-primary">
-                            Login
-                        </button>
+                        <button type="submit" class="btn-primary">Login</button>
                     </div>
 
-                    <div style="margin-top: 10px; font-size: 12px; text-align: right;">
-                        <a href="#" class="link-muted">Forgot Password?</a>
+                    <!-- ✅ Sign Up Link -->
+                    <div style="text-align: center; margin-top: 15px; font-size: 13px; color: #6b7280;">
+                        Create a new account?
+                        <a href="{{ route('register') }}" style="color: #1e88e5; text-decoration: none; font-weight: 500;">
+                            Sign Up
+                        </a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+</div>
 @endsection
-

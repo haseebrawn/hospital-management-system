@@ -3,136 +3,74 @@
 @section('title', 'Register User - Hospital HMS')
 
 @section('content')
-    <div class="auth-grid">
-        <div>
-            <div class="auth-card auth-card-register">
-                <div class="auth-brand auth-brand-center">
-                    <div class="auth-logo">+</div>
-                    <div class="auth-brand-text">
-                        <span class="auth-brand-title">Hospital HMS</span>
-                    </div>
+<div class="auth-grid">
+    <div>
+        <div class="auth-card auth-card-register">
+            <div class="auth-brand auth-brand-center">
+                <div class="auth-logo">
+                    <img src="{{ asset('images/HMS logo.png') }}" alt="Hospital HMS Logo" style="width: 55px; height: 55px;">
                 </div>
+                <div class="auth-brand-text">
+                    <span class="auth-brand-title">Hospital HMS</span>
+                </div>
+            </div>
 
+            <div class="alert alert-danger js-form-error" style="display: none;"></div>
+
+            @if ($errors->any())
+            <div class="alert alert-danger">
+                {{ __('There were some problems with your input.') }}
+            </div>
+            @endif
+
+            <div class="auth-card-form">
                 <div class="auth-card-title auth-card-title-center">Register New User</div>
-
-                <div class="alert alert-danger js-form-error" style="display: none;"></div>
-
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        {{ __('There were some problems with your input.') }}
-                    </div>
-                @endif
-
                 <form method="POST" action="{{ route('register.post') }}" data-ajax="true">
                     @csrf
 
                     <div class="form-group">
-                        <label class="form-label" for="name">Full Name</label>
-                        <input
-                            id="name"
-                            type="text"
-                            name="name"
-                            value="{{ old('name') }}"
-                            class="form-input"
-                            placeholder="Enter full name"
-                            required
-                        >
-                        @error('name')
-                            <div class="text-danger">{{ $message }}</div>
-                        @enderror
+                        <input type="text" name="name" placeholder="Name" class="form-input" required>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="email">Email</label>
-                        <input
-                            id="email"
-                            type="email"
-                            name="email"
-                            value="{{ old('email') }}"
-                            class="form-input"
-                            placeholder="name@example.com"
-                            required
-                        >
-                        @error('email')
-                            <div class="text-danger">{{ $message }}</div>
-                        @enderror
+                        <input type="email" name="email" placeholder="Email" class="form-input" required>
                     </div>
 
-                    <div class="form-row-2">
-                        <div class="form-group">
-                            <label class="form-label" for="department">Department</label>
-                            <select
-                                id="department"
-                                name="department"
-                                class="form-select"
-                                required
-                            >
-                                <option value="" disabled {{ old('department') ? '' : 'selected' }}>Select department</option>
-                                @foreach ($departments as $department)
-                                    <option value="{{ $department }}" {{ old('department') === $department ? 'selected' : '' }}>
-                                        {{ $department }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('department')
-                                <div class="text-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="role">Role</label>
-                            <input
-                                id="role"
-                                type="text"
-                                name="role"
-                                value="{{ old('role') }}"
-                                class="form-input"
-                                placeholder="e.g. Nurse, Doctor (optional)"
-                            >
-                            @error('role')
-                                <div class="text-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
+                    <div class="form-group">
+                        <select name="department" class="form-select" required>
+                            <option value="" disabled selected>Select Department</option>
+                            @foreach ($departments as $department)
+                            <option value="{{ $department }}">{{ $department }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
-                    <div class="form-row-2">
-                        <div class="form-group">
-                            <label class="form-label" for="password">Password</label>
-                            <input
-                                id="password"
-                                type="password"
-                                name="password"
-                                class="form-input"
-                                placeholder="Create password"
-                                required
-                            >
-                            @error('password')
-                                <div class="text-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="password_confirmation">Confirm Password</label>
-                            <input
-                                id="password_confirmation"
-                                type="password"
-                                name="password_confirmation"
-                                class="form-input"
-                                placeholder="Confirm password"
-                                required
-                            >
-                        </div>
+                    <div class="form-group">
+                        <input type="text" name="role" placeholder="Role" class="form-input">
                     </div>
 
-                    <div class="form-actions" style="margin-top: 18px;">
-                        <a href="{{ route('login') }}" class="link-muted">Back to Login</a>
-                        <button type="submit" class="btn-primary">
-                            Register
-                        </button>
+                    <div class="form-group">
+                        <input type="password" name="password" placeholder="Password" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="password" name="password_confirmation" placeholder="Confirm Password" class="form-input" required>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Register</button>
+                    </div>
+                    <!-- ✅ Added Login Link -->
+                    <div style="text-align: center; margin-top: 15px; font-size: 13px; color: #6b7280;">
+                        Already have an account?
+                        <a href="{{ route('login') }}" style="color: #1e88e5; text-decoration: none; font-weight: 500;">
+                            Login
+                        </a>
                     </div>
                 </form>
             </div>
+
         </div>
     </div>
+</div>
 @endsection
-

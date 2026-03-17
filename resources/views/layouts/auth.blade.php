@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ✅ CSRF TOKEN -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Hospital HMS - Auth')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,6 +29,7 @@
 
         body {
             margin: 0;
+            padding: 0;
             min-height: 100vh;
             font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #eef3fb, #f9fbff);
@@ -57,7 +61,7 @@
         }
 
         .auth-grid {
-            max-width: 520px;
+            max-width: 410px;
             margin: 0 auto;
         }
 
@@ -72,38 +76,9 @@
         .auth-brand {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
             margin-bottom: 18px;
-        }
-
-        .auth-logo {
-            width: 32px;
-            height: 32px;
-            border-radius: 9px;
-            background-color: var(--primary);
-            position: relative;
-            box-shadow: 0 6px 18px rgba(30, 136, 229, 0.45);
-        }
-
-        .auth-logo::before,
-        .auth-logo::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #ffffff;
-            border-radius: 2px;
-        }
-
-        .auth-logo::before {
-            width: 60%;
-            height: 22%;
-        }
-
-        .auth-logo::after {
-            width: 22%;
-            height: 60%;
+            justify-content: center;
         }
 
         .auth-brand-text {
@@ -134,6 +109,14 @@
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 4px;
+        }
+
+        .auth-card-form {
+            padding: 15px 15px 15px 15px;
+            box-shadow: 0 16px 45px rgba(15, 23, 42, 0.08);
+            border-radius: 14px;
+            background: #ffffff;
+            margin-top: 20px;
         }
 
         .auth-card-title-center {
@@ -223,13 +206,12 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 10px 22px rgba(30, 136, 229, 0.35);
-            transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.15s ease;
+            width: 100%;
         }
 
         .btn-primary:hover {
             transform: translateY(-1px);
-            box-shadow: 0 14px 30px rgba(30, 136, 229, 0.42);
+            /* box-shadow: 0 14px 30px rgba(30, 136, 229, 0.42); */
             background: linear-gradient(135deg, #2196f3, #1e88e5);
         }
 
@@ -290,81 +272,73 @@
         }
     </style>
 </head>
-<body>
-    <div class="auth-wrapper">
-        <div class="auth-header">
-            <!-- <h1>Authentication Module</h1> -->
-            <!-- <div class="auth-subtitle">Desktop Admin Views · Mobile User Views</div> -->
-        </div>
 
+<body>
+
+    <div class="auth-wrapper">
         @yield('content')
     </div>
 
     <script>
-        (function () {
-            const metaCsrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-            const forms = document.querySelectorAll('form[data-ajax="true"]');
+        (function() {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            forms.forEach(function (form) {
-                form.addEventListener('submit', function (e) {
-                    e.preventDefault();
+            document.addEventListener('submit', async function(e) {
+                const form = e.target;
 
-                    const url = form.getAttribute('action');
-                    const method = (form.getAttribute('method') || 'POST').toUpperCase();
-                    const errorBox = form.querySelector('.js-form-error');
-                    const csrfField = form.querySelector('input[name="_token"]');
-                    const csrfToken = csrfField ? csrfField.value : metaCsrfToken || '';
+                if (!form.matches('form[data-ajax="true"]')) return;
 
-                    if (errorBox) {
-                        errorBox.style.display = 'none';
-                        errorBox.textContent = '';
-                    }
+                e.preventDefault(); // prevent default submit
 
-                    const formData = new FormData(form);
+                const url = form.action;
+                const method = form.method.toUpperCase() || 'POST';
+                const errorBox = form.querySelector('.js-form-error');
 
-                    fetch(url, {
-                        method: method,
-                        credentials: 'same-origin',
+                if (errorBox) {
+                    errorBox.style.display = 'none';
+                    errorBox.innerHTML = '';
+                }
+
+                const formData = new FormData(form);
+
+                try {
+                    const res = await fetch(url, {
+                        method,
                         headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
                             'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest',
                             'Accept': 'application/json',
                         },
                         body: formData,
-                    })
-                        .then(async (response) => {
-                            const data = await response.json().catch(() => ({}));
+                        credentials: 'same-origin'
+                    });
 
-                            if (!response.ok || data.status === 'error') {
-                                const message =
-                                    (data && (data.message || (data.errors && Object.values(data.errors)[0][0]))) ||
-                                    'Something went wrong. Please try again.';
+                    const data = await res.json();
 
-                                if (errorBox) {
-                                    errorBox.textContent = message;
-                                    errorBox.style.display = 'block';
-                                } else {
-                                    alert(message);
-                                }
-                                return;
-                            }
+                    if (!res.ok || data.status === 'error') {
+                        const message = data.message || Object.values(data.errors || {}).flat().join('<br>') || 'Something went wrong';
+                        if (errorBox) {
+                            errorBox.innerHTML = message;
+                            errorBox.style.display = 'block';
+                        }
+                        return;
+                    }
 
-                            if (data.redirect) {
-                                window.location.href = data.redirect;
-                            }
-                        })
-                        .catch(() => {
-                            if (errorBox) {
-                                errorBox.textContent = 'Network error. Please try again.';
-                                errorBox.style.display = 'block';
-                            } else {
-                                alert('Network error. Please try again.');
-                            }
-                        });
-                });
+                    // ✅ Redirect if returned
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+
+                } catch (err) {
+                    if (errorBox) {
+                        errorBox.innerHTML = 'Network error. Try again.';
+                        errorBox.style.display = 'block';
+                    }
+                }
             });
         })();
     </script>
-</body>
-</html>
 
+</body>
+
+</html>
