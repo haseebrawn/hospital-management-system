@@ -7,6 +7,7 @@
     <title>@yield('title', 'Hospital HMS Dashboard')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -39,15 +40,84 @@
 
         .topbar {
             height: 60px;
-            padding: 0 24px;
+            padding: 0 24px 0px 10px;
             background: var(--card-bg);
             border-bottom: 1px solid var(--border-color);
-            display: flex;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
             align-items: center;
-            justify-content: space-between;
+            gap: 20px;
             position: sticky;
             top: 0;
             z-index: 40;
+        }
+
+        .search-area {
+            display: flex;
+            justify-content: left;
+        }
+
+        /* Search Box Wrapper */
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Input */
+        .search-input {
+            width: 100%;
+            padding: 8px 14px 8px 35px;
+            /* left space for icon */
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            font-size: 13px;
+            outline: none;
+        }
+
+        /* Focus */
+        .search-input:focus {
+            border-color: var(--primary);
+        }
+
+        /* Icon */
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .notification-icon {
+            position: relative;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .notification-icon:hover {
+            color: var(--primary);
+        }
+
+        /* Badge */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -6px;
+            background: red;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 999px;
+        }
+
+        /* Right Area Alignment */
+        .profile-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .brand {
@@ -90,7 +160,7 @@
             position: relative;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 20px;
         }
 
         .profile-name {
@@ -230,23 +300,33 @@
 <body>
     <div class="shell">
         <header class="topbar">
+            <!-- LEFT: Logo + Name -->
             <div class="brand">
-                <div class="auth-logo" style="padding: 2px 0px 2px 0px;">
-                    <img src="{{ asset('images/HMS logo.png') }}" alt="Hospital HMS Logo" style="width: 70px; height: 55px; padding: 2px 0px 2px 0px;">
+                <div class="auth-logo" style="padding: 2px 0;">
+                    <img src="{{ asset('images/HMS logo.png') }}" alt="Hospital HMS Logo"
+                        style="width: 70px; height: 55px;">
                 </div>
                 <div class="brand-text">
                     <div class="brand-title">Hospital HMS</div>
-                    <!-- <div class="brand-sub">Admin Dashboard</div> -->
                 </div>
             </div>
 
-            <div class="profile-area">
-                @auth
-                <!-- <div class="profile-name">
-                    {{ auth()->user()->name }}
-                </div> -->
-                @endauth
+            <!-- CENTER: Search -->
+            <div class="search-area">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" placeholder="Search..." class="search-input">
+                </div>
+            </div>
 
+            <!-- RIGHT: Notification + Profile -->
+            <div class="profile-area">
+                <!-- Notification Icon -->
+                <div class="notification-icon">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+
+                <!-- 👤 Profile -->
                 <button class="profile-avatar-btn" id="profileAvatarButton" type="button">
                     @php
                     $initial = auth()->check() ? mb_substr(auth()->user()->name, 0, 1) : 'A';
@@ -256,6 +336,7 @@
                     </div>
                 </button>
 
+                <!-- Dropdown -->
                 <div class="profile-dropdown" id="profileDropdown">
                     @auth
                     <div class="dropdown-header">
@@ -282,7 +363,7 @@
         </header>
 
         <main class="main">
-            <div class="card">
+            <div class="">
                 @yield('content')
             </div>
         </main>
