@@ -7,6 +7,8 @@ use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest; // we will create this
 use App\Http\Resources\UserResource;
@@ -23,6 +25,89 @@ class AuthController extends Controller
         $departments = Department::orderBy('name')->pluck('name');
 
         return view('auth.register', compact('departments'));
+    }
+
+    public function showForgotPasswordForm()
+    {
+        return view('auth.forgot-password');
+    }
+
+    public function sendPasswordResetLink(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        $status = Password::sendResetLink(['email' => $validated['email']]);
+
+        if ($request->ajax() || $request->expectsJson()) {
+            if ($status === Password::RESET_LINK_SENT) {
+                return response()->json([
+                    'status' => 'ok',
+                    'message' => __($status),
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => __($status),
+            ], 422);
+        }
+
+        return $status === Password::RESET_LINK_SENT
+            ? back()->with('status', __($status))
+            : back()->withErrors(['email' => __($status)])->withInput();
+    }
+
+    public function showResetPasswordForm(string $token, Request $request)
+    {
+        return view('auth.reset-password', [
+            'token' => $token,
+            'email' => $request->query('email'),
+        ]);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'token' => ['required'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'confirmed', 'min:6'],
+        ]);
+
+        $status = Password::reset(
+            [
+                'email' => $validated['email'],
+                'password' => $validated['password'],
+                'password_confirmation' => $request->input('password_confirmation'),
+                'token' => $validated['token'],
+            ],
+            function (User $user, string $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])->save();
+            }
+        );
+
+        if ($request->ajax() || $request->expectsJson()) {
+            if ($status === Password::PASSWORD_RESET) {
+                return response()->json([
+                    'status' => 'ok',
+                    'message' => __($status),
+                    'redirect' => route('login'),
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => __($status),
+            ], 422);
+        }
+
+        return $status === Password::PASSWORD_RESET
+            ? redirect()->route('login')->with('status', __($status))
+            : back()->withErrors(['email' => __($status)])->withInput();
     }
 
     public function register(RegisterRequest $request)

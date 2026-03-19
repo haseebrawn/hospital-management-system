@@ -1,77 +1,97 @@
-<!-- Left Sidebar -->
-<aside class="sidebar" id="sidebar">
-    <!-- Logo Section -->
-    <div class="logo-section">
-        <div class="logo-circle">
-            <img src="https://imperiumai.ai/assets/images/logo.svg" alt="logo">
+<aside class="app-sidebar" aria-label="Sidebar navigation">
+    <div class="app-sidebar__header">
+        <div class="app-sidebar__brand">
+            <div class="app-sidebar__brand-icon" aria-hidden="true">
+                <i class="fa-solid fa-hospital"></i>
+            </div>
+            <span class="app-sidebar__brand-text">Hospital HMS</span>
         </div>
-        <button type="button" class="sidebar-toggle-btn" id="sidebar-toggle" aria-label="Toggle sidebar">
-            <i class="fas fa-chevron-left" id="sidebar-toggle-icon"></i>
-        </button>
     </div>
 
-    <!-- Navigation Menu -->
-    <nav class="nav-menu">
-        <div class="nav-section">
-            <h3 class="nav-title">Dashboard</h3>
-            <ul class="nav-list">
-                <li class="nav-item active" title="Overview">
-                    <i class="fas fa-th-large"></i>
-                    <span class="nav-item-text">Patients</span>
-                </li>
-                <li class="nav-item" title="My Recommendations">
-                    <i class="fas fa-star"></i>
-                    <span class="nav-item-text">Appointments</span>
-                </li>
-                <li class="nav-item" title="Subscription Plan">
-                    <i class="fas fa-crown"></i>
-                    <span class="nav-item-text">Lab Tests</span>
-                </li>
-                <li class="nav-item" title="Purchases">
-                    <i class="fas fa-shopping-bag"></i>
-                    <span class="nav-item-text">Pharmacy</span>
-                </li>
-                <li class="nav-item" title="Domain Overview">
-                    <i class="fas fa-globe"></i>
-                    <span class="nav-item-text">Billing</span>
-                </li>
-                <li class="nav-item" title="Current Project">
-                    <i class="fas fa-folder"></i>
-                    <span class="nav-item-text">Staff</span>
-                </li>
-                <li class="nav-item" title="Calendar">
-                    <i class="fas fa-calendar"></i>
-                    <span class="nav-item-text">Shifts</span>
-                </li>
-                <li class="nav-item" title="Referral">
-                    <i class="fas fa-user-friends"></i>
-                    <span class="nav-item-text">Wards & Beds</span>
-                </li>
-                <li class="nav-item" title="CRM">
-                    <i class="fas fa-address-book"></i>
-                    <span class="nav-item-text">Reports</span>
-                </li>
-                <li class="nav-item" title="Messages">
-                    <i class="fas fa-envelope"></i>
-                    <span class="nav-item-text">Admin Panel</span>
-                </li>
-            </ul>
-        </div>
-    
+    <nav class="app-sidebar__nav" aria-label="Main">
+        <a class="app-sidebar__item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}"
+            href="{{ route('dashboard') }}">
+            <span class="app-sidebar__icon"><i class="fa-solid fa-gauge"></i></span>
+            <span class="app-sidebar__label">Dashboard</span>
+        </a>
+
+        <a class="app-sidebar__item" href="#" aria-disabled="true">
+            <span class="app-sidebar__icon"><i class="fa-solid fa-user-group"></i></span>
+            <span class="app-sidebar__label">Patients</span>
+        </a>
+
+        <a class="app-sidebar__item" href="#" aria-disabled="true">
+            <span class="app-sidebar__icon"><i class="fa-regular fa-calendar-check"></i></span>
+            <span class="app-sidebar__label">Appointments</span>
+        </a>
+
+        <a class="app-sidebar__item" href="#" aria-disabled="true">
+            <span class="app-sidebar__icon"><i class="fa-solid fa-flask"></i></span>
+            <span class="app-sidebar__label">Lab Tests</span>
+        </a>
+
+        <a class="app-sidebar__item" href="#" aria-disabled="true">
+            <span class="app-sidebar__icon"><i class="fa-solid fa-pills"></i></span>
+            <span class="app-sidebar__label">Pharmacy</span>
+            <span class="app-sidebar__caret"><i class="fa-solid fa-chevron-down"></i></span>
+        </a>
+
+        <a class="app-sidebar__item" href="#" aria-disabled="true">
+            <span class="app-sidebar__icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+            <span class="app-sidebar__label">Billing</span>
+        </a>
+
+        <a class="app-sidebar__item" href="#" aria-disabled="true">
+            <span class="app-sidebar__icon"><i class="fa-solid fa-user-doctor"></i></span>
+            <span class="app-sidebar__label">Staff</span>
+        </a>
+
+        <a class="app-sidebar__item" href="#" aria-disabled="true">
+            <span class="app-sidebar__icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+            <span class="app-sidebar__label">Shifts</span>
+        </a>
+
+        <a class="app-sidebar__item" href="#" aria-disabled="true">
+            <span class="app-sidebar__icon"><i class="fa-solid fa-bed"></i></span>
+            <span class="app-sidebar__label">Wards &amp; Beds</span>
+            <span class="app-sidebar__caret"><i class="fa-solid fa-chevron-down"></i></span>
+        </a>
+
+        <a class="app-sidebar__item" href="#" aria-disabled="true">
+            <span class="app-sidebar__icon"><i class="fa-solid fa-chart-line"></i></span>
+            <span class="app-sidebar__label">Reports</span>
+        </a>
+
+        <a class="app-sidebar__item" href="#" aria-disabled="true">
+            <span class="app-sidebar__icon"><i class="fa-solid fa-shield-halved"></i></span>
+            <span class="app-sidebar__label">Admin Panel</span>
+        </a>
     </nav>
 
-    <!-- Bottom Section -->
-    <div class="sidebar-bottom">
-        <div class="upgrade-illustration">
-            <img src="https://imperiumai.ai/assets/social/Moneyverse-Home-Office.png" alt="illustrations">
-        </div>
-        <button class="upgrade-btn"><span class="upgrade-btn-text">Upgrade</span><i class="fas fa-arrow-up upgrade-btn-icon"></i></button>
-        <div class="user-info" title="Welcome back David">
-            <div class="user-avatar-small">
-                <img src="https://plus.unsplash.com/premium_photo-1689568126014-06fea9d5d341?w=130&amp;h=130&amp;fit=crop" alt="Avatar" class="imperium-about-avatar-small">
+    <div class="app-sidebar__footer">
+        <div class="app-sidebar__user">
+            <div class="app-sidebar__user-avatar" aria-hidden="true">
+                @php
+                    $initial = auth()->check() ? mb_substr(auth()->user()->name, 0, 1) : 'A';
+                @endphp
+                {{ mb_strtoupper($initial) }}
             </div>
-            <span class="user-name">Welcome back David</span>
-            <i class="fas fa-chevron-right user-info-arrow"></i>
+            <div class="app-sidebar__user-meta">
+                <div class="app-sidebar__user-name">
+                    @auth
+                        {{ auth()->user()->name }}
+                    @else
+                        Administrator
+                    @endauth
+                </div>
+                <div class="app-sidebar__user-role">
+                    @auth
+                        {{ optional(auth()->user()->department)->name ?? 'Staff Member' }}
+                    @else
+                        Administration
+                    @endauth
+                </div>
+            </div>
         </div>
     </div>
 </aside>

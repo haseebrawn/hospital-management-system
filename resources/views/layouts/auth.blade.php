@@ -293,10 +293,15 @@
                 const url = form.action;
                 const method = form.method.toUpperCase() || 'POST';
                 const errorBox = form.querySelector('.js-form-error');
+                const successBox = form.closest('.auth-card')?.querySelector('.js-form-success') || form.querySelector('.js-form-success');
 
                 if (errorBox) {
                     errorBox.style.display = 'none';
                     errorBox.innerHTML = '';
+                }
+                if (successBox) {
+                    successBox.style.display = 'none';
+                    successBox.innerHTML = '';
                 }
 
                 const formData = new FormData(form);
@@ -322,6 +327,11 @@
                             errorBox.style.display = 'block';
                         }
                         return;
+                    }
+
+                    if (data.message && successBox) {
+                        successBox.innerHTML = data.message;
+                        successBox.style.display = 'block';
                     }
 
                     // ✅ Redirect if returned

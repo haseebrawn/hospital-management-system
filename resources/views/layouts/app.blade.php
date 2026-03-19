@@ -260,9 +260,165 @@
             border: 1px solid #fecaca;
         }
 
-        .main {
+        /* App frame (Sidebar + Page) */
+        .app-frame {
+            flex: 1;
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* Sidebar */
+        .app-sidebar {
+            width: 260px;
+            min-width: 260px;
+            background: linear-gradient(180deg, #1f2f57, #152645);
+            color: rgba(255, 255, 255, 0.92);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 60px;
+            height: calc(100vh - 60px);
+            overflow: auto;
+        }
+
+        .app-sidebar__header {
+            padding: 18px 16px 12px;
+        }
+
+        .app-sidebar__brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .app-sidebar__brand-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.14);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(2, 6, 23, 0.25);
+        }
+
+        .app-sidebar__brand-text {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        .app-sidebar__nav {
+            padding: 10px 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .app-sidebar__item {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.85);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1;
+            transition: background 160ms ease, color 160ms ease;
+            user-select: none;
+        }
+
+        .app-sidebar__item[aria-disabled="true"] {
+            cursor: default;
+            opacity: 0.92;
+        }
+
+        .app-sidebar__item:hover {
+            background: rgba(255, 255, 255, 0.09);
+            color: #ffffff;
+        }
+
+        .app-sidebar__item.is-active {
+            background: rgba(37, 99, 235, 0.35);
+            border: 1px solid rgba(96, 165, 250, 0.35);
+            box-shadow: 0 16px 40px rgba(2, 6, 23, 0.28);
+            color: #ffffff;
+        }
+
+        .app-sidebar__icon {
+            width: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        .app-sidebar__label {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .app-sidebar__caret {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        .app-sidebar__footer {
+            margin-top: auto;
+            padding: 14px 12px 16px;
+        }
+
+        .app-sidebar__user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 10px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .app-sidebar__user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #60a5fa, #2563eb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .app-sidebar__user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.92);
+            max-width: 160px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .app-sidebar__user-role {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 2px;
+            max-width: 160px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Page content area */
+        .app-page {
             flex: 1;
             padding: 24px 24px 32px;
+            min-width: 0;
         }
 
         .card {
@@ -290,8 +446,14 @@
                 padding: 0 14px;
             }
 
-            .main {
+            .app-page {
                 padding: 16px 14px 24px;
+            }
+        }
+
+        @media (max-width: 980px) {
+            .app-sidebar {
+                display: none;
             }
         }
     </style>
@@ -362,11 +524,12 @@
             </div>
         </header>
 
-        <main class="main">
-            <div class="">
+        <div class="app-frame">
+            @include('sidebar.sidebar')
+            <main class="app-page">
                 @yield('content')
-            </div>
-        </main>
+            </main>
+        </div>
     </div>
 
     <script>
