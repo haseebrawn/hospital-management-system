@@ -40,7 +40,7 @@
                         <input type="password" name="password" placeholder="Password" class="form-input" required>
                     </div>
 
-                    <!-- ✅ Remember + Forgot Password -->
+                    <!-- Remember + Forgot Password -->
                     <div class="form-group remember-me" style="display: flex; justify-content: space-between; align-items: center;">
                         <label>
                             <input type="checkbox" name="remember"> Remember me
@@ -55,7 +55,7 @@
                         <button type="submit" class="btn-primary">Login</button>
                     </div>
 
-                    <!-- ✅ Sign Up Link -->
+                    <!-- Sign Up Link -->
                     <div style="text-align: center; margin-top: 15px; font-size: 13px; color: #6b7280;">
                         Create a new account?
                         <a href="{{ route('register') }}" style="color: #1e88e5; text-decoration: none; font-weight: 500;">

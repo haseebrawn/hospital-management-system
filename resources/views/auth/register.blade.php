@@ -60,7 +60,7 @@
                     <div class="form-actions">
                         <button type="submit" class="btn-primary">Register</button>
                     </div>
-                    <!-- ✅ Added Login Link -->
+                    <!-- Added Login Link -->
                     <div style="text-align: center; margin-top: 15px; font-size: 13px; color: #6b7280;">
                         Already have an account?
                         <a href="{{ route('login') }}" style="color: #1e88e5; text-decoration: none; font-weight: 500;">

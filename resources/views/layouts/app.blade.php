@@ -175,6 +175,37 @@
             cursor: pointer;
         }
 
+        /* EMAIL INPUT (RIGHT SIDE) */
+        .email-box {
+            position: relative;
+            width: 180px;
+        }
+
+        .email-input {
+            width: 100%;
+            padding: 6px 10px 6px 30px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 12px;
+            background: #f9fafb;
+        }
+
+        .email-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #fff;
+        }
+
+        /* Icon inside input */
+        .email-icon {
+            position: absolute;
+            top: 50%;
+            left: 8px;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #0257ff;
+        }
+
         .profile-avatar {
             width: 34px;
             height: 34px;
@@ -483,12 +514,18 @@
 
             <!-- RIGHT: Notification + Profile -->
             <div class="profile-area">
+                <!-- Email Input -->
+                <div class="email-box">
+                    <i class="fa-solid fa-envelope email-icon"></i>
+                    <input class="email-input">
+                </div>
+
                 <!-- Notification Icon -->
                 <div class="notification-icon">
                     <i class="fa-solid fa-bell"></i>
                 </div>
 
-                <!-- 👤 Profile -->
+                <!--  Profile -->
                 <button class="profile-avatar-btn" id="profileAvatarButton" type="button">
                     @php
                     $initial = auth()->check() ? mb_substr(auth()->user()->name, 0, 1) : 'A';
