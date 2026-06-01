@@ -48,10 +48,10 @@
             <table class="dash-table" style="min-width: 1040px;">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th class="u-nowrap">ID</th>
                         <th>Date</th>
                         <th>Time</th>
-                        <th>Patient</th>
+                        <th>Patient Name</th>
                         <th>Doctor</th>
                         <th>Department</th>
                         <th>Status</th>
@@ -61,9 +61,9 @@
                 <tbody>
                     @forelse ($appointments as $appt)
                         <tr>
-                            <td>{{ $appt->id }}</td>
-                            <td>{{ $appt->date }}</td>
-                            <td>{{ substr((string) $appt->time, 0, 5) }}</td>
+                            <td class="u-nowrap">{{ $appt->id }}</td>
+                            <td class="u-nowrap">{{ $appt->date }}</td>
+                            <td class="u-nowrap">{{ substr((string) $appt->time, 0, 5) }}</td>
                             <td style="font-weight:600;">
                                 <a href="{{ route('appointments.show', $appt) }}" style="color:inherit; text-decoration:none;">
                                     {{ optional($appt->patient)->first_name }} {{ optional($appt->patient)->last_name }}
@@ -71,7 +71,7 @@
                             </td>
                             <td>{{ optional($appt->doctor)->name ?? '-' }}</td>
                             <td>{{ optional($appt->department)->name ?? '-' }}</td>
-                            <td style="text-transform:capitalize;">{{ str_replace('_', ' ', $appt->status) }}</td>
+                            <td class="u-nowrap" style="text-transform:capitalize;">{{ str_replace('_', ' ', $appt->status) }}</td>
                             <td style="text-align:right;">
                                 <a href="{{ route('appointments.edit', $appt) }}"
                                     style="font-size:13px; color: var(--primary); text-decoration:none; margin-right:10px;">

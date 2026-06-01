@@ -110,26 +110,6 @@
         margin: 0;
     }
 
-    .dash-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 12px;
-    }
-
-    .dash-table th,
-    .dash-table td {
-        padding: 10px 8px;
-        border-bottom: 1px solid rgba(229, 231, 235, 0.95);
-        text-align: left;
-        white-space: nowrap;
-    }
-
-    .dash-table th {
-        font-size: 11px;
-        color: var(--text-muted);
-        font-weight: 600;
-    }
-
     .dash-badge {
         font-size: 11px;
         padding: 4px 8px;
@@ -358,11 +338,6 @@
         .dash-stat {
             min-height: auto;
             padding: 12px;
-        }
-
-        .dash-table {
-            display: block;
-            overflow-x: auto;
         }
 
         .dash-chart {

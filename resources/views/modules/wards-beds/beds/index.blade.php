@@ -58,7 +58,7 @@
             <table class="dash-table" style="min-width: 1020px;">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th class="u-nowrap">ID</th>
                         <th>Bed</th>
                         <th>Ward</th>
                         <th>Department</th>
@@ -69,11 +69,11 @@
                 <tbody>
                     @forelse ($beds as $bed)
                         <tr>
-                            <td>{{ $bed->id }}</td>
-                            <td style="font-weight:700;">{{ $bed->bed_number }}</td>
+                            <td class="u-nowrap">{{ $bed->id }}</td>
+                            <td class="u-nowrap" style="font-weight:700;">{{ $bed->bed_number }}</td>
                             <td>{{ optional($bed->ward)->name ?? '-' }}</td>
                             <td>{{ optional(optional($bed->ward)->department)->name ?? '-' }}</td>
-                            <td style="text-transform:capitalize;">{{ $bed->status }}</td>
+                            <td class="u-nowrap" style="text-transform:capitalize;">{{ $bed->status }}</td>
                             <td style="text-align:right;">
                                 <a href="{{ route('beds.edit', $bed) }}"
                                     style="font-size:13px; color: var(--primary); text-decoration:none; margin-right:10px;">
@@ -110,4 +110,3 @@
         </div>
     </div>
 @endsection
-

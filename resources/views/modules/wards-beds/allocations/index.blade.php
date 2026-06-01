@@ -62,8 +62,8 @@
             <table class="dash-table" style="min-width: 1200px;">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Patient</th>
+                        <th class="u-nowrap">ID</th>
+                        <th>Patient Name</th>
                         <th>Bed</th>
                         <th>Ward</th>
                         <th>Assigned</th>
@@ -74,14 +74,14 @@
                 <tbody>
                     @forelse ($allocations as $a)
                         <tr>
-                            <td>{{ $a->id }}</td>
+                            <td class="u-nowrap">{{ $a->id }}</td>
                             <td style="font-weight:600;">
                                 {{ optional($a->patient)->first_name }} {{ optional($a->patient)->last_name }}
                             </td>
-                            <td>{{ optional($a->bed)->bed_number ?? '-' }}</td>
+                            <td class="u-nowrap">{{ optional($a->bed)->bed_number ?? '-' }}</td>
                             <td>{{ optional(optional($a->bed)->ward)->name ?? '-' }}</td>
-                            <td>{{ optional($a->assigned_at)->format('Y-m-d H:i') }}</td>
-                            <td>{{ $a->released_at ? $a->released_at->format('Y-m-d H:i') : '-' }}</td>
+                            <td class="u-nowrap">{{ optional($a->assigned_at)->format('Y-m-d H:i') }}</td>
+                            <td class="u-nowrap">{{ $a->released_at ? $a->released_at->format('Y-m-d H:i') : '-' }}</td>
                             <td style="text-align:right;">
                                 @if (!$a->released_at)
                                     <form method="POST" action="{{ route('allocations.release', $a) }}" style="display:inline;">
@@ -136,4 +136,3 @@
         </div>
     </div>
 @endsection
-

@@ -11,13 +11,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #1e88e5;
-            --primary-dark: #1565c0;
-            --bg: #f3f4f8;
+            --primary: #2563eb;
+            --primary-2: #06b6d4;
+            --primary-dark: #1d4ed8;
+            --bg: #f6f8fc;
             --card-bg: #ffffff;
-            --border-color: #e5e7eb;
-            --text-main: #111827;
-            --text-muted: #6b7280;
+            --border-color: rgba(148, 163, 184, 0.28);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --shadow-sm: 0 10px 30px rgba(2, 6, 23, 0.06);
+            --shadow-md: 0 18px 55px rgba(2, 6, 23, 0.10);
+            --ring: 0 0 0 4px rgba(37, 99, 235, 0.18);
         }
 
         * {
@@ -28,7 +32,10 @@
             margin: 0;
             min-height: 100vh;
             font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background-color: var(--bg);
+            background:
+                radial-gradient(1200px 600px at 10% -10%, rgba(37, 99, 235, 0.14), transparent 60%),
+                radial-gradient(900px 500px at 90% 0%, rgba(6, 182, 212, 0.12), transparent 55%),
+                var(--bg);
             color: var(--text-main);
         }
 
@@ -41,8 +48,9 @@
         .topbar {
             height: 60px;
             padding: 0 24px 0px 10px;
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.78);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+            backdrop-filter: blur(10px);
             display: grid;
             grid-template-columns: auto 1fr auto;
             align-items: center;
@@ -472,6 +480,31 @@
             margin-bottom: 18px;
         }
 
+        /* Tables (used across modules) */
+        .dash-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .dash-table th,
+        .dash-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(229, 231, 235, 0.95);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .dash-table th {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .u-nowrap {
+            white-space: nowrap;
+        }
+
         @media (max-width: 640px) {
             .topbar {
                 padding: 0 14px;
@@ -488,6 +521,12 @@
             }
         }
     </style>
+    @php($viteManifest = public_path('build/manifest.json'))
+    @if (file_exists($viteManifest))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <link rel="stylesheet" href="{{ asset('css/hms.css') }}">
+    @endif
 </head>
 
 <body>
@@ -525,11 +564,10 @@
                     <i class="fa-solid fa-bell"></i>
                 </div>
 
+                @php($initial = auth()->check() ? mb_substr(auth()->user()->name, 0, 1) : 'A')
+
                 <!--  Profile -->
                 <button class="profile-avatar-btn" id="profileAvatarButton" type="button">
-                    @php
-                    $initial = auth()->check() ? mb_substr(auth()->user()->name, 0, 1) : 'A';
-                    @endphp
                     <div class="profile-avatar">
                         {{ mb_strtoupper($initial) }}
                     </div>

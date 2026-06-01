@@ -48,7 +48,7 @@
             <table class="dash-table" style="min-width: 1040px;">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th class="u-nowrap">ID</th>
                         <th>Name</th>
                         <th>Stock</th>
                         <th>Price</th>
@@ -60,16 +60,16 @@
                 <tbody>
                     @forelse ($medicines as $med)
                         <tr>
-                            <td>{{ $med->id }}</td>
+                            <td class="u-nowrap">{{ $med->id }}</td>
                             <td style="font-weight:600;">
                                 <a href="{{ route('medicines.show', $med) }}" style="color:inherit; text-decoration:none;">
                                     {{ $med->name }}
                                 </a>
                             </td>
-                            <td>{{ $med->stock }}</td>
-                            <td>{{ number_format((float) $med->price, 2) }}</td>
-                            <td>{{ $med->expiry_date ?? '-' }}</td>
-                            <td style="text-transform:capitalize;">{{ $med->status }}</td>
+                            <td class="u-nowrap">{{ $med->stock }}</td>
+                            <td class="u-nowrap">{{ number_format((float) $med->price, 2) }}</td>
+                            <td class="u-nowrap">{{ $med->expiry_date ?? '-' }}</td>
+                            <td class="u-nowrap" style="text-transform:capitalize;">{{ $med->status }}</td>
                             <td style="text-align:right;">
                                 <a href="{{ route('medicines.edit', $med) }}"
                                     style="font-size:13px; color: var(--primary); text-decoration:none; margin-right:10px;">

@@ -48,8 +48,9 @@
             <table class="dash-table" style="min-width: 1100px;">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Patient</th>
+                        <th class="u-nowrap">ID</th>
+                        <th>Patient Name</th>
+                        <th class="u-nowrap">Phone</th>
                         <th>Total</th>
                         <th>Status</th>
                         <th>Created By</th>
@@ -61,20 +62,18 @@
                 <tbody>
                     @forelse ($billings as $inv)
                         <tr>
-                            <td>{{ $inv->id }}</td>
+                            <td class="u-nowrap">{{ $inv->id }}</td>
                             <td style="font-weight:600;">
                                 <a href="{{ route('billing.show', $inv) }}" style="color:inherit; text-decoration:none;">
                                     {{ optional($inv->patient)->first_name }} {{ optional($inv->patient)->last_name }}
                                 </a>
-                                <div style="font-size:12px; color: var(--text-muted);">
-                                    {{ optional($inv->patient)->contact_number }}
-                                </div>
                             </td>
-                            <td>{{ number_format((float) $inv->total_amount, 2) }}</td>
-                            <td style="text-transform:capitalize;">{{ $inv->status }}</td>
+                            <td class="u-nowrap">{{ optional($inv->patient)->contact_number ?? '-' }}</td>
+                            <td class="u-nowrap">{{ number_format((float) $inv->total_amount, 2) }}</td>
+                            <td class="u-nowrap" style="text-transform:capitalize;">{{ $inv->status }}</td>
                             <td>{{ optional($inv->creator)->name ?? '-' }}</td>
                             <td>{{ optional($inv->approver)->name ?? '-' }}</td>
-                            <td>{{ optional($inv->created_at)->format('Y-m-d H:i') }}</td>
+                            <td class="u-nowrap">{{ optional($inv->created_at)->format('Y-m-d H:i') }}</td>
                             <td style="text-align:right;">
                                 <a href="{{ route('billing.show', $inv) }}"
                                     style="font-size:13px; color: var(--primary); text-decoration:none; margin-right:10px;">
@@ -93,7 +92,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" style="padding: 16px;">No invoices found.</td>
+                            <td colspan="9" style="padding: 16px;">No invoices found.</td>
                         </tr>
                     @endforelse
                 </tbody>

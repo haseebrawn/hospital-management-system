@@ -58,8 +58,9 @@
             <table class="dash-table" style="min-width: 1100px;">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>User</th>
+                        <th class="u-nowrap">ID</th>
+                        <th>Name</th>
+                        <th class="u-nowrap">Email</th>
                         <th>Department</th>
                         <th>Designation</th>
                         <th>Status</th>
@@ -70,17 +71,17 @@
                 <tbody>
                     @forelse ($staff as $s)
                         <tr>
-                            <td>{{ $s->id }}</td>
+                            <td class="u-nowrap">{{ $s->id }}</td>
                             <td style="font-weight:600;">
                                 <a href="{{ route('staff.show', $s) }}" style="color:inherit; text-decoration:none;">
                                     {{ optional($s->user)->name }}
                                 </a>
-                                <div style="font-size:12px; color: var(--text-muted);">{{ optional($s->user)->email }}</div>
                             </td>
+                            <td class="u-nowrap">{{ optional($s->user)->email }}</td>
                             <td>{{ optional($s->department)->name ?? '-' }}</td>
                             <td>{{ $s->designation }}</td>
-                            <td style="text-transform:capitalize;">{{ $s->employment_status }}</td>
-                            <td>{{ $s->joining_date }}</td>
+                            <td class="u-nowrap" style="text-transform:capitalize;">{{ $s->employment_status }}</td>
+                            <td class="u-nowrap">{{ $s->joining_date }}</td>
                             <td style="text-align:right;">
                                 <a href="{{ route('staff.edit', $s) }}"
                                     style="font-size:13px; color: var(--primary); text-decoration:none; margin-right:10px;">
@@ -99,7 +100,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" style="padding: 16px;">No staff found.</td>
+                            <td colspan="8" style="padding: 16px;">No staff found.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -111,4 +112,3 @@
         </div>
     </div>
 @endsection
-
