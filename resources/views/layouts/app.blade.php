@@ -564,6 +564,7 @@
         <div class="app-frame">
             @include('sidebar.sidebar')
             <main class="app-page">
+                @include('partials.flash')
                 @yield('content')
             </main>
         </div>

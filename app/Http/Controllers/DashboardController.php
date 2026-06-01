@@ -7,6 +7,7 @@ use App\Models\Patient;
 use App\Models\Appointment;
 use App\Models\Bed;
 use App\Models\Billing;
+use App\Models\LabTest;
 
 class DashboardController extends Controller
 {
@@ -15,13 +16,14 @@ class DashboardController extends Controller
         // Summary Metrics
         $totalPatients = Patient::count();
         $newAppointments = Appointment::whereDate('created_at', now()->toDateString())->count();
-        $labTestsPending = 12; // replace with real logic if LabTest model exists
+        $labTestsPending = LabTest::where('status', 'pending')->count();
         $todaysRevenue = Billing::whereDate('created_at', now()->toDateString())
             ->sum('total_amount');
 
         // Recent Appointments
         $recentAppointments = Appointment::with('patient', 'doctor')
-            ->orderByDesc('scheduled_at')
+            ->orderByDesc('date')
+            ->orderByDesc('time')
             ->limit(5)
             ->get();
 
