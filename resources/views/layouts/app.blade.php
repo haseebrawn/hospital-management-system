@@ -472,6 +472,31 @@
             margin-bottom: 18px;
         }
 
+        /* Tables (used across modules) */
+        .dash-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .dash-table th,
+        .dash-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(229, 231, 235, 0.95);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .dash-table th {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .u-nowrap {
+            white-space: nowrap;
+        }
+
         @media (max-width: 640px) {
             .topbar {
                 padding: 0 14px;

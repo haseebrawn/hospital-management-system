@@ -48,8 +48,8 @@
             <table class="dash-table" style="min-width: 1050px;">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Staff</th>
+                        <th class="u-nowrap">ID</th>
+                        <th>Staff Name</th>
                         <th>Department</th>
                         <th>Date</th>
                         <th>Shift</th>
@@ -60,13 +60,13 @@
                 <tbody>
                     @forelse ($shifts as $shift)
                         <tr>
-                            <td>{{ $shift->id }}</td>
+                            <td class="u-nowrap">{{ $shift->id }}</td>
                             <td style="font-weight:600;">{{ optional(optional($shift->staff)->user)->name ?? '-' }}</td>
                             <td>{{ optional(optional($shift->staff)->department)->name ?? '-' }}</td>
-                            <td>{{ $shift->shift_date }}</td>
-                            <td>{{ $shift->shift_name }}</td>
-                            <td>{{ substr((string) $shift->shift_start, 0, 5) }}</td>
-                            <td>{{ substr((string) $shift->shift_end, 0, 5) }}</td>
+                            <td class="u-nowrap">{{ $shift->shift_date }}</td>
+                            <td class="u-nowrap">{{ $shift->shift_name }}</td>
+                            <td class="u-nowrap">{{ substr((string) $shift->shift_start, 0, 5) }}</td>
+                            <td class="u-nowrap">{{ substr((string) $shift->shift_end, 0, 5) }}</td>
                         </tr>
                     @empty
                         <tr>

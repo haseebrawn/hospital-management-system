@@ -11,6 +11,7 @@
             <table class="dash-table" style="min-width: 820px;">
                 <thead>
                     <tr>
+                        <th class="u-nowrap">ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Department</th>
@@ -21,8 +22,9 @@
                 <tbody>
                     @forelse ($users as $user)
                         <tr>
+                            <td class="u-nowrap">{{ $user->id }}</td>
                             <td>{{ $user->name }}</td>
-                            <td>{{ $user->email }}</td>
+                            <td class="u-nowrap">{{ $user->email }}</td>
                             <td>{{ optional($user->department)->name ?? '-' }}</td>
                             <td>{{ $user->roles->pluck('name')->implode(', ') ?: '-' }}</td>
                             <td style="text-align:right; white-space:nowrap;">
@@ -76,7 +78,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" style="padding: 16px;">No users found.</td>
+                            <td colspan="6" style="padding: 16px;">No users found.</td>
                         </tr>
                     @endforelse
                 </tbody>

@@ -48,9 +48,9 @@
             <table class="dash-table" style="min-width: 1120px;">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th class="u-nowrap">ID</th>
                         <th>Test Type</th>
-                        <th>Patient</th>
+                        <th>Patient Name</th>
                         <th>Doctor</th>
                         <th>Technician</th>
                         <th>Status</th>
@@ -60,7 +60,7 @@
                 <tbody>
                     @forelse ($tests as $test)
                         <tr>
-                            <td>{{ $test->id }}</td>
+                            <td class="u-nowrap">{{ $test->id }}</td>
                             <td style="font-weight:600;">
                                 <a href="{{ route('lab-tests.show', $test) }}" style="color:inherit; text-decoration:none;">
                                     {{ $test->test_type }}
@@ -69,7 +69,7 @@
                             <td>{{ optional($test->patient)->first_name }} {{ optional($test->patient)->last_name }}</td>
                             <td>{{ optional($test->doctor)->name ?? '-' }}</td>
                             <td>{{ optional($test->technician)->name ?? '-' }}</td>
-                            <td style="text-transform:capitalize;">{{ str_replace('_', ' ', $test->status) }}</td>
+                            <td class="u-nowrap" style="text-transform:capitalize;">{{ str_replace('_', ' ', $test->status) }}</td>
                             <td style="text-align:right;">
                                 <a href="{{ route('lab-tests.edit', $test) }}"
                                     style="font-size:13px; color: var(--primary); text-decoration:none; margin-right:10px;">

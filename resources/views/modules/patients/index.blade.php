@@ -35,8 +35,8 @@
             <table class="dash-table" style="min-width: 920px;">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Patient</th>
+                        <th class="u-nowrap">ID</th>
+                        <th>Patient Name</th>
                         <th>Phone</th>
                         <th>Gender</th>
                         <th>Department</th>
@@ -46,14 +46,14 @@
                 <tbody>
                     @forelse ($patients as $patient)
                         <tr>
-                            <td>{{ $patient->id }}</td>
+                            <td class="u-nowrap">{{ $patient->id }}</td>
                             <td style="font-weight:600;">
                                 <a href="{{ route('patients.show', $patient) }}" style="color:inherit; text-decoration:none;">
                                     {{ $patient->first_name }} {{ $patient->last_name }}
                                 </a>
                             </td>
-                            <td>{{ $patient->contact_number }}</td>
-                            <td style="text-transform:capitalize;">{{ $patient->gender }}</td>
+                            <td class="u-nowrap">{{ $patient->contact_number }}</td>
+                            <td class="u-nowrap" style="text-transform:capitalize;">{{ $patient->gender }}</td>
                             <td>{{ optional($patient->department)->name ?? '-' }}</td>
                             <td style="text-align:right;">
                                 <a href="{{ route('patients.edit', $patient) }}"

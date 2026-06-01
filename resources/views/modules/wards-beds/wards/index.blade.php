@@ -48,7 +48,7 @@
             <table class="dash-table" style="min-width: 980px;">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th class="u-nowrap">ID</th>
                         <th>Name</th>
                         <th>Department</th>
                         <th>Capacity</th>
@@ -59,11 +59,11 @@
                 <tbody>
                     @forelse ($wards as $ward)
                         <tr>
-                            <td>{{ $ward->id }}</td>
+                            <td class="u-nowrap">{{ $ward->id }}</td>
                             <td style="font-weight:600;">{{ $ward->name }}</td>
                             <td>{{ optional($ward->department)->name ?? '-' }}</td>
-                            <td>{{ $ward->capacity }}</td>
-                            <td>{{ $ward->beds_count }}</td>
+                            <td class="u-nowrap">{{ $ward->capacity }}</td>
+                            <td class="u-nowrap">{{ $ward->beds_count }}</td>
                             <td style="text-align:right;">
                                 <a href="{{ route('wards.edit', $ward) }}"
                                     style="font-size:13px; color: var(--primary); text-decoration:none; margin-right:10px;">
@@ -100,4 +100,3 @@
         </div>
     </div>
 @endsection
-
