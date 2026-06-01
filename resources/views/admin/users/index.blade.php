@@ -16,7 +16,7 @@
                         <th>Email</th>
                         <th>Department</th>
                         <th>Roles</th>
-                        <th style="text-align:right;">Actions</th>
+                        <th class="u-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -27,8 +27,9 @@
                             <td class="u-nowrap">{{ $user->email }}</td>
                             <td>{{ optional($user->department)->name ?? '-' }}</td>
                             <td>{{ $user->roles->pluck('name')->implode(', ') ?: '-' }}</td>
-                            <td style="text-align:right; white-space:nowrap;">
-                                <form method="POST" action="{{ route('admin.users.role.assign', $user) }}" style="display:inline-flex; gap:8px; align-items:center;">
+                            <td class="u-right u-nowrap">
+                                <form method="POST" action="{{ route('admin.users.role.assign', $user) }}"
+                                    style="display:inline-flex; gap:8px; align-items:center;">
                                     @csrf
                                     @method('PUT')
                                     <select name="role"
@@ -43,7 +44,8 @@
                                     </button>
                                 </form>
 
-                                <form method="POST" action="{{ route('admin.users.role.remove', $user) }}" style="display:inline-flex; gap:8px; align-items:center; margin-left:10px;">
+                                <form method="POST" action="{{ route('admin.users.role.remove', $user) }}"
+                                    style="display:inline-flex; gap:8px; align-items:center; margin-left:10px;">
                                     @csrf
                                     @method('DELETE')
                                     <input name="role" placeholder="role (optional)"
@@ -63,7 +65,8 @@
                                             style="padding:6px 8px; border:1px solid var(--border-color); border-radius:10px; font-size:13px; background:#fff;">
                                             <option value="">— None —</option>
                                             @foreach ($departments as $dept)
-                                                <option value="{{ $dept->id }}" {{ (string) $user->department_id === (string) $dept->id ? 'selected' : '' }}>
+                                                <option value="{{ $dept->id }}"
+                                                    {{ (string) $user->department_id === (string) $dept->id ? 'selected' : '' }}>
                                                     {{ $dept->name }}
                                                 </option>
                                             @endforeach
