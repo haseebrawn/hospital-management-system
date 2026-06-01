@@ -551,54 +551,7 @@
             <h3 class="dash-card__title">Patients Overview</h3>
         </div>
         <div class="dash-chart dash-chart--compact" role="img" aria-label="Patients overview chart (static)">
-            <svg viewBox="0 0 360 150" preserveAspectRatio="none" aria-hidden="true">
-                <defs>
-                    <linearGradient id="poFill" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.35" />
-                        <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.02" />
-                    </linearGradient>
-                </defs>
-
-                <!-- grid -->
-                <g opacity="0.45" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2 4">
-                    <line x1="36" y1="24" x2="350" y2="24" />
-                    <line x1="36" y1="54" x2="350" y2="54" />
-                    <line x1="36" y1="84" x2="350" y2="84" />
-                    <line x1="36" y1="114" x2="350" y2="114" />
-                </g>
-
-                <!-- area -->
-                <path d="M36,112 L90,70 L144,84 L198,60 L252,72 L306,44 L350,30 L350,132 L36,132 Z" fill="url(#poFill)" />
-
-                <!-- line -->
-                <path d="M36,112 L90,70 L144,84 L198,60 L252,72 L306,44 L350,30" fill="none" stroke="#3b82f6"
-                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-
-                <!-- points -->
-                <g fill="#ffffff" stroke="#3b82f6" stroke-width="3">
-                    <circle cx="36" cy="112" r="4.5" />
-                    <circle cx="90" cy="70" r="4.5" />
-                    <circle cx="144" cy="84" r="4.5" />
-                    <circle cx="198" cy="60" r="4.5" />
-                    <circle cx="252" cy="72" r="4.5" />
-                    <circle cx="306" cy="44" r="4.5" />
-                    <circle cx="350" cy="30" r="4.5" />
-                </g>
-
-                <!-- labels -->
-                <g fill="#64748b" font-size="11" font-family="Inter, system-ui, sans-serif">
-                    <text x="18" y="28" text-anchor="end">300</text>
-                    <text x="18" y="58" text-anchor="end">200</text>
-                    <text x="18" y="88" text-anchor="end">100</text>
-                    <text x="22" y="118" text-anchor="end">50</text>
-
-                    <text x="36" y="140" text-anchor="start">May</text>
-                    <text x="116" y="140" text-anchor="middle">6605</text>
-                    <text x="198" y="140" text-anchor="middle">Mar</text>
-                    <text x="278" y="140" text-anchor="middle">App</text>
-                    <text x="350" y="140" text-anchor="end">Anyy</text>
-                </g>
-            </svg>
+            <svg id="dashPatientsChartSvg" viewBox="0 0 360 150" preserveAspectRatio="none" aria-hidden="true"></svg>
         </div>
     </div>
 </div>
@@ -654,53 +607,7 @@
             </div>
         </div>
         <div class="dash-chart" role="img" aria-label="Hospital revenue chart (static)">
-            <svg viewBox="0 0 520 190" preserveAspectRatio="none" aria-hidden="true">
-                <defs>
-                    <linearGradient id="revB" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.28" />
-                        <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.03" />
-                    </linearGradient>
-                    <linearGradient id="revG" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stop-color="#34d399" stop-opacity="0.22" />
-                        <stop offset="100%" stop-color="#34d399" stop-opacity="0.03" />
-                    </linearGradient>
-                    <linearGradient id="revY" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.18" />
-                        <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.03" />
-                    </linearGradient>
-                </defs>
-
-                <g opacity="0.35" stroke="#cbd5e1" stroke-width="1">
-                    <line x1="40" y1="30" x2="510" y2="30" />
-                    <line x1="40" y1="70" x2="510" y2="70" />
-                    <line x1="40" y1="110" x2="510" y2="110" />
-                    <line x1="40" y1="150" x2="510" y2="150" />
-                </g>
-
-                <!-- areas -->
-                <path d="M40,140 L110,120 L180,132 L250,92 L320,110 L390,78 L460,86 L510,60 L510,170 L40,170 Z"
-                    fill="url(#revB)" />
-                <path d="M40,150 L110,138 L180,146 L250,112 L320,126 L390,98 L460,106 L510,84 L510,170 L40,170 Z"
-                    fill="url(#revG)" />
-                <path d="M40,158 L110,148 L180,154 L250,132 L320,138 L390,124 L460,128 L510,110 L510,170 L40,170 Z"
-                    fill="url(#revY)" />
-
-                <!-- lines -->
-                <path d="M40,140 L110,120 L180,132 L250,92 L320,110 L390,78 L460,86 L510,60" fill="none"
-                    stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M40,150 L110,138 L180,146 L250,112 L320,126 L390,98 L460,106 L510,84" fill="none"
-                    stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
-                <path d="M40,158 L110,148 L180,154 L250,132 L320,138 L390,124 L460,128 L510,110" fill="none"
-                    stroke="#f59e0b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
-
-                <g fill="#64748b" font-size="11" font-family="Inter, system-ui, sans-serif">
-                    <text x="40" y="184" text-anchor="start">Jan</text>
-                    <text x="180" y="184" text-anchor="middle">Mar</text>
-                    <text x="320" y="184" text-anchor="middle">May</text>
-                    <text x="460" y="184" text-anchor="middle">Jul</text>
-                    <text x="510" y="184" text-anchor="end">Sep</text>
-                </g>
-            </svg>
+            <svg id="dashRevenueChartSvg" viewBox="0 0 520 190" preserveAspectRatio="none" aria-hidden="true"></svg>
         </div>
     </div>
 </div>
@@ -715,50 +622,8 @@
             <span class="dash-legend__item"><span class="dash-legend__dot" style="background:#f87171;"></span>Cancelled</span>
         </div>
     </div>
-    <div class="dash-chart" style="height: 220px;" role="img" aria-label="Appointment overview chart (static)">
-        <svg viewBox="0 0 760 220" preserveAspectRatio="none" aria-hidden="true">
-            <g opacity="0.35" stroke="#cbd5e1" stroke-width="1">
-                <line x1="40" y1="35" x2="740" y2="35" />
-                <line x1="40" y1="75" x2="740" y2="75" />
-                <line x1="40" y1="115" x2="740" y2="115" />
-                <line x1="40" y1="155" x2="740" y2="155" />
-                <line x1="40" y1="195" x2="740" y2="195" />
-            </g>
-
-            <!-- grouped bars -->
-            <g>
-                <!-- Billing -->
-                <rect x="80" y="120" width="22" height="75" rx="6" fill="#60a5fa" opacity="0.9" />
-                <rect x="108" y="90" width="22" height="105" rx="6" fill="#34d399" opacity="0.9" />
-                <rect x="136" y="135" width="22" height="60" rx="6" fill="#fbbf24" opacity="0.9" />
-                <rect x="164" y="150" width="22" height="45" rx="6" fill="#f87171" opacity="0.9" />
-
-                <!-- Pharmacy -->
-                <rect x="250" y="105" width="22" height="90" rx="6" fill="#60a5fa" opacity="0.9" />
-                <rect x="278" y="70" width="22" height="125" rx="6" fill="#34d399" opacity="0.9" />
-                <rect x="306" y="120" width="22" height="75" rx="6" fill="#fbbf24" opacity="0.9" />
-                <rect x="334" y="160" width="22" height="35" rx="6" fill="#f87171" opacity="0.9" />
-
-                <!-- Lab -->
-                <rect x="420" y="115" width="22" height="80" rx="6" fill="#60a5fa" opacity="0.9" />
-                <rect x="448" y="80" width="22" height="115" rx="6" fill="#34d399" opacity="0.9" />
-                <rect x="476" y="110" width="22" height="85" rx="6" fill="#fbbf24" opacity="0.9" />
-                <rect x="504" y="165" width="22" height="30" rx="6" fill="#f87171" opacity="0.9" />
-
-                <!-- Total -->
-                <rect x="590" y="85" width="22" height="110" rx="6" fill="#60a5fa" opacity="0.9" />
-                <rect x="618" y="50" width="22" height="145" rx="6" fill="#34d399" opacity="0.9" />
-                <rect x="646" y="95" width="22" height="100" rx="6" fill="#fbbf24" opacity="0.9" />
-                <rect x="674" y="140" width="22" height="55" rx="6" fill="#f87171" opacity="0.9" />
-            </g>
-
-            <g fill="#64748b" font-size="11" font-family="Inter, system-ui, sans-serif">
-                <text x="122" y="212" text-anchor="middle">Billing</text>
-                <text x="292" y="212" text-anchor="middle">Pharmacy</text>
-                <text x="462" y="212" text-anchor="middle">Lab</text>
-                <text x="632" y="212" text-anchor="middle">Total</text>
-            </g>
-        </svg>
+    <div class="dash-chart" style="height: 220px;" role="img" aria-label="Appointment overview chart">
+        <svg id="dashAppointmentsChartSvg" viewBox="0 0 760 220" preserveAspectRatio="none" aria-hidden="true"></svg>
     </div>
 </div>
 
@@ -775,6 +640,208 @@
         const elRecentBody = document.getElementById('dashRecentAppointmentsBody');
         const elNotifications = document.getElementById('dashNotifications');
         const elServerTime = document.getElementById('dashServerTime');
+        const elPatientsChart = document.getElementById('dashPatientsChartSvg');
+        const elRevenueChart = document.getElementById('dashRevenueChartSvg');
+        const elAppointmentsChart = document.getElementById('dashAppointmentsChartSvg');
+
+        function svg(tag) {
+            return document.createElementNS('http://www.w3.org/2000/svg', tag);
+        }
+
+        function renderLineAreaChart(svgEl, labels, series, options) {
+            if (!svgEl) return;
+            const W = options?.width ?? 520;
+            const H = options?.height ?? 190;
+            const padL = options?.padL ?? 40;
+            const padR = options?.padR ?? 10;
+            const padT = options?.padT ?? 20;
+            const padB = options?.padB ?? 20;
+            const innerW = W - padL - padR;
+            const innerH = H - padT - padB;
+
+            svgEl.innerHTML = '';
+
+            const allValues = series.flatMap(s => s.data.map(v => Number(v || 0)));
+            const max = Math.max(1, ...allValues);
+            const min = 0;
+
+            const grid = svg('g');
+            grid.setAttribute('opacity', '0.35');
+            grid.setAttribute('stroke', '#cbd5e1');
+            grid.setAttribute('stroke-width', '1');
+            for (let i = 0; i < 4; i++) {
+                const y = padT + (innerH * i) / 3;
+                const line = svg('line');
+                line.setAttribute('x1', String(padL));
+                line.setAttribute('x2', String(W - padR));
+                line.setAttribute('y1', String(y));
+                line.setAttribute('y2', String(y));
+                grid.appendChild(line);
+            }
+            svgEl.appendChild(grid);
+
+            const defs = svg('defs');
+            series.forEach((s, idx) => {
+                const g = svg('linearGradient');
+                g.setAttribute('id', `${options.gradPrefix}${idx}`);
+                g.setAttribute('x1', '0');
+                g.setAttribute('x2', '0');
+                g.setAttribute('y1', '0');
+                g.setAttribute('y2', '1');
+                const a = svg('stop');
+                a.setAttribute('offset', '0%');
+                a.setAttribute('stop-color', s.color);
+                a.setAttribute('stop-opacity', String(s.fillOpacityTop ?? 0.22));
+                const b = svg('stop');
+                b.setAttribute('offset', '100%');
+                b.setAttribute('stop-color', s.color);
+                b.setAttribute('stop-opacity', String(s.fillOpacityBottom ?? 0.03));
+                g.appendChild(a);
+                g.appendChild(b);
+                defs.appendChild(g);
+            });
+            svgEl.appendChild(defs);
+
+            function points(vals) {
+                return vals.map((v, i) => {
+                    const x = padL + (innerW * (vals.length === 1 ? 0 : i / (vals.length - 1)));
+                    const y = padT + innerH - ((v - min) / (max - min)) * innerH;
+                    return [x, y];
+                });
+            }
+
+            series.forEach((s, idx) => {
+                const vals = s.data.map(v => Number(v || 0));
+                const pts = points(vals);
+                if (!pts.length) return;
+
+                const area = svg('path');
+                const dArea = `M${pts[0][0]},${pts[0][1]} ` +
+                    pts.slice(1).map(p => `L${p[0]},${p[1]}`).join(' ') +
+                    ` L${pts[pts.length - 1][0]},${padT + innerH} L${pts[0][0]},${padT + innerH} Z`;
+                area.setAttribute('d', dArea);
+                area.setAttribute('fill', `url(#${options.gradPrefix}${idx})`);
+                svgEl.appendChild(area);
+
+                const line = svg('path');
+                const dLine = `M${pts[0][0]},${pts[0][1]} ` + pts.slice(1).map(p => `L${p[0]},${p[1]}`).join(' ');
+                line.setAttribute('d', dLine);
+                line.setAttribute('fill', 'none');
+                line.setAttribute('stroke', s.color);
+                line.setAttribute('stroke-width', '3');
+                line.setAttribute('stroke-linecap', 'round');
+                line.setAttribute('stroke-linejoin', 'round');
+                line.setAttribute('opacity', String(s.lineOpacity ?? 1));
+                svgEl.appendChild(line);
+            });
+
+            // x labels (first/last)
+            const lg = svg('g');
+            lg.setAttribute('fill', '#64748b');
+            lg.setAttribute('font-size', '11');
+            lg.setAttribute('font-family', 'Inter, system-ui, sans-serif');
+            const first = labels?.[0] ? String(labels[0]).slice(5) : '';
+            const last = labels?.[labels.length - 1] ? String(labels[labels.length - 1]).slice(5) : '';
+            const t1 = svg('text');
+            t1.setAttribute('x', String(padL));
+            t1.setAttribute('y', String(H - 6));
+            t1.setAttribute('text-anchor', 'start');
+            t1.textContent = first;
+            const t2 = svg('text');
+            t2.setAttribute('x', String(W - padR));
+            t2.setAttribute('y', String(H - 6));
+            t2.setAttribute('text-anchor', 'end');
+            t2.textContent = last;
+            lg.appendChild(t1);
+            lg.appendChild(t2);
+            svgEl.appendChild(lg);
+        }
+
+        function renderPatientsChart(chart) {
+            if (!elPatientsChart) return;
+            const labels = chart?.labels || [];
+            const data = (chart?.data || []).map(v => Number(v || 0));
+            renderLineAreaChart(elPatientsChart, labels, [{
+                data,
+                color: '#3b82f6',
+                fillOpacityTop: 0.35,
+                fillOpacityBottom: 0.02
+            }], { width: 360, height: 150, padL: 36, padR: 10, padT: 18, padB: 18, gradPrefix: 'poFillDyn' });
+        }
+
+        function renderRevenueChart(chart) {
+            if (!elRevenueChart) return;
+            const labels = chart?.labels || [];
+            renderLineAreaChart(elRevenueChart, labels, [
+                { data: chart?.billing || [], color: '#3b82f6', fillOpacityTop: 0.28, fillOpacityBottom: 0.03 },
+                { data: chart?.medicines_added || [], color: '#10b981', fillOpacityTop: 0.22, fillOpacityBottom: 0.03, lineOpacity: 0.95 },
+                { data: chart?.lab_tests || [], color: '#f59e0b', fillOpacityTop: 0.18, fillOpacityBottom: 0.03, lineOpacity: 0.92 },
+            ], { width: 520, height: 190, padL: 40, padR: 10, padT: 20, padB: 22, gradPrefix: 'revFillDyn' });
+        }
+
+        function renderAppointmentsChart(chart) {
+            if (!elAppointmentsChart) return;
+            const labels = chart?.labels || [];
+            const values = (chart?.data || []).map(v => Number(v || 0));
+
+            const W = 760, H = 220;
+            const padL = 50, padR = 20, padT = 20, padB = 40;
+            const innerW = W - padL - padR;
+            const innerH = H - padT - padB;
+
+            elAppointmentsChart.innerHTML = '';
+
+            const grid = svg('g');
+            grid.setAttribute('opacity', '0.35');
+            grid.setAttribute('stroke', '#cbd5e1');
+            grid.setAttribute('stroke-width', '1');
+            for (let i = 0; i < 5; i++) {
+                const y = padT + (innerH * i) / 4;
+                const line = svg('line');
+                line.setAttribute('x1', String(padL));
+                line.setAttribute('x2', String(W - padR));
+                line.setAttribute('y1', String(y));
+                line.setAttribute('y2', String(y));
+                grid.appendChild(line);
+            }
+            elAppointmentsChart.appendChild(grid);
+
+            const max = Math.max(1, ...values);
+            const gap = innerW / Math.max(1, values.length);
+            const barW = gap * 0.55;
+            const colors = ['#60a5fa', '#34d399', '#fbbf24', '#f87171'];
+
+            const bars = svg('g');
+            values.forEach((v, i) => {
+                const h = (v / max) * innerH;
+                const x = padL + i * gap + (gap - barW) / 2;
+                const y = padT + innerH - h;
+                const rect = svg('rect');
+                rect.setAttribute('x', String(x));
+                rect.setAttribute('y', String(y));
+                rect.setAttribute('width', String(barW));
+                rect.setAttribute('height', String(h));
+                rect.setAttribute('rx', '8');
+                rect.setAttribute('fill', colors[i % colors.length]);
+                rect.setAttribute('opacity', '0.9');
+                bars.appendChild(rect);
+            });
+            elAppointmentsChart.appendChild(bars);
+
+            const lg = svg('g');
+            lg.setAttribute('fill', '#64748b');
+            lg.setAttribute('font-size', '11');
+            lg.setAttribute('font-family', 'Inter, system-ui, sans-serif');
+            labels.forEach((l, i) => {
+                const t = svg('text');
+                t.setAttribute('x', String(padL + i * gap + gap / 2));
+                t.setAttribute('y', String(H - 12));
+                t.setAttribute('text-anchor', 'middle');
+                t.textContent = String(l).replaceAll('_', ' ');
+                lg.appendChild(t);
+            });
+            elAppointmentsChart.appendChild(lg);
+        }
 
         function formatNumber(n) {
             try {
@@ -868,6 +935,12 @@
                             `;
                         }).join('');
                     }
+                }
+
+                if (data.charts) {
+                    renderPatientsChart(data.charts.patients_overview);
+                    renderRevenueChart(data.charts.revenue_overview);
+                    renderAppointmentsChart(data.charts.appointments_overview);
                 }
             } catch (e) {
                 // ignore
