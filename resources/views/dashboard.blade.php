@@ -325,7 +325,114 @@
         flex: 0 0 auto;
     }
 
-    @media (max-width: 1200px) {
+    /* =========================
+   📱 MOBILE (max-width: 640px)
+    ========================= */
+    @media (max-width: 640px) {
+
+        .dash-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .dash-title {
+            font-size: 16px;
+        }
+
+        .dash-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .dash-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dash-lower {
+            grid-template-columns: 1fr;
+        }
+
+        .dash-bed {
+            grid-template-columns: 1fr;
+        }
+
+        .dash-stat {
+            min-height: auto;
+            padding: 12px;
+        }
+
+        .dash-table {
+            display: block;
+            overflow-x: auto;
+        }
+
+        .dash-chart {
+            height: 150px;
+        }
+
+        .dash-chart--compact {
+            height: 120px;
+        }
+    }
+
+    /* =========================
+   📲 TABLET (641px - 1024px)
+    ========================= */
+    @media (min-width: 641px) and (max-width: 1024px) {
+
+        .dash-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .dash-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dash-lower {
+            grid-template-columns: 1fr;
+        }
+
+        .dash-bed {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    /* =========================
+   💻 LAPTOP (1025px - 1440px)
+     ========================= */
+    @media (min-width: 1025px) and (max-width: 1440px) {
+
+        .dash-stats {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .dash-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .dash-lower {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* =========================
+   🖥️ LARGE SCREENS (1441px+)
+     ========================= */
+    @media (min-width: 1441px) {
+
+        .dash-stats {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .dash-grid {
+            grid-template-columns: 1.35fr 0.65fr 1fr;
+        }
+
+        .dash-lower {
+            grid-template-columns: 0.92fr 1.08fr;
+        }
+    }
+
+    /* @media (max-width: 1200px) {
         .dash-stats {
             grid-template-columns: repeat(2, minmax(180px, 1fr));
         }
@@ -337,17 +444,12 @@
         .dash-lower {
             grid-template-columns: 1fr;
         }
-    }
+    } */
 </style>
 
 <div class="dash-header">
     <div>
         <h2 class="dash-title">Dashboard</h2>
-        <!-- <p class="dash-subtitle">
-            Welcome,
-            <strong>{{ auth()->user()->name }}</strong>
-            ({{ optional(auth()->user()->department)->name ?? 'Staff Member' }})
-        </p> -->
     </div>
 </div>
 
@@ -355,28 +457,28 @@
     <div class="dash-stat dash-stat--blue">
         <div class="dash-stat__meta">
             <div class="dash-stat__label">Total Patients</div>
-            <div class="dash-stat__value">1,250</div>
+            <div class="dash-stat__value" id="dashTotalPatients">{{ number_format($totalPatients ?? 0) }}</div>
         </div>
         <div class="dash-stat__icon"><i class="fa-solid fa-user-group"></i></div>
     </div>
     <div class="dash-stat dash-stat--green">
         <div class="dash-stat__meta">
             <div class="dash-stat__label">New Appointments</div>
-            <div class="dash-stat__value">38</div>
+            <div class="dash-stat__value" id="dashNewAppointments">{{ number_format($newAppointments ?? 0) }}</div>
         </div>
         <div class="dash-stat__icon"><i class="fa-regular fa-calendar-check"></i></div>
     </div>
     <div class="dash-stat dash-stat--yellow">
         <div class="dash-stat__meta">
             <div class="dash-stat__label">Lab Tests Pending</div>
-            <div class="dash-stat__value">12</div>
+            <div class="dash-stat__value" id="dashLabPending">{{ number_format($labTestsPending ?? 0) }}</div>
         </div>
         <div class="dash-stat__icon"><i class="fa-solid fa-flask"></i></div>
     </div>
     <div class="dash-stat dash-stat--purple">
         <div class="dash-stat__meta">
             <div class="dash-stat__label">Today's Revenue</div>
-            <div class="dash-stat__value">52,300</div>
+            <div class="dash-stat__value" id="dashTodaysRevenue">{{ number_format((float) ($todaysRevenue ?? 0), 2) }}</div>
         </div>
         <div class="dash-stat__icon"><i class="fa-solid fa-sack-dollar"></i></div>
     </div>
@@ -386,7 +488,7 @@
     <div class="card">
         <div class="dash-card__head">
             <h3 class="dash-card__title">Recent Appointments</h3>
-            <a href="#" style="font-size:12px; color: var(--primary); text-decoration:none;">View All</a>
+            <a href="{{ route('appointments.index') }}" style="font-size:12px; color: var(--primary); text-decoration:none;">View All</a>
         </div>
         <table class="dash-table">
             <thead>
@@ -396,22 +498,34 @@
                     <th>Status</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>Sarah Ahmed</td>
-                    <td>Dr. Hassan Ali</td>
-                    <td><span class="dash-badge dash-badge--upcoming">Upcoming</span></td>
-                </tr>
-                <tr>
-                    <td>John Smith</td>
-                    <td>Dr. Ayesha Khan</td>
-                    <td><span class="dash-badge dash-badge--checked">Checked-in</span></td>
-                </tr>
-                <tr>
-                    <td>Jatten Stuus</td>
-                    <td>Dr. Haider Khan</td>
-                    <td><span class="dash-badge dash-badge--cancelled">Cancelled</span></td>
-                </tr>
+            <tbody id="dashRecentAppointmentsBody">
+                @php
+                    $statusClass = function (string $status): string {
+                        return match ($status) {
+                            'approved', 'completed' => 'dash-badge--checked',
+                            'cancelled' => 'dash-badge--cancelled',
+                            default => 'dash-badge--upcoming',
+                        };
+                    };
+                @endphp
+
+                @forelse (($recentAppointments ?? []) as $appt)
+                    <tr>
+                        <td>
+                            {{ optional($appt->patient)->first_name }} {{ optional($appt->patient)->last_name }}
+                        </td>
+                        <td>{{ optional($appt->doctor)->name ?? '—' }}</td>
+                        <td>
+                            <span class="dash-badge {{ $statusClass((string) ($appt->status ?? 'pending')) }}">
+                                {{ ucfirst(str_replace('_', ' ', (string) ($appt->status ?? 'pending'))) }}
+                            </span>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="3" style="padding: 12px;">No appointments yet.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
@@ -422,17 +536,13 @@
         </div>
         <div class="dash-bed">
             <div class="dash-bed__ring">
-                <div class="dash-bed__circle dash-bed__circle--green">31</div>
+                <div class="dash-bed__circle dash-bed__circle--green" id="dashBedsAvailable">{{ number_format($availableBeds ?? 0) }}</div>
                 <p class="dash-bed__label">Available</p>
             </div>
             <div class="dash-bed__ring">
-                <div class="dash-bed__circle dash-bed__circle--red">30</div>
+                <div class="dash-bed__circle dash-bed__circle--red" id="dashBedsOccupied">{{ number_format($occupiedBeds ?? 0) }}</div>
                 <p class="dash-bed__label">Occupied</p>
             </div>
-        </div>
-        <div style="display:flex; justify-content:space-around; margin-top: 0px; font-size:12px; color: var(--text-muted);">
-            <span> <strong style="color:#059669;">41</strong></span>
-            <span> <strong style="color:#dc2626;">26</strong></span>
         </div>
     </div>
 
@@ -498,60 +608,38 @@
         <div class="card">
             <div class="dash-card__head">
                 <h3 class="dash-card__title">Notifications</h3>
-                <a href="#" style="font-size:12px; color: var(--primary); text-decoration:none;">View All</a>
+                <a href="#" style="font-size:12px; color: var(--primary); text-decoration:none;">Latest</a>
             </div>
-            <div class="dash-notify">
-                <div class="dash-notify__item">
-                    <div class="dash-notify__left">
-                        <span class="dash-dot dash-dot--green"></span>
-                        <div class="dash-notify__text">New patient Sarah Ahmed registered</div>
+            <div class="dash-notify" id="dashNotifications">
+                @forelse (($notifications ?? []) as $n)
+                    <div class="dash-notify__item" @if ($loop->last) style="border-bottom:0;" @endif>
+                        <div class="dash-notify__left">
+                            <span class="dash-dot"></span>
+                            <div class="dash-notify__text">{{ $n['message'] ?? $n['text'] ?? 'Notification' }}</div>
+                        </div>
+                        <div class="dash-notify__time">—</div>
                     </div>
-                    <div class="dash-notify__time">Just now</div>
-                </div>
-                <div class="dash-notify__item">
-                    <div class="dash-notify__left">
-                        <span class="dash-dot"></span>
-                        <div class="dash-notify__text">New appointment for Ali Raza</div>
+                @empty
+                    <div class="dash-notify__item" style="border-bottom:0;">
+                        <div class="dash-notify__left">
+                            <span class="dash-dot"></span>
+                            <div class="dash-notify__text">No notifications.</div>
+                        </div>
+                        <div class="dash-notify__time">—</div>
                     </div>
-                    <div class="dash-notify__time">2m ago</div>
-                </div>
-                <div class="dash-notify__item" style="border-bottom:0;">
-                    <div class="dash-notify__left">
-                        <span class="dash-dot dash-dot--red"></span>
-                        <div class="dash-notify__text">Bed 14 ready for next patient</div>
-                    </div>
-                    <div class="dash-notify__time">1h ago</div>
-                </div>
+                @endforelse
             </div>
         </div>
 
         <div class="card">
             <div class="dash-card__head">
-                <h3 class="dash-card__title">Notifications</h3>
-                <a href="#" style="font-size:12px; color: var(--primary); text-decoration:none;">View All</a>
+                <h3 class="dash-card__title">Live Status</h3>
+                <span style="font-size:12px; color: var(--text-muted);">Updates every 15s</span>
             </div>
-            <div class="dash-notify">
-                <div class="dash-notify__item">
-                    <div class="dash-notify__left">
-                        <span class="dash-dot"></span>
-                        <div class="dash-notify__text">Inventory updated in Pharmacy</div>
-                    </div>
-                    <div class="dash-notify__time">Today</div>
-                </div>
-                <div class="dash-notify__item">
-                    <div class="dash-notify__left">
-                        <span class="dash-dot dash-dot--green"></span>
-                        <div class="dash-notify__text">Lab report ready for Patient #665</div>
-                    </div>
-                    <div class="dash-notify__time">Yesterday</div>
-                </div>
-                <div class="dash-notify__item" style="border-bottom:0;">
-                    <div class="dash-notify__left">
-                        <span class="dash-dot dash-dot--red"></span>
-                        <div class="dash-notify__text">Billing reminder: pending invoices</div>
-                    </div>
-                    <div class="dash-notify__time">2d ago</div>
-                </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <span style="padding:6px 10px; border-radius:999px; border:1px solid var(--border-color); font-size:13px;">
+                    Server: <b id="dashServerTime">—</b>
+                </span>
             </div>
         </div>
     </div>
@@ -673,4 +761,121 @@
         </svg>
     </div>
 </div>
+
+<script>
+    (function() {
+        const endpoint = @json(route('dashboard.data'));
+
+        const elTotalPatients = document.getElementById('dashTotalPatients');
+        const elNewAppointments = document.getElementById('dashNewAppointments');
+        const elLabPending = document.getElementById('dashLabPending');
+        const elRevenue = document.getElementById('dashTodaysRevenue');
+        const elBedsAvailable = document.getElementById('dashBedsAvailable');
+        const elBedsOccupied = document.getElementById('dashBedsOccupied');
+        const elRecentBody = document.getElementById('dashRecentAppointmentsBody');
+        const elNotifications = document.getElementById('dashNotifications');
+        const elServerTime = document.getElementById('dashServerTime');
+
+        function formatNumber(n) {
+            try {
+                return new Intl.NumberFormat().format(n);
+            } catch (e) {
+                return String(n);
+            }
+        }
+
+        function formatMoney(n) {
+            try {
+                return new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(n);
+            } catch (e) {
+                return String(n);
+            }
+        }
+
+        function badgeClass(status) {
+            if (status === 'approved' || status === 'completed') return 'dash-badge--checked';
+            if (status === 'cancelled') return 'dash-badge--cancelled';
+            return 'dash-badge--upcoming';
+        }
+
+        function safeText(s) {
+            return (s === null || s === undefined || s === '') ? '—' : String(s);
+        }
+
+        async function refreshDashboard() {
+            try {
+                const res = await fetch(endpoint, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                if (!res.ok) return;
+
+                const data = await res.json();
+
+                if (elTotalPatients) elTotalPatients.textContent = formatNumber(data.total_patients ?? 0);
+                if (elNewAppointments) elNewAppointments.textContent = formatNumber(data.new_appointments ?? 0);
+                if (elLabPending) elLabPending.textContent = formatNumber(data.lab_tests_pending ?? 0);
+                if (elRevenue) elRevenue.textContent = formatMoney(data.todays_revenue ?? 0);
+                if (elBedsAvailable) elBedsAvailable.textContent = formatNumber(data.available_beds ?? 0);
+                if (elBedsOccupied) elBedsOccupied.textContent = formatNumber(data.occupied_beds ?? 0);
+                if (elServerTime) elServerTime.textContent = safeText(data.server_time);
+
+                if (elRecentBody) {
+                    const rows = Array.isArray(data.recent_appointments) ? data.recent_appointments : [];
+                    if (rows.length === 0) {
+                        elRecentBody.innerHTML = '<tr><td colspan="3" style="padding:12px;">No appointments yet.</td></tr>';
+                    } else {
+                        elRecentBody.innerHTML = rows.map(r => {
+                            const status = safeText(r.status || 'pending');
+                            return `
+                                <tr>
+                                    <td>${safeText(r.patient)}</td>
+                                    <td>${safeText(r.doctor)}</td>
+                                    <td><span class="dash-badge ${badgeClass(status)}">${status.replaceAll('_', ' ')}</span></td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                if (elNotifications) {
+                    const notifs = Array.isArray(data.notifications) ? data.notifications : [];
+                    if (notifs.length === 0) {
+                        elNotifications.innerHTML = `
+                            <div class="dash-notify__item" style="border-bottom:0;">
+                                <div class="dash-notify__left">
+                                    <span class="dash-dot"></span>
+                                    <div class="dash-notify__text">No notifications.</div>
+                                </div>
+                                <div class="dash-notify__time">—</div>
+                            </div>
+                        `;
+                    } else {
+                        elNotifications.innerHTML = notifs.map((n, idx) => {
+                            const last = idx === notifs.length - 1;
+                            return `
+                                <div class="dash-notify__item" ${last ? 'style="border-bottom:0;"' : ''}>
+                                    <div class="dash-notify__left">
+                                        <span class="dash-dot"></span>
+                                        <div class="dash-notify__text">${safeText(n.text)}</div>
+                                    </div>
+                                    <div class="dash-notify__time">—</div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch (e) {
+                // ignore
+            }
+        }
+
+        refreshDashboard();
+        setInterval(refreshDashboard, 15000);
+    })();
+</script>
 @endsection

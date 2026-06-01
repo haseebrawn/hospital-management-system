@@ -7,6 +7,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Staff;
 
  /**
      * @method bool hasRole(string|array $roles)
@@ -51,6 +52,11 @@ class User extends Authenticatable
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function staff()
+    {
+        return $this->hasOne(Staff::class);
     }
 
     /**

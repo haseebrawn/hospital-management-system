@@ -1,0 +1,36 @@
+# Test Matrix (Phase-wise)
+
+This file maps **frontend phases/modules** to the current **Feature tests**.
+
+Run all feature tests:
+
+`php artisan test --testsuite=Feature`
+
+## Phase 1 — Auth + foundation
+
+- Web login throttling: `tests/Feature/Web/AuthThrottleTest.php`
+- Base homepage redirect: `tests/Feature/ExampleTest.php`
+
+## Phase 2 — Patients + Appointments
+
+- Patients web UI: `tests/Feature/Web/PatientsWebTest.php`
+- Appointments web UI: `tests/Feature/Web/AppointmentsWebTest.php`
+
+## Phase 3 — Lab + Pharmacy + Billing
+
+- Lab tests web UI: `tests/Feature/Web/LabTestsWebTest.php`
+- Medicines web UI: `tests/Feature/Web/MedicinesWebTest.php`
+- Billing web UI: `tests/Feature/Web/BillingWebTest.php`
+
+## Phase 4 — HR + Shifts + Wards/Beds
+
+- Staff web UI: `tests/Feature/Web/StaffWebTest.php`
+- Shifts web UI: `tests/Feature/Web/ShiftsWebTest.php`
+- Wards/Beds/Allocations web UI: `tests/Feature/Web/WardsBedsWebTest.php`
+
+## Phase 5 — Admin + Reports + System
+
+- Admin users management: `tests/Feature/Web/AdminUsersWebTest.php`
+- Reports pages: `tests/Feature/Web/ReportsWebTest.php`
+- System tools (backups/logs): `tests/Feature/Web/SystemWebTest.php`
+

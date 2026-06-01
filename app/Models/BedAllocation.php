@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class BedAllocation extends Model
 {
+    use HasFactory;
+
     protected $fillable = 
     [
         'patient_id', 
@@ -24,4 +27,3 @@ class BedAllocation extends Model
         return $this->belongsTo(Bed::class);
     }
 }
-
