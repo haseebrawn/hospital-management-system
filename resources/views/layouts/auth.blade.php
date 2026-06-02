@@ -70,8 +70,12 @@
             display: flex;
             align-items: flex-end;
             background:
-                linear-gradient(145deg, rgba(37, 99, 235, 0.98), rgba(29, 78, 216, 0.96)),
-                linear-gradient(135deg, #2563eb, #0f172a);
+                linear-gradient(135deg,
+                    rgba(15, 23, 42, 0.92) 0%,
+                    rgba(17, 94, 89, 0.88) 18%,
+                    rgba(37, 99, 235, 0.92) 42%,
+                    rgba(168, 85, 247, 0.84) 68%,
+                    rgba(14, 165, 233, 0.88) 100%);
         }
 
         .auth-visual::before {
@@ -80,8 +84,10 @@
             inset: 0;
             background:
                 radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.18), transparent 22%),
-                radial-gradient(circle at 82% 24%, rgba(6, 182, 212, 0.18), transparent 18%),
-                radial-gradient(circle at 72% 82%, rgba(255, 255, 255, 0.14), transparent 20%);
+                radial-gradient(circle at 82% 24%, rgba(6, 182, 212, 0.24), transparent 18%),
+                radial-gradient(circle at 72% 82%, rgba(255, 255, 255, 0.14), transparent 20%),
+                radial-gradient(circle at 22% 82%, rgba(244, 114, 182, 0.16), transparent 16%),
+                radial-gradient(circle at 88% 68%, rgba(251, 191, 36, 0.12), transparent 18%);
             pointer-events: none;
         }
 
@@ -92,6 +98,102 @@
             display: flex;
             flex-direction: column;
             gap: 22px;
+        }
+
+        .auth-visual-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .auth-visual-brand-mark {
+            width: 56px;
+            height: 56px;
+            /* border-radius: 18px; */
+            display: grid;
+            place-items: center;
+            /* background: rgba(255, 255, 255, 0.14); */
+            /* border: 1px solid rgba(255, 255, 255, 0.18); */
+            /* box-shadow: 0 18px 30px rgba(15, 23, 42, 0.18); */
+            overflow: hidden;
+            flex: 0 0 auto;
+        }
+
+        .auth-visual-brand-mark img {
+            width: 42px;
+            height: 42px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .auth-visual-brand-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .auth-visual-brand-title {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .auth-visual-brand-subtitle {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.78);
+        }
+
+        .auth-visual-hero {
+            display: grid;
+            grid-template-columns: 118px 1fr;
+            gap: 18px;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .auth-visual-hero-badge {
+            width: 118px;
+            height: 118px;
+            border-radius: 34px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            display: grid;
+            place-items: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+        }
+
+        .auth-visual-hero-badge::before {
+            content: '';
+            position: absolute;
+            width: 84px;
+            height: 84px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .auth-visual-hero-badge::after {
+            content: '';
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .auth-visual-hero-badge i {
+            position: relative;
+            z-index: 1;
+            font-size: 40px;
+            color: #ffffff;
+        }
+
+        .auth-visual-hero-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .auth-visual-badge {
@@ -117,7 +219,7 @@
         }
 
         .auth-visual-title {
-            font-size: 42px;
+            font-size: 40px;
             line-height: 1.02;
             margin: 0;
             font-weight: 800;
@@ -128,9 +230,32 @@
         .auth-visual-copy {
             max-width: 500px;
             font-size: 15px;
-            line-height: 1.75;
-            color: rgba(255, 255, 255, 0.82);
+            line-height: 1.65;
+            color: rgba(255, 255, 255, 0.86);
             margin: 0;
+        }
+
+        .auth-visual-pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .auth-visual-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            font-size: 12px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.94);
+        }
+
+        .auth-visual-pill i {
+            color: #dbeafe;
         }
 
         .auth-visual-stats {
@@ -183,6 +308,105 @@
             align-items: center;
             justify-content: center;
             background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            font-size: 11px;
+        }
+
+        .auth-visual-feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .auth-visual-feature {
+            padding: 14px 14px 13px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .auth-visual-feature-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, 0.14);
+            color: #ffffff;
+            flex: 0 0 auto;
+        }
+
+        .auth-visual-feature-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .auth-visual-feature-text {
+            font-size: 12px;
+            line-height: 1.55;
+            color: rgba(255, 255, 255, 0.76);
+        }
+
+        .auth-visual-board {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 12px;
+        }
+
+        .auth-visual-board-card {
+            min-height: 152px;
+            border-radius: 20px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        }
+
+        .auth-visual-board-title {
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.72);
+            margin-bottom: 10px;
+        }
+
+        .auth-visual-board-big {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .auth-visual-board-copy {
+            font-size: 12px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .auth-visual-board-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .auth-visual-board-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.88);
+        }
+
+        .auth-visual-board-item i {
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, 0.14);
             color: #ffffff;
             font-size: 11px;
         }
@@ -440,7 +664,24 @@
                 font-size: 32px;
             }
 
+            .auth-visual-hero {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-visual-hero-badge {
+                width: 96px;
+                height: 96px;
+            }
+
             .auth-visual-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-visual-feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-visual-board {
                 grid-template-columns: 1fr;
             }
 
@@ -471,17 +712,52 @@
         <div class="auth-shell">
             <aside class="auth-visual">
                 <div class="auth-visual-content">
-                    <div class="auth-visual-badge">
-                        <span class="auth-visual-badge-dot"></span>
-                        <span>Hospital Management System</span>
+                    <div class="auth-visual-brand">
+                        <div class="auth-visual-brand-mark">
+                            <img src="{{ asset('images/HMS logo.png') }}" alt="Hospital HMS Logo">
+                        </div>
+                        <div class="auth-visual-brand-copy">
+                            <div class="auth-visual-brand-title">Hospital HMS</div>
+                            <div class="auth-visual-brand-subtitle">Secure care management platform</div>
+                        </div>
                     </div>
 
-                    <div>
-                        <h1 class="auth-visual-title">Modern care operations in one secure place.</h1>
-                        <p class="auth-visual-copy">
-                            Manage patients, staff, appointments, billing, and reports with a clean workflow designed
-                            for hospital teams.
-                        </p>
+                    <div class="auth-visual-hero">
+                        <div class="auth-visual-hero-badge" aria-hidden="true">
+                            <i class="fa-solid fa-hospital"></i>
+                        </div>
+                        <div class="auth-visual-hero-copy">
+                            <div>
+                                <h1 class="auth-visual-title">Modern care operations in one secure place.</h1>
+                                <p class="auth-visual-copy">
+                                    A polished workspace for hospital teams, designed to feel calm, fast, and
+                                    trustworthy from the first login.
+                                </p>
+                            </div>
+                            <div class="auth-visual-pill-row">
+                                <div class="auth-visual-pill"><i class="fa-solid fa-shield-heart"></i> Secure access</div>
+                                <div class="auth-visual-pill"><i class="fa-solid fa-stethoscope"></i> Clinical flow</div>
+                                <div class="auth-visual-pill"><i class="fa-solid fa-bed-pulse"></i> Patient care</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="auth-visual-board">
+                        <div class="auth-visual-board-card">
+                            <div class="auth-visual-board-title">Today</div>
+                            <div class="auth-visual-board-big">Live hospital board</div>
+                            <div class="auth-visual-board-copy">
+                                Track admissions, assigned beds, and key actions in a clean command-center style view.
+                            </div>
+                        </div>
+                        <div class="auth-visual-board-card">
+                            <div class="auth-visual-board-title">Quick modules</div>
+                            <div class="auth-visual-board-list">
+                                <div class="auth-visual-board-item"><i class="fa-solid fa-user-doctor"></i> Doctors and nurses</div>
+                                <div class="auth-visual-board-item"><i class="fa-solid fa-vial"></i> Lab and results</div>
+                                <div class="auth-visual-board-item"><i class="fa-solid fa-pills"></i> Pharmacy and billing</div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="auth-visual-stats">
