@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\NotificationController;
-
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\AuditController;
@@ -42,51 +39,7 @@ use App\Http\Controllers\ReportsController;
 
 Route::prefix('v1')->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication (Public)
-    |--------------------------------------------------------------------------
-    */
-
-    Route::prefix('auth')->group(function () {
-
-        Route::post('/register', [AuthController::class, 'register']);
-        Route::post('/login', [AuthController::class, 'login'])
-            ->middleware('throttle:5,1');
-
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Protected Routes
-    |--------------------------------------------------------------------------
-    */
-
-    Route::middleware(['auth'])->group(function () {
-
-        /*
-        |--------------------------------------------------------------------------
-        | Profile
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get('/profile', [AuthController::class, 'profile']);
-        Route::post('/logout', [AuthController::class, 'logout']);
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Notifications
-        |--------------------------------------------------------------------------
-        */
-
-        Route::prefix('notifications')->group(function () {
-
-            Route::get('/', [NotificationController::class, 'index']);
-            Route::post('/read-all', [NotificationController::class, 'markAllRead']);
-
-        });
-
+    Route::middleware(['auth:sanctum'])->group(function () {
 
         /*
         |--------------------------------------------------------------------------
@@ -192,7 +145,7 @@ Route::prefix('v1')->group(function () {
         */
 
         Route::prefix('pharmacy')
-            ->middleware('role:super_admin|pharmacist')
+            ->middleware('role:super_admin|pharmacist|doctor')
             ->group(function () {
 
                 /*
@@ -213,14 +166,6 @@ Route::prefix('v1')->group(function () {
                 Route::put('/prescriptions/{id}/dispense', [PharmacyController::class, 'dispense']);
 
             });
-
-
-        /*
-        | Doctor Medicine View
-        */
-
-        Route::get('/pharmacy/medicines', [MedicineController::class, 'index'])
-            ->middleware('role:doctor|super_admin|pharmacist');
 
 
         /*
