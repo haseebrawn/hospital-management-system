@@ -10,16 +10,18 @@
     <title>@yield('title', 'Hospital HMS - Auth')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #1e88e5;
-            --primary-dark: #1565c0;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-soft: #dbeafe;
+            --accent: #06b6d4;
             --danger: #e53935;
             --gray-light: #f3f5f9;
             --border-color: #dde2ee;
-            --text-main: #1f2933;
-            --text-muted: #6b7280;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
             --card-bg: #ffffff;
         }
 
@@ -32,14 +34,171 @@
             padding: 0;
             min-height: 100vh;
             font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #eef3fb, #f9fbff);
+            background:
+                radial-gradient(900px 520px at 12% 10%, rgba(37, 99, 235, 0.18), transparent 60%),
+                radial-gradient(700px 420px at 88% 20%, rgba(6, 182, 212, 0.14), transparent 55%),
+                linear-gradient(135deg, #eef3fb, #f9fbff 60%, #eef6ff);
             color: var(--text-main);
         }
 
         .auth-wrapper {
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 0 16px;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 16px;
+        }
+
+        .auth-shell {
+            width: min(1180px, 100%);
+            min-height: 720px;
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            overflow: hidden;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            box-shadow: 0 28px 80px rgba(15, 23, 42, 0.14);
+            backdrop-filter: blur(14px);
+        }
+
+        .auth-visual {
+            position: relative;
+            padding: 36px;
+            color: #ffffff;
+            display: flex;
+            align-items: flex-end;
+            background:
+                linear-gradient(145deg, rgba(37, 99, 235, 0.98), rgba(29, 78, 216, 0.96)),
+                linear-gradient(135deg, #2563eb, #0f172a);
+        }
+
+        .auth-visual::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.18), transparent 22%),
+                radial-gradient(circle at 82% 24%, rgba(6, 182, 212, 0.18), transparent 18%),
+                radial-gradient(circle at 72% 82%, rgba(255, 255, 255, 0.14), transparent 20%);
+            pointer-events: none;
+        }
+
+        .auth-visual-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .auth-visual-badge {
+            width: fit-content;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .auth-visual-badge-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: #7dd3fc;
+            box-shadow: 0 0 0 6px rgba(125, 211, 252, 0.18);
+        }
+
+        .auth-visual-title {
+            font-size: 42px;
+            line-height: 1.02;
+            margin: 0;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            max-width: 12ch;
+        }
+
+        .auth-visual-copy {
+            max-width: 500px;
+            font-size: 15px;
+            line-height: 1.75;
+            color: rgba(255, 255, 255, 0.82);
+            margin: 0;
+        }
+
+        .auth-visual-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .auth-visual-stat {
+            padding: 14px 14px 13px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+        }
+
+        .auth-visual-stat-value {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .auth-visual-stat-label {
+            font-size: 12px;
+            line-height: 1.45;
+            color: rgba(255, 255, 255, 0.78);
+        }
+
+        .auth-visual-list {
+            display: grid;
+            gap: 10px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            max-width: 420px;
+        }
+
+        .auth-visual-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.84);
+        }
+
+        .auth-visual-list i {
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            font-size: 11px;
+        }
+
+        .auth-panel {
+            padding: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 251, 255, 0.96));
+        }
+
+        .auth-panel-inner {
+            width: 100%;
+            max-width: 430px;
         }
 
         .auth-header {
@@ -61,23 +220,29 @@
         }
 
         .auth-grid {
-            max-width: 410px;
-            margin: 0 auto;
+            width: 100%;
         }
 
         .auth-card {
             background: var(--card-bg);
-            border-radius: 14px;
+            border-radius: 20px;
             box-shadow: 0 16px 45px rgba(15, 23, 42, 0.08);
-            padding: 26px 28px 24px;
+            padding: 28px 28px 24px;
             border: 1px solid rgba(226, 232, 240, 0.9);
+        }
+
+        .auth-card-login {
+            min-height: 560px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .auth-brand {
             display: flex;
             align-items: center;
             gap: 15px;
-            margin-bottom: 18px;
+            margin-bottom: 20px;
             justify-content: center;
         }
 
@@ -112,11 +277,12 @@
         }
 
         .auth-card-form {
-            padding: 15px 15px 15px 15px;
-            box-shadow: 0 16px 45px rgba(15, 23, 42, 0.08);
-            border-radius: 14px;
-            background: #ffffff;
-            margin-top: 20px;
+            padding: 18px 18px 16px;
+            /* box-shadow: 0 16px 45px rgba(15, 23, 42, 0.08); */
+            /* border-radius: 18px; */
+            /* background: #ffffff; */
+            /* margin-top: 18px; */
+            /* border: 1px solid rgba(226, 232, 240, 0.8); */
         }
 
         .auth-card-title-center {
@@ -145,9 +311,9 @@
         .form-input,
         .form-select {
             width: 100%;
-            padding: 9px 11px;
+            padding: 11px 12px;
             font-size: 13px;
-            border-radius: 9px;
+            border-radius: 12px;
             border: 1px solid var(--border-color);
             background-color: #f9fafb;
             transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
@@ -196,17 +362,18 @@
 
         .btn-primary {
             border: none;
-            border-radius: 999px;
-            padding: 9px 22px;
-            font-size: 13px;
-            font-weight: 500;
+            border-radius: 14px;
+            padding: 12px 22px;
+            font-size: 14px;
+            font-weight: 700;
             color: #ffffff;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            background: linear-gradient(135deg, var(--primary), #1e40af);
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             width: 100%;
+            box-shadow: 0 16px 28px rgba(37, 99, 235, 0.22);
         }
 
         .btn-primary:hover {
@@ -237,7 +404,7 @@
         }
 
         .alert {
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 10px 12px;
             font-size: 12px;
             margin-bottom: 14px;
@@ -257,17 +424,42 @@
 
         @media (max-width: 960px) {
             .auth-wrapper {
-                margin: 24px auto 32px;
+                padding: 24px 14px;
+            }
+
+            .auth-shell {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+
+            .auth-visual {
+                padding: 26px 22px;
+            }
+
+            .auth-visual-title {
+                font-size: 32px;
+            }
+
+            .auth-visual-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-panel {
+                padding: 22px;
             }
         }
 
         @media (max-width: 640px) {
             .auth-card {
-                padding: 22px 18px 20px;
+                padding: 20px 16px 18px;
             }
 
             .auth-header h1 {
                 font-size: 22px;
+            }
+
+            .auth-visual-copy {
+                font-size: 14px;
             }
         }
     </style>
@@ -276,7 +468,51 @@
 <body>
 
     <div class="auth-wrapper">
-        @yield('content')
+        <div class="auth-shell">
+            <aside class="auth-visual">
+                <div class="auth-visual-content">
+                    <div class="auth-visual-badge">
+                        <span class="auth-visual-badge-dot"></span>
+                        <span>Hospital Management System</span>
+                    </div>
+
+                    <div>
+                        <h1 class="auth-visual-title">Modern care operations in one secure place.</h1>
+                        <p class="auth-visual-copy">
+                            Manage patients, staff, appointments, billing, and reports with a clean workflow designed
+                            for hospital teams.
+                        </p>
+                    </div>
+
+                    <div class="auth-visual-stats">
+                        <div class="auth-visual-stat">
+                            <div class="auth-visual-stat-value">24/7</div>
+                            <div class="auth-visual-stat-label">Access for hospital teams across shifts.</div>
+                        </div>
+                        <div class="auth-visual-stat">
+                            <div class="auth-visual-stat-value">8+</div>
+                            <div class="auth-visual-stat-label">Core modules for staff, patients, billing, and reports.</div>
+                        </div>
+                        <div class="auth-visual-stat">
+                            <div class="auth-visual-stat-value">RBAC</div>
+                            <div class="auth-visual-stat-label">Role-based access for secure workflow control.</div>
+                        </div>
+                    </div>
+
+                    <ul class="auth-visual-list">
+                        <li><i class="fa-solid fa-circle-check"></i> Clean dashboard experience for admins and staff.</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Fast onboarding for login and sign up.</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Responsive layout for desktop and mobile.</li>
+                    </ul>
+                </div>
+            </aside>
+
+            <main class="auth-panel">
+                <div class="auth-panel-inner">
+                    @yield('content')
+                </div>
+            </main>
+        </div>
     </div>
 
     <script>

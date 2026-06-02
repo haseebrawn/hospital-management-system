@@ -25,6 +25,9 @@
 
             <div class="auth-card-form">
                 <div class="auth-card-title auth-card-title-center">Register New User</div>
+                <div class="auth-card-caption" style="text-align:center;">
+                    Create a new account to access hospital modules and permissions.
+                </div>
                 <form method="POST" action="{{ route('register.post') }}" data-ajax="true">
                     @csrf
 

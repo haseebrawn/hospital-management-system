@@ -3,9 +3,9 @@
 @section('title', 'Admin Login - Hospital HMS')
 
 @section('content')
-<div class="auth-grid">
-    <div>
-        <div class="auth-card">
+    <div class="auth-grid">
+        <div>
+        <div class="auth-card auth-card-login">
             <div class="auth-brand">
                 <div class="auth-logo">
                     <img src="{{ asset('images/HMS logo.png') }}" alt="Hospital HMS Logo" style="width: 55px; height: 55px;">
@@ -29,6 +29,9 @@
 
             <div class="auth-card-form">
                 <div class="auth-card-title auth-card-title-center">Login to Your Account</div>
+                <div class="auth-card-caption" style="text-align:center;">
+                    Enter your email and password to continue to the dashboard.
+                </div>
                 <form method="POST" action="{{ route('login.post') }}" data-ajax="true">
                     @csrf
 
