@@ -32,7 +32,7 @@
                 <div class="auth-card-caption" style="text-align:center;">
                     Enter your email and password to continue to the dashboard.
                 </div>
-                <form method="POST" action="{{ route('login.post') }}" data-ajax="true">
+                <form method="POST" action="{{ route('login.post') }}">
                     @csrf
 
                     <div class="form-group">
