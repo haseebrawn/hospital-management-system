@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\ShiftAssignRequest;
 use App\Models\Staff;
 use App\Models\StaffShift;
+use App\Services\HospitalNotificationService;
 use Illuminate\Http\Request;
 
 class ShiftsController extends Controller
@@ -46,9 +47,22 @@ class ShiftsController extends Controller
         return view('modules.shifts.create', compact('staffOptions', 'shiftNameOptions'));
     }
 
-    public function store(ShiftAssignRequest $request)
+    public function store(ShiftAssignRequest $request, HospitalNotificationService $notifications)
     {
-        StaffShift::create($request->validated());
+        $shift = StaffShift::create($request->validated());
+        $shift->load('staff.user');
+
+        $payload = [
+            'title' => 'Shift assigned',
+            'message' => ($shift->staff->user->name ?? 'A staff member') . " was assigned to {$shift->shift_name} shift on {$shift->shift_date}.",
+            'module' => 'shifts',
+            'type' => 'success',
+            'url' => route('shifts.index', ['staff_id' => $shift->staff_id]),
+            'icon' => 'fa-solid fa-clock-rotate-left',
+        ];
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'hr_manager'], $payload, $request->user());
+        $notifications->notifyUsers([$shift->staff?->user], $payload);
 
         return redirect()
             ->route('shifts.index')

@@ -9,6 +9,7 @@ use App\Models\Appointment;
 use App\Models\Department;
 use App\Models\Patient;
 use App\Models\User;
+use App\Services\HospitalNotificationService;
 use Illuminate\Http\Request;
 
 class AppointmentsController extends Controller
@@ -48,9 +49,24 @@ class AppointmentsController extends Controller
         return view('modules.appointments.create', compact('patients', 'doctors', 'departments', 'statusOptions'));
     }
 
-    public function store(AppointmentStoreRequest $request)
+    public function store(AppointmentStoreRequest $request, HospitalNotificationService $notifications)
     {
-        Appointment::create($request->validated());
+        $appointment = Appointment::create($request->validated());
+        $appointment->load(['patient', 'doctor']);
+
+        $patientName = trim((string) (($appointment->patient->first_name ?? '') . ' ' . ($appointment->patient->last_name ?? '')));
+
+        $payload = [
+            'title' => 'New appointment created',
+            'message' => "{$patientName} has a {$appointment->status} appointment on {$appointment->date} at {$appointment->time}.",
+            'module' => 'appointments',
+            'type' => 'success',
+            'url' => route('appointments.show', $appointment),
+            'icon' => 'fa-regular fa-calendar-check',
+        ];
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'receptionist'], $payload, $request->user());
+        $notifications->notifyUsers([$appointment->doctor], $payload);
 
         return redirect()
             ->route('appointments.index')
@@ -76,9 +92,23 @@ class AppointmentsController extends Controller
         return view('modules.appointments.edit', compact('appointment', 'patients', 'doctors', 'departments', 'statusOptions'));
     }
 
-    public function update(AppointmentUpdateRequest $request, Appointment $appointment)
+    public function update(AppointmentUpdateRequest $request, Appointment $appointment, HospitalNotificationService $notifications)
     {
         $appointment->update($request->validated());
+        $appointment->load(['patient', 'doctor']);
+
+        $patientName = trim((string) (($appointment->patient->first_name ?? '') . ' ' . ($appointment->patient->last_name ?? '')));
+        $payload = [
+            'title' => 'Appointment updated',
+            'message' => "{$patientName} appointment is now {$appointment->status}.",
+            'module' => 'appointments',
+            'type' => $appointment->status === 'cancelled' ? 'warning' : 'info',
+            'url' => route('appointments.show', $appointment),
+            'icon' => 'fa-solid fa-calendar-days',
+        ];
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'receptionist'], $payload, $request->user());
+        $notifications->notifyUsers([$appointment->doctor], $payload);
 
         return redirect()
             ->route('appointments.show', $appointment)

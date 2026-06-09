@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Hospital HMS Dashboard')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -103,6 +104,9 @@
             font-size: 18px;
             cursor: pointer;
             color: var(--text-muted);
+            border: 0;
+            background: transparent;
+            padding: 8px;
         }
 
         .notification-icon:hover {
@@ -114,11 +118,119 @@
             position: absolute;
             top: -5px;
             right: -6px;
-            background: red;
+            background: #ef4444;
             color: #fff;
             font-size: 10px;
+            min-width: 18px;
+            height: 18px;
             padding: 2px 5px;
             border-radius: 999px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .notification-badge.is-visible {
+            display: inline-flex;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            right: 52px;
+            top: 48px;
+            width: 340px;
+            max-width: calc(100vw - 24px);
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid rgba(229, 231, 235, 0.95);
+            box-shadow: 0 22px 55px rgba(15, 23, 42, 0.16);
+            overflow: hidden;
+            display: none;
+            z-index: 60;
+        }
+
+        .notification-dropdown.visible {
+            display: block;
+        }
+
+        .notification-dropdown__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 14px 10px;
+            border-bottom: 1px solid rgba(229, 231, 235, 0.9);
+        }
+
+        .notification-dropdown__title {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .notification-dropdown__action {
+            border: 0;
+            background: transparent;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .notification-list {
+            max-height: 360px;
+            overflow: auto;
+            display: grid;
+        }
+
+        .notification-item {
+            display: grid;
+            grid-template-columns: 34px 1fr;
+            gap: 10px;
+            padding: 12px 14px;
+            text-decoration: none;
+            color: var(--text-main);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.72);
+            background: #ffffff;
+        }
+
+        .notification-item:hover {
+            background: #f8fafc;
+        }
+
+        .notification-item.is-unread {
+            background: rgba(37, 99, 235, 0.06);
+        }
+
+        .notification-item__icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            color: #2563eb;
+            background: rgba(37, 99, 235, 0.1);
+            font-size: 13px;
+        }
+
+        .notification-item__title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .notification-item__message {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+
+        .notification-empty {
+            padding: 18px 14px;
+            color: var(--text-muted);
+            font-size: 13px;
+            text-align: center;
         }
 
         /* Right Area Alignment */
@@ -560,8 +672,21 @@
                 </div>
 
                 <!-- Notification Icon -->
-                <div class="notification-icon">
+                <button class="notification-icon" id="notificationButton" type="button" aria-label="Notifications">
                     <i class="fa-solid fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                </button>
+
+                <div class="notification-dropdown" id="notificationDropdown">
+                    <div class="notification-dropdown__header">
+                        <div class="notification-dropdown__title">Notifications</div>
+                        <button class="notification-dropdown__action" id="notificationReadAllButton" type="button">
+                            Mark all read
+                        </button>
+                    </div>
+                    <div class="notification-list" id="notificationList">
+                        <div class="notification-empty">Loading notifications...</div>
+                    </div>
                 </div>
 
                 @php($initial = auth()->check() ? mb_substr(auth()->user()->name, 0, 1) : 'A')
@@ -612,18 +737,193 @@
         (function() {
             const avatarButton = document.getElementById('profileAvatarButton');
             const dropdown = document.getElementById('profileDropdown');
+            const notificationButton = document.getElementById('notificationButton');
+            const notificationDropdown = document.getElementById('notificationDropdown');
+            const notificationBadge = document.getElementById('notificationBadge');
+            const notificationList = document.getElementById('notificationList');
+            const notificationReadAllButton = document.getElementById('notificationReadAllButton');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            const notificationIndexUrl = @json(auth()->check() ? route('notifications.index') : null);
+            const notificationReadAllUrl = @json(auth()->check() ? route('notifications.read-all') : null);
+            const notificationReadUrlTemplate = @json(auth()->check() ? route('notifications.read', ['notification' => '__NOTIFICATION_ID__']) : null);
+            const currentUserId = @json(auth()->id());
 
-            if (!avatarButton || !dropdown) return;
+            function escapeHtml(value) {
+                return String(value ?? '').replace(/[&<>"']/g, function(match) {
+                    return ({
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#039;'
+                    })[match];
+                });
+            }
 
-            avatarButton.addEventListener('click', function(event) {
+            function setBadge(count) {
+                if (!notificationBadge) return;
+
+                const value = Number(count || 0);
+                notificationBadge.textContent = value > 99 ? '99+' : String(value);
+                notificationBadge.classList.toggle('is-visible', value > 0);
+            }
+
+            function renderNotifications(notifications) {
+                if (!notificationList) return;
+
+                if (!notifications || notifications.length === 0) {
+                    notificationList.innerHTML = '<div class="notification-empty">No notifications yet.</div>';
+                    return;
+                }
+
+                notificationList.innerHTML = notifications.map(function(notification) {
+                    const title = escapeHtml(notification.title || 'Hospital notification');
+                    const message = escapeHtml(notification.message || '');
+                    const icon = escapeHtml(notification.icon || 'fa-solid fa-bell');
+                    const url = notification.url ? escapeHtml(notification.url) : '#';
+                    const unread = notification.read_at ? '' : ' is-unread';
+                    const notificationId = escapeHtml(notification.id || '');
+
+                    return `
+                        <a class="notification-item${unread}" href="${url}" data-notification-id="${notificationId}">
+                            <span class="notification-item__icon"><i class="${icon}"></i></span>
+                            <span>
+                                <span class="notification-item__title">${title}</span>
+                                <span class="notification-item__message">${message}</span>
+                            </span>
+                        </a>
+                    `;
+                }).join('');
+            }
+
+            async function loadNotifications() {
+                if (!notificationIndexUrl) return;
+
+                try {
+                    const response = await fetch(notificationIndexUrl, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    });
+
+                    if (!response.ok) return;
+
+                    const data = await response.json();
+                    setBadge(data.unread_count || 0);
+                    renderNotifications(data.notifications || []);
+                } catch (error) {
+                    if (notificationList) {
+                        notificationList.innerHTML = '<div class="notification-empty">Unable to load notifications.</div>';
+                    }
+                }
+            }
+
+            async function markNotificationRead(notificationId) {
+                if (!notificationReadUrlTemplate || !csrfToken || !notificationId) return null;
+
+                const response = await fetch(notificationReadUrlTemplate.replace('__NOTIFICATION_ID__', encodeURIComponent(notificationId)), {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) return null;
+
+                return response.json();
+            }
+
+            async function markAllRead() {
+                if (!notificationReadAllUrl || !csrfToken) return;
+
+                const response = await fetch(notificationReadAllUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+
+                if (response.ok) {
+                    setBadge(0);
+                    loadNotifications();
+                }
+            }
+
+            if (avatarButton && dropdown) {
+                avatarButton.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    dropdown.classList.toggle('visible');
+                    notificationDropdown?.classList.remove('visible');
+                });
+            }
+
+            if (notificationButton && notificationDropdown) {
+                notificationButton.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    notificationDropdown.classList.toggle('visible');
+                    dropdown?.classList.remove('visible');
+                    loadNotifications();
+                });
+            }
+
+            notificationReadAllButton?.addEventListener('click', function(event) {
                 event.stopPropagation();
-                dropdown.classList.toggle('visible');
+                markAllRead();
+            });
+
+            notificationList?.addEventListener('click', async function(event) {
+                const notificationItem = event.target.closest('.notification-item');
+
+                if (!notificationItem || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                    return;
+                }
+
+                const notificationId = notificationItem.dataset.notificationId;
+                const href = notificationItem.getAttribute('href') || '#';
+
+                event.preventDefault();
+                notificationItem.classList.remove('is-unread');
+
+                try {
+                    const data = await markNotificationRead(notificationId);
+
+                    if (data && typeof data.unread_count !== 'undefined') {
+                        setBadge(data.unread_count);
+                    }
+                } finally {
+                    if (href && href !== '#') {
+                        window.location.href = href;
+                    }
+                }
             });
 
             document.addEventListener('click', function(event) {
-                if (!dropdown.contains(event.target) && !avatarButton.contains(event.target)) {
+                if (dropdown && avatarButton && !dropdown.contains(event.target) && !avatarButton.contains(event.target)) {
                     dropdown.classList.remove('visible');
                 }
+
+                if (notificationDropdown && notificationButton && !notificationDropdown.contains(event.target) && !notificationButton.contains(event.target)) {
+                    notificationDropdown.classList.remove('visible');
+                }
+            });
+
+            loadNotifications();
+
+            document.addEventListener('DOMContentLoaded', function() {
+                if (!window.Echo || !currentUserId) return;
+
+                window.Echo.private(`App.Models.User.${currentUserId}`)
+                    .notification(function() {
+                        loadNotifications();
+                    });
             });
         })();
     </script>

@@ -16,6 +16,7 @@ use App\Http\Controllers\Web\Admin\UsersController as AdminUsersController;
 use App\Http\Controllers\Web\System\BackupsController as SystemBackupsController;
 use App\Http\Controllers\Web\System\LogsController as SystemLogsController;
 use App\Http\Controllers\Web\DashboardDataController;
+use App\Http\Controllers\Web\NotificationsController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -40,6 +41,9 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/data', DashboardDataController::class)->name('dashboard.data');
+    Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read-all', [NotificationsController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::post('/notifications/{notification}/read', [NotificationsController::class, 'markRead'])->name('notifications.read');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     /*

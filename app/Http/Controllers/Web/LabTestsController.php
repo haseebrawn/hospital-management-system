@@ -8,6 +8,7 @@ use App\Http\Requests\Web\LabTestUpdateRequest;
 use App\Models\LabTest;
 use App\Models\Patient;
 use App\Models\User;
+use App\Services\HospitalNotificationService;
 use Illuminate\Http\Request;
 
 class LabTestsController extends Controller
@@ -49,9 +50,23 @@ class LabTestsController extends Controller
         return view('modules.lab-tests.create', compact('patients', 'doctors', 'technicians', 'statusOptions'));
     }
 
-    public function store(LabTestStoreRequest $request)
+    public function store(LabTestStoreRequest $request, HospitalNotificationService $notifications)
     {
-        LabTest::create($request->validated());
+        $labTest = LabTest::create($request->validated());
+        $labTest->load(['patient', 'doctor', 'technician']);
+
+        $patientName = trim((string) (($labTest->patient->first_name ?? '') . ' ' . ($labTest->patient->last_name ?? '')));
+        $payload = [
+            'title' => 'New lab test requested',
+            'message' => "{$labTest->test_type} has been requested for {$patientName}.",
+            'module' => 'lab-tests',
+            'type' => 'success',
+            'url' => route('lab-tests.show', $labTest),
+            'icon' => 'fa-solid fa-flask',
+        ];
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'lab_technician'], $payload, $request->user());
+        $notifications->notifyUsers([$labTest->doctor, $labTest->technician], $payload);
 
         return redirect()
             ->route('lab-tests.index')
@@ -77,9 +92,23 @@ class LabTestsController extends Controller
         return view('modules.lab-tests.edit', compact('labTest', 'patients', 'doctors', 'technicians', 'statusOptions'));
     }
 
-    public function update(LabTestUpdateRequest $request, LabTest $labTest)
+    public function update(LabTestUpdateRequest $request, LabTest $labTest, HospitalNotificationService $notifications)
     {
         $labTest->update($request->validated());
+        $labTest->load(['patient', 'doctor', 'technician']);
+
+        $patientName = trim((string) (($labTest->patient->first_name ?? '') . ' ' . ($labTest->patient->last_name ?? '')));
+        $payload = [
+            'title' => 'Lab test updated',
+            'message' => "{$labTest->test_type} for {$patientName} is now {$labTest->status}.",
+            'module' => 'lab-tests',
+            'type' => $labTest->status === 'completed' ? 'success' : 'info',
+            'url' => route('lab-tests.show', $labTest),
+            'icon' => 'fa-solid fa-vial-circle-check',
+        ];
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'lab_technician'], $payload, $request->user());
+        $notifications->notifyUsers([$labTest->doctor, $labTest->technician], $payload);
 
         return redirect()
             ->route('lab-tests.show', $labTest)

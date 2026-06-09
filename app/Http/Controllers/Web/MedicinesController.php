@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\MedicineStoreRequest;
 use App\Http\Requests\Web\MedicineUpdateRequest;
 use App\Models\Medicine;
+use App\Services\HospitalNotificationService;
 use Illuminate\Http\Request;
 
 class MedicinesController extends Controller
@@ -36,9 +37,18 @@ class MedicinesController extends Controller
         return view('modules.medicines.create', compact('statusOptions'));
     }
 
-    public function store(MedicineStoreRequest $request)
+    public function store(MedicineStoreRequest $request, HospitalNotificationService $notifications)
     {
-        Medicine::create($request->validated());
+        $medicine = Medicine::create($request->validated());
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'pharmacist'], [
+            'title' => 'Medicine added',
+            'message' => "{$medicine->name} was added to pharmacy stock.",
+            'module' => 'pharmacy',
+            'type' => 'success',
+            'url' => route('medicines.show', $medicine),
+            'icon' => 'fa-solid fa-pills',
+        ], $request->user());
 
         return redirect()
             ->route('medicines.index')
@@ -57,9 +67,23 @@ class MedicinesController extends Controller
         return view('modules.medicines.edit', compact('medicine', 'statusOptions'));
     }
 
-    public function update(MedicineUpdateRequest $request, Medicine $medicine)
+    public function update(MedicineUpdateRequest $request, Medicine $medicine, HospitalNotificationService $notifications)
     {
         $medicine->update($request->validated());
+
+        $type = ((int) $medicine->stock <= 10 || $medicine->status === 'unavailable') ? 'warning' : 'info';
+        $message = $type === 'warning'
+            ? "{$medicine->name} needs pharmacy attention. Stock: {$medicine->stock}, status: {$medicine->status}."
+            : "{$medicine->name} pharmacy details were updated.";
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'pharmacist'], [
+            'title' => $type === 'warning' ? 'Medicine stock alert' : 'Medicine updated',
+            'message' => $message,
+            'module' => 'pharmacy',
+            'type' => $type,
+            'url' => route('medicines.show', $medicine),
+            'icon' => $type === 'warning' ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-pills',
+        ], $request->user());
 
         return redirect()
             ->route('medicines.show', $medicine)

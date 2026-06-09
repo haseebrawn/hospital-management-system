@@ -14,6 +14,7 @@ use App\Models\BedAllocation;
 use App\Models\Department;
 use App\Models\Patient;
 use App\Models\Ward;
+use App\Services\HospitalNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -57,9 +58,18 @@ class WardsBedsController extends Controller
         return view('modules.wards-beds.wards.create', compact('departments'));
     }
 
-    public function wardsStore(WardStoreRequest $request)
+    public function wardsStore(WardStoreRequest $request, HospitalNotificationService $notifications)
     {
-        Ward::create($request->validated());
+        $ward = Ward::create($request->validated());
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'doctor', 'nurse'], [
+            'title' => 'Ward created',
+            'message' => "{$ward->name} ward was created with capacity {$ward->capacity}.",
+            'module' => 'wards-beds',
+            'type' => 'success',
+            'url' => route('wards.index'),
+            'icon' => 'fa-solid fa-hospital',
+        ], $request->user());
 
         return redirect()
             ->route('wards.index')
@@ -126,7 +136,7 @@ class WardsBedsController extends Controller
         return view('modules.wards-beds.beds.create', compact('wards', 'statusOptions'));
     }
 
-    public function bedsStore(BedStoreRequest $request)
+    public function bedsStore(BedStoreRequest $request, HospitalNotificationService $notifications)
     {
         $data = $request->validated();
 
@@ -137,7 +147,17 @@ class WardsBedsController extends Controller
                 ->withInput();
         }
 
-        Bed::create($data);
+        $bed = Bed::create($data);
+        $bed->load('ward');
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'doctor', 'nurse'], [
+            'title' => 'Bed created',
+            'message' => "Bed {$bed->bed_number} was added to " . ($bed->ward->name ?? 'a ward') . '.',
+            'module' => 'wards-beds',
+            'type' => 'success',
+            'url' => route('beds.index', ['ward_id' => $bed->ward_id]),
+            'icon' => 'fa-solid fa-bed',
+        ], $request->user());
 
         return redirect()
             ->route('beds.index')
@@ -211,7 +231,7 @@ class WardsBedsController extends Controller
         return view('modules.wards-beds.allocations.create', compact('patients', 'beds'));
     }
 
-    public function allocationsStore(BedAllocationAssignRequest $request)
+    public function allocationsStore(BedAllocationAssignRequest $request, HospitalNotificationService $notifications)
     {
         $data = $request->validated();
 
@@ -234,12 +254,24 @@ class WardsBedsController extends Controller
             return $allocation;
         });
 
+        $allocation->load(['patient', 'bed.ward']);
+        $patientName = trim((string) (($allocation->patient->first_name ?? '') . ' ' . ($allocation->patient->last_name ?? '')));
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'doctor', 'nurse'], [
+            'title' => 'Bed assigned',
+            'message' => "{$patientName} was assigned to bed {$allocation->bed->bed_number}.",
+            'module' => 'wards-beds',
+            'type' => 'success',
+            'url' => route('allocations.index', ['patient_id' => $allocation->patient_id]),
+            'icon' => 'fa-solid fa-bed-pulse',
+        ], $request->user());
+
         return redirect()
             ->route('allocations.index')
             ->with('status', "Bed assigned successfully (Allocation #{$allocation->id}).");
     }
 
-    public function allocationsRelease(BedAllocation $allocation)
+    public function allocationsRelease(BedAllocation $allocation, HospitalNotificationService $notifications)
     {
         if ($allocation->released_at) {
             return redirect()
@@ -252,12 +284,24 @@ class WardsBedsController extends Controller
             $allocation->bed->update(['status' => 'available']);
         });
 
+        $allocation->load(['patient', 'bed']);
+        $patientName = trim((string) (($allocation->patient->first_name ?? '') . ' ' . ($allocation->patient->last_name ?? '')));
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'doctor', 'nurse'], [
+            'title' => 'Bed released',
+            'message' => "Bed {$allocation->bed->bed_number} was released from {$patientName}.",
+            'module' => 'wards-beds',
+            'type' => 'info',
+            'url' => route('allocations.index', ['patient_id' => $allocation->patient_id]),
+            'icon' => 'fa-solid fa-bed',
+        ], request()->user());
+
         return redirect()
             ->route('allocations.index')
             ->with('status', 'Bed released successfully.');
     }
 
-    public function allocationsTransfer(BedAllocationTransferRequest $request, BedAllocation $allocation)
+    public function allocationsTransfer(BedAllocationTransferRequest $request, BedAllocation $allocation, HospitalNotificationService $notifications)
     {
         if ($allocation->released_at) {
             return redirect()
@@ -267,7 +311,7 @@ class WardsBedsController extends Controller
 
         $data = $request->validated();
 
-        DB::transaction(function () use ($allocation, $data) {
+        $newAllocation = DB::transaction(function () use ($allocation, $data) {
             $newBed = Bed::lockForUpdate()->findOrFail($data['bed_id']);
             if ($newBed->status !== 'available') {
                 abort(422, 'New bed is not available.');
@@ -276,7 +320,7 @@ class WardsBedsController extends Controller
             $allocation->update(['released_at' => Carbon::now()]);
             $allocation->bed->update(['status' => 'available']);
 
-            BedAllocation::create([
+            $newAllocation = BedAllocation::create([
                 'patient_id' => $allocation->patient_id,
                 'bed_id' => $newBed->id,
                 'assigned_at' => Carbon::now(),
@@ -284,7 +328,21 @@ class WardsBedsController extends Controller
             ]);
 
             $newBed->update(['status' => 'occupied']);
+
+            return $newAllocation;
         });
+
+        $newAllocation->load(['patient', 'bed']);
+        $patientName = trim((string) (($newAllocation->patient->first_name ?? '') . ' ' . ($newAllocation->patient->last_name ?? '')));
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'doctor', 'nurse'], [
+            'title' => 'Bed transferred',
+            'message' => "{$patientName} was transferred to bed {$newAllocation->bed->bed_number}.",
+            'module' => 'wards-beds',
+            'type' => 'info',
+            'url' => route('allocations.index', ['patient_id' => $newAllocation->patient_id]),
+            'icon' => 'fa-solid fa-right-left',
+        ], $request->user());
 
         return redirect()
             ->route('allocations.index')

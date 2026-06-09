@@ -8,6 +8,7 @@ use App\Http\Requests\Web\StaffUpdateRequest;
 use App\Models\Department;
 use App\Models\Staff;
 use App\Models\User;
+use App\Services\HospitalNotificationService;
 use Illuminate\Http\Request;
 
 class StaffController extends Controller
@@ -52,9 +53,19 @@ class StaffController extends Controller
         return view('modules.staff.create', compact('departments', 'statusOptions', 'users'));
     }
 
-    public function store(StaffStoreRequest $request)
+    public function store(StaffStoreRequest $request, HospitalNotificationService $notifications)
     {
         $staff = Staff::create($request->validated());
+        $staff->load(['user', 'department']);
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'hr_manager'], [
+            'title' => 'Staff profile created',
+            'message' => ($staff->user->name ?? 'A staff member') . ' was added to ' . ($staff->department->name ?? 'the hospital') . '.',
+            'module' => 'staff',
+            'type' => 'success',
+            'url' => route('staff.show', $staff),
+            'icon' => 'fa-solid fa-user-doctor',
+        ], $request->user());
 
         return redirect()
             ->route('staff.show', $staff)
@@ -78,9 +89,19 @@ class StaffController extends Controller
         return view('modules.staff.edit', compact('staff', 'departments', 'statusOptions'));
     }
 
-    public function update(StaffUpdateRequest $request, Staff $staff)
+    public function update(StaffUpdateRequest $request, Staff $staff, HospitalNotificationService $notifications)
     {
         $staff->update($request->validated());
+        $staff->load(['user', 'department']);
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'hr_manager'], [
+            'title' => 'Staff profile updated',
+            'message' => ($staff->user->name ?? 'A staff member') . ' profile was updated.',
+            'module' => 'staff',
+            'type' => 'info',
+            'url' => route('staff.show', $staff),
+            'icon' => 'fa-solid fa-id-card',
+        ], $request->user());
 
         return redirect()
             ->route('staff.show', $staff)

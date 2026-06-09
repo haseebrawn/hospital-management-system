@@ -7,6 +7,7 @@ use App\Http\Requests\Web\PatientStoreRequest;
 use App\Http\Requests\Web\PatientUpdateRequest;
 use App\Models\Department;
 use App\Models\Patient;
+use App\Services\HospitalNotificationService;
 use Illuminate\Http\Request;
 
 class PatientsController extends Controller
@@ -38,9 +39,18 @@ class PatientsController extends Controller
         return view('modules.patients.create', compact('departments'));
     }
 
-    public function store(PatientStoreRequest $request)
+    public function store(PatientStoreRequest $request, HospitalNotificationService $notifications)
     {
-        Patient::create($request->validated());
+        $patient = Patient::create($request->validated());
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'doctor', 'nurse', 'receptionist'], [
+            'title' => 'New patient registered',
+            'message' => trim("{$patient->first_name} {$patient->last_name}") . ' has been added to the patient registry.',
+            'module' => 'patients',
+            'type' => 'success',
+            'url' => route('patients.show', $patient),
+            'icon' => 'fa-solid fa-user-plus',
+        ], $request->user());
 
         return redirect()
             ->route('patients.index')
@@ -61,9 +71,18 @@ class PatientsController extends Controller
         return view('modules.patients.edit', compact('patient', 'departments'));
     }
 
-    public function update(PatientUpdateRequest $request, Patient $patient)
+    public function update(PatientUpdateRequest $request, Patient $patient, HospitalNotificationService $notifications)
     {
         $patient->update($request->validated());
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'doctor', 'nurse', 'receptionist'], [
+            'title' => 'Patient profile updated',
+            'message' => trim("{$patient->first_name} {$patient->last_name}") . ' profile information was updated.',
+            'module' => 'patients',
+            'type' => 'info',
+            'url' => route('patients.show', $patient),
+            'icon' => 'fa-solid fa-user-pen',
+        ], $request->user());
 
         return redirect()
             ->route('patients.show', $patient)

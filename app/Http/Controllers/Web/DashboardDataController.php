@@ -103,7 +103,20 @@ class DashboardDataController extends Controller
         $availableBeds = Bed::where('status', 'available')->count();
         $occupiedBeds = Bed::where('status', 'occupied')->count();
 
-        $notifications = [];
+        $notifications = $request->user()
+            ? $request->user()->notifications()
+                ->latest()
+                ->limit(6)
+                ->get()
+                ->map(fn ($notification) => [
+                    'id' => $notification->id,
+                    'read_at' => optional($notification->read_at)->toIso8601String(),
+                    'created_at' => optional($notification->created_at)->toIso8601String(),
+                    ...$notification->data,
+                ])
+                ->values()
+                ->toArray()
+            : [];
 
         $patientsTrend = $this->groupCountByMonth('patients', 'created_at', 6);
         $billingTrend = $this->groupSumByMonth('billings', 'created_at', 'total_amount', 6);

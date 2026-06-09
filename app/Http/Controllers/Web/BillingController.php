@@ -7,6 +7,7 @@ use App\Http\Requests\Web\BillingStoreRequest;
 use App\Models\Billing;
 use App\Models\BillingItem;
 use App\Models\Patient;
+use App\Services\HospitalNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +46,7 @@ class BillingController extends Controller
         return view('modules.billing.create', compact('patients', 'typeOptions'));
     }
 
-    public function store(BillingStoreRequest $request)
+    public function store(BillingStoreRequest $request, HospitalNotificationService $notifications)
     {
         $data = $request->validated();
 
@@ -84,6 +85,18 @@ class BillingController extends Controller
             return $billing;
         });
 
+        $billing->load('patient');
+        $patientName = trim((string) (($billing->patient->first_name ?? '') . ' ' . ($billing->patient->last_name ?? '')));
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'accountant'], [
+            'title' => 'New invoice created',
+            'message' => "Invoice #{$billing->id} for {$patientName} was created for {$billing->total_amount}.",
+            'module' => 'billing',
+            'type' => 'success',
+            'url' => route('billing.show', $billing),
+            'icon' => 'fa-solid fa-file-invoice-dollar',
+        ], $request->user());
+
         return redirect()
             ->route('billing.show', $billing)
             ->with('status', 'Invoice created successfully.');
@@ -96,7 +109,7 @@ class BillingController extends Controller
         return view('modules.billing.show', compact('billing'));
     }
 
-    public function pay(Billing $billing)
+    public function pay(Billing $billing, HospitalNotificationService $notifications)
     {
         if ($billing->status !== 'pending') {
             return redirect()
@@ -109,12 +122,21 @@ class BillingController extends Controller
             'approved_by' => Auth::id(),
         ]);
 
+        $notifications->notifyRoles(['super_admin', 'admin', 'accountant'], [
+            'title' => 'Invoice paid',
+            'message' => "Invoice #{$billing->id} has been marked as paid.",
+            'module' => 'billing',
+            'type' => 'success',
+            'url' => route('billing.show', $billing),
+            'icon' => 'fa-solid fa-money-bill-wave',
+        ], request()->user());
+
         return redirect()
             ->route('billing.show', $billing)
             ->with('status', 'Invoice marked as paid.');
     }
 
-    public function cancel(Billing $billing)
+    public function cancel(Billing $billing, HospitalNotificationService $notifications)
     {
         if ($billing->status === 'paid') {
             return redirect()
@@ -125,6 +147,15 @@ class BillingController extends Controller
         $billing->update([
             'status' => 'cancelled',
         ]);
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'accountant'], [
+            'title' => 'Invoice cancelled',
+            'message' => "Invoice #{$billing->id} has been cancelled.",
+            'module' => 'billing',
+            'type' => 'warning',
+            'url' => route('billing.show', $billing),
+            'icon' => 'fa-solid fa-ban',
+        ], request()->user());
 
         return redirect()
             ->route('billing.show', $billing)
