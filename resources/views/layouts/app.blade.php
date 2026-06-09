@@ -99,6 +99,67 @@
             color: var(--text-muted);
         }
 
+        .search-results {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 0;
+            right: 0;
+            z-index: 60;
+            display: none;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.16);
+            backdrop-filter: blur(14px);
+        }
+
+        .search-results.visible {
+            display: block;
+        }
+
+        .search-result-item,
+        .search-result-state {
+            display: grid;
+            grid-template-columns: 34px 1fr;
+            gap: 10px;
+            padding: 12px 14px;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .search-result-item:last-child,
+        .search-result-state:last-child {
+            border-bottom: 0;
+        }
+
+        .search-result-item:hover {
+            background: rgba(37, 99, 235, 0.07);
+        }
+
+        .search-result-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .search-result-title {
+            display: block;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .search-result-subtitle,
+        .search-result-state {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
         .notification-icon {
             position: relative;
             font-size: 18px;
@@ -659,7 +720,8 @@
             <div class="search-area">
                 <div class="search-box">
                     <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                    <input type="text" placeholder="Search..." class="search-input">
+                    <input type="text" placeholder="Search patients, appointments, billing..." class="search-input" id="globalSearchInput" autocomplete="off">
+                    <div class="search-results" id="globalSearchResults"></div>
                 </div>
             </div>
 
@@ -742,11 +804,16 @@
             const notificationBadge = document.getElementById('notificationBadge');
             const notificationList = document.getElementById('notificationList');
             const notificationReadAllButton = document.getElementById('notificationReadAllButton');
+            const globalSearchInput = document.getElementById('globalSearchInput');
+            const globalSearchResults = document.getElementById('globalSearchResults');
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            const globalSearchUrl = @json(auth()->check() ? route('search') : null);
             const notificationIndexUrl = @json(auth()->check() ? route('notifications.index') : null);
             const notificationReadAllUrl = @json(auth()->check() ? route('notifications.read-all') : null);
             const notificationReadUrlTemplate = @json(auth()->check() ? route('notifications.read', ['notification' => '__NOTIFICATION_ID__']) : null);
             const currentUserId = @json(auth()->id());
+            let globalSearchTimer = null;
+            let globalSearchController = null;
 
             function escapeHtml(value) {
                 return String(value ?? '').replace(/[&<>"']/g, function(match) {
@@ -766,6 +833,79 @@
                 const value = Number(count || 0);
                 notificationBadge.textContent = value > 99 ? '99+' : String(value);
                 notificationBadge.classList.toggle('is-visible', value > 0);
+            }
+
+            function setSearchState(message) {
+                if (!globalSearchResults) return;
+
+                globalSearchResults.innerHTML = `
+                    <div class="search-result-state">
+                        <span class="search-result-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <span>${escapeHtml(message)}</span>
+                    </div>
+                `;
+                globalSearchResults.classList.add('visible');
+            }
+
+            function renderSearchResults(results) {
+                if (!globalSearchResults) return;
+
+                if (!results || results.length === 0) {
+                    setSearchState('No results found.');
+                    return;
+                }
+
+                globalSearchResults.innerHTML = results.map(function(result) {
+                    const title = escapeHtml(result.title || 'Search result');
+                    const subtitle = escapeHtml(result.subtitle || '');
+                    const icon = escapeHtml(result.icon || 'fa-solid fa-circle-info');
+                    const url = result.url ? escapeHtml(result.url) : '#';
+
+                    return `
+                        <a class="search-result-item" href="${url}">
+                            <span class="search-result-icon"><i class="${icon}"></i></span>
+                            <span>
+                                <span class="search-result-title">${title}</span>
+                                <span class="search-result-subtitle">${subtitle}</span>
+                            </span>
+                        </a>
+                    `;
+                }).join('');
+                globalSearchResults.classList.add('visible');
+            }
+
+            async function runGlobalSearch(query) {
+                if (!globalSearchUrl || !query) return;
+
+                if (globalSearchController) {
+                    globalSearchController.abort();
+                }
+
+                globalSearchController = new AbortController();
+                setSearchState('Searching...');
+
+                try {
+                    const response = await fetch(`${globalSearchUrl}?q=${encodeURIComponent(query)}`, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin',
+                        signal: globalSearchController.signal
+                    });
+
+                    if (!response.ok) {
+                        setSearchState('Unable to search right now.');
+                        return;
+                    }
+
+                    const data = await response.json();
+                    renderSearchResults(data.results || []);
+                } catch (error) {
+                    if (error.name !== 'AbortError') {
+                        setSearchState('Unable to search right now.');
+                    }
+                }
             }
 
             function renderNotifications(notifications) {
@@ -879,6 +1019,31 @@
                 markAllRead();
             });
 
+            globalSearchInput?.addEventListener('input', function() {
+                const query = globalSearchInput.value.trim();
+
+                clearTimeout(globalSearchTimer);
+
+                if (!query) {
+                    globalSearchResults?.classList.remove('visible');
+                    if (globalSearchResults) {
+                        globalSearchResults.innerHTML = '';
+                    }
+                    return;
+                }
+
+                setSearchState('Searching...');
+                globalSearchTimer = setTimeout(function() {
+                    runGlobalSearch(query);
+                }, 300);
+            });
+
+            globalSearchInput?.addEventListener('focus', function() {
+                if (globalSearchInput.value.trim() && globalSearchResults?.innerHTML) {
+                    globalSearchResults.classList.add('visible');
+                }
+            });
+
             notificationList?.addEventListener('click', async function(event) {
                 const notificationItem = event.target.closest('.notification-item');
 
@@ -912,6 +1077,10 @@
 
                 if (notificationDropdown && notificationButton && !notificationDropdown.contains(event.target) && !notificationButton.contains(event.target)) {
                     notificationDropdown.classList.remove('visible');
+                }
+
+                if (globalSearchResults && globalSearchInput && !globalSearchResults.contains(event.target) && !globalSearchInput.contains(event.target)) {
+                    globalSearchResults.classList.remove('visible');
                 }
             });
 
