@@ -5,7 +5,7 @@
 @section('content')
     <div class="card">
         <div class="card-title">Appointment Report</div>
-        <div class="card-subtitle">Filter by appointment date range.</div>
+        <div class="card-subtitle">Filter scoped appointments by appointment date range.</div>
 
         <form method="GET" action="{{ route('reports.appointments') }}" style="display:flex; gap:10px; align-items:end; flex-wrap:wrap;">
             <div>
@@ -78,4 +78,3 @@
         </div>
     </div>
 @endsection
-

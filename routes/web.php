@@ -13,6 +13,7 @@ use App\Http\Controllers\Web\ShiftsController;
 use App\Http\Controllers\Web\WardsBedsController;
 use App\Http\Controllers\Web\ReportsController as WebReportsController;
 use App\Http\Controllers\Web\Admin\UsersController as AdminUsersController;
+use App\Http\Controllers\Web\Admin\AppointmentsController as AdminAppointmentsController;
 use App\Http\Controllers\Web\System\BackupsController as SystemBackupsController;
 use App\Http\Controllers\Web\System\LogsController as SystemLogsController;
 use App\Http\Controllers\Web\DashboardDataController;
@@ -163,12 +164,14 @@ Route::middleware('auth')->group(function () {
         });
 
     Route::prefix('reports')
-        ->middleware('role:super_admin|admin|doctor|nurse|accountant|pharmacist|lab_technician|hr_manager')
+        ->middleware('role:super_admin|admin|doctor|nurse|receptionist|accountant|pharmacist|lab_technician|hr_manager')
         ->group(function () {
             Route::get('/', [WebReportsController::class, 'index'])->name('reports.index');
             Route::get('/patients', [WebReportsController::class, 'patients'])->name('reports.patients');
             Route::get('/appointments', [WebReportsController::class, 'appointments'])->name('reports.appointments');
             Route::get('/billing', [WebReportsController::class, 'billing'])->name('reports.billing');
+            Route::get('/lab-tests', [WebReportsController::class, 'labTests'])->name('reports.lab-tests');
+            Route::get('/pharmacy', [WebReportsController::class, 'pharmacy'])->name('reports.pharmacy');
             Route::get('/ward-bed', [WebReportsController::class, 'wardBed'])->name('reports.ward-bed');
             Route::get('/staff', [WebReportsController::class, 'staff'])->name('reports.staff');
         });
@@ -176,6 +179,9 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')
         ->middleware('role:super_admin|admin')
         ->group(function () {
+            Route::get('/appointments', [AdminAppointmentsController::class, 'index'])->name('admin.appointments.index');
+            Route::put('/appointments/{appointment}/status', [AdminAppointmentsController::class, 'updateStatus'])->name('admin.appointments.status');
+
             Route::get('/users', [AdminUsersController::class, 'index'])->name('admin.users.index');
             Route::put('/users/{user}/role', [AdminUsersController::class, 'assignRole'])->name('admin.users.role.assign');
             Route::delete('/users/{user}/role', [AdminUsersController::class, 'removeRole'])->name('admin.users.role.remove');

@@ -80,7 +80,7 @@ Route::prefix('v1')->group(function () {
         */
 
         Route::prefix('patients')
-            ->middleware('role:super_admin|doctor|nurse|receptionist')
+            ->middleware('role:super_admin|admin|doctor|nurse|receptionist')
             ->group(function () {
 
                 Route::get('/', [PatientController::class, 'index']);
@@ -101,13 +101,13 @@ Route::prefix('v1')->group(function () {
         Route::prefix('appointments')->group(function () {
 
             Route::post('/', [AppointmentController::class, 'store'])
-                ->middleware('role:super_admin|admin|receptionist');
+                ->middleware('role:super_admin|admin|nurse|receptionist');
 
             Route::get('/', [AppointmentController::class, 'index'])
-                ->middleware('role:super_admin|admin|doctor|receptionist');
+                ->middleware('role:super_admin|admin|doctor|nurse|receptionist');
 
             Route::put('/{id}', [AppointmentController::class, 'update'])
-                ->middleware('role:super_admin|admin|doctor');
+                ->middleware('role:super_admin|admin|doctor|nurse|receptionist');
 
             Route::delete('/{id}', [AppointmentController::class, 'destroy'])
                 ->middleware('role:super_admin|admin');
@@ -124,16 +124,16 @@ Route::prefix('v1')->group(function () {
         Route::prefix('lab-tests')->group(function () {
 
             Route::get('/', [LabTestController::class, 'index'])
-                ->middleware('role:lab_technician|doctor');
+                ->middleware('role:super_admin|admin|lab_technician|doctor');
 
             Route::post('/', [LabTestController::class, 'store'])
-                ->middleware('role:lab_technician');
+                ->middleware('role:super_admin|admin|lab_technician|doctor');
 
             Route::put('/{id}', [LabTestController::class, 'update'])
-                ->middleware('role:lab_technician');
+                ->middleware('role:super_admin|admin|lab_technician|doctor');
 
             Route::delete('/{id}', [LabTestController::class, 'destroy'])
-                ->middleware('role:lab_technician');
+                ->middleware('role:super_admin|admin|lab_technician');
 
         });
 
@@ -145,7 +145,7 @@ Route::prefix('v1')->group(function () {
         */
 
         Route::prefix('pharmacy')
-            ->middleware('role:super_admin|pharmacist|doctor')
+            ->middleware('role:super_admin|admin|pharmacist|doctor')
             ->group(function () {
 
                 /*
@@ -175,7 +175,7 @@ Route::prefix('v1')->group(function () {
         */
 
         Route::prefix('billing')
-            ->middleware('role:super_admin|accountant')
+            ->middleware('role:super_admin|admin|accountant')
             ->group(function () {
 
                 Route::post('/', [BillingController::class, 'createInvoice']);
@@ -275,10 +275,10 @@ Route::prefix('v1')->group(function () {
         Route::prefix('reports')->group(function () {
 
             Route::get('/patients', [ReportsController::class, 'patientReport'])
-                ->middleware('role:super_admin|admin|doctor|nurse');
+                ->middleware('role:super_admin|admin|doctor|nurse|receptionist');
 
             Route::get('/appointments', [ReportsController::class, 'appointmentReport'])
-                ->middleware('role:super_admin|admin|doctor');
+                ->middleware('role:super_admin|admin|doctor|nurse|receptionist');
 
             Route::get('/billing', [ReportsController::class, 'billingReport'])
                 ->middleware('role:super_admin|admin|accountant');

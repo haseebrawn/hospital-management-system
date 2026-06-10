@@ -200,14 +200,16 @@ class AuthController extends Controller
         // regenerate session
         $request->session()->regenerate();
 
+        $redirectRoute = route('dashboard');
+
         if ($request->ajax()) {
             return response()->json([
                 'status' => 'ok',
-                'redirect' => route('dashboard'),
+                'redirect' => $redirectRoute,
             ]);
         }
 
-        return redirect()->intended(route('dashboard'));
+        return redirect()->intended($redirectRoute);
     }
 
     public function profile(Request $request)

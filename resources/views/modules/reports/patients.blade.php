@@ -5,7 +5,7 @@
 @section('content')
     <div class="card">
         <div class="card-title">Patient Report</div>
-        <div class="card-subtitle">Filter by created date range.</div>
+        <div class="card-subtitle">Filter scoped patient records by created date range.</div>
 
         <form method="GET" action="{{ route('reports.patients') }}" style="display:flex; gap:10px; align-items:end; flex-wrap:wrap;">
             <div>
@@ -76,4 +76,3 @@
         </div>
     </div>
 @endsection
-

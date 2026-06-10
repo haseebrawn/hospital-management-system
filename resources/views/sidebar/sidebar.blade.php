@@ -96,7 +96,7 @@
         @endauth
 
         @auth
-            @if (auth()->user()->hasAnyRole(['super_admin', 'admin', 'doctor', 'nurse', 'accountant', 'pharmacist', 'lab_technician', 'hr_manager']))
+            @if (auth()->user()->hasAnyRole(['super_admin', 'admin', 'doctor', 'nurse', 'receptionist', 'accountant', 'pharmacist', 'lab_technician', 'hr_manager']))
                 <a class="app-sidebar__item {{ request()->routeIs('reports.*') ? 'is-active' : '' }}"
                     href="{{ route('reports.index') }}">
                     <span class="app-sidebar__icon"><i class="fa-solid fa-chart-line"></i></span>
@@ -107,10 +107,16 @@
 
         @auth
             @if (auth()->user()->hasAnyRole(['super_admin', 'admin']))
-                <a class="app-sidebar__item {{ request()->routeIs('admin.*') ? 'is-active' : '' }}"
+                <a class="app-sidebar__item {{ request()->routeIs('admin.appointments.*') ? 'is-active' : '' }}"
+                    href="{{ route('admin.appointments.index') }}">
+                    <span class="app-sidebar__icon"><i class="fa-solid fa-calendar-check"></i></span>
+                    <span class="app-sidebar__label">Admin Appointments</span>
+                </a>
+
+                <a class="app-sidebar__item {{ request()->routeIs('admin.users.*') ? 'is-active' : '' }}"
                     href="{{ route('admin.users.index') }}">
-                    <span class="app-sidebar__icon"><i class="fa-solid fa-shield-halved"></i></span>
-                    <span class="app-sidebar__label">Admin Panel</span>
+                    <span class="app-sidebar__icon"><i class="fa-solid fa-users-gear"></i></span>
+                    <span class="app-sidebar__label">Admin Users</span>
                 </a>
 
                 <a class="app-sidebar__item {{ request()->routeIs('system.backups.*') ? 'is-active' : '' }}"

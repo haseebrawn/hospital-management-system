@@ -5,7 +5,7 @@
 @section('content')
     <div class="card">
         <div class="card-title">Ward &amp; Bed Report</div>
-        <div class="card-subtitle">Occupancy overview.</div>
+        <div class="card-subtitle">Occupancy overview based on your department access.</div>
 
         <div style="margin-top: 14px; overflow:auto;">
             <table class="dash-table" style="min-width: 980px;">
@@ -41,4 +41,3 @@
         </div>
     </div>
 @endsection
-

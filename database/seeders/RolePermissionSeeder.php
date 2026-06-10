@@ -47,6 +47,10 @@ class RolePermissionSeeder extends Seeder
             'view staff',
             'assign shifts',
             'view shifts',
+            'manage backups',
+            'view backups',
+            'view logs',
+            'manage security',
         ];
 
         foreach ($permissions as $permission) {
@@ -100,20 +104,60 @@ class RolePermissionSeeder extends Seeder
 
         // Admin same as HR Manager
         $adminRole = Role::where('name', 'admin')->first();
-        $adminRole?->givePermissionTo([
+        $adminRole?->syncPermissions([
+            'manage users',
+            'manage roles',
+            'manage departments',
+            'view patients',
+            'edit patients',
+            'create appointments',
+            'manage prescriptions',
+            'manage lab tests',
+            'manage billing',
+            'manage medicines',
+            'dispense prescriptions',
             'manage staff',
             'view staff',
             'assign shifts',
-            'view shifts'
+            'view shifts',
+            'manage backups',
+            'view backups',
+            'view logs',
         ]);
 
         // Doctor & HOD Department Admin only view staff & shift
         $doctorRole = Role::where('name', 'doctor')->first();
         $doctorRole?->givePermissionTo([
+            'view patients',
+            'edit patients',
+            'manage prescriptions',
+            'manage lab tests',
             'view staff',
             'view shifts'
         ]);
 
+        // Reception handles patient registration and appointment scheduling
+        $receptionistRole = Role::where('name', 'receptionist')->first();
+        $receptionistRole?->syncPermissions([
+            'view patients',
+            'edit patients',
+            'create appointments',
+        ]);
+
+        // Nurses support patient flow and ward/appointment coordination
+        $nurseRole = Role::where('name', 'nurse')->first();
+        $nurseRole?->syncPermissions([
+            'view patients',
+            'edit patients',
+            'create appointments',
+            'view shifts',
+        ]);
+
+        // Accountant owns billing operations
+        $accountantRole = Role::where('name', 'accountant')->first();
+        $accountantRole?->syncPermissions([
+            'manage billing',
+        ]);
 
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     }

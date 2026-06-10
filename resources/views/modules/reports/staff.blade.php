@@ -5,7 +5,7 @@
 @section('content')
     <div class="card">
         <div class="card-title">Staff Report</div>
-        <div class="card-subtitle">Staff directory by department.</div>
+        <div class="card-subtitle">Staff directory based on your role and department access.</div>
 
         <form method="GET" action="{{ route('reports.staff') }}" style="display:flex; gap:10px; align-items:end; flex-wrap:wrap;">
             <div>
@@ -71,4 +71,3 @@
         </div>
     </div>
 @endsection
-

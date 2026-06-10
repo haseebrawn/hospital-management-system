@@ -2,34 +2,64 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Patient;
-use App\Models\Appointment;
-use App\Models\Bed;
-use App\Models\Billing;
-use App\Models\LabTest;
+use App\Models\BillingItem;
+use App\Models\Medicine;
+use App\Services\DashboardScopeService;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(DashboardScopeService $dashboardScope)
     {
+        $user = Auth::user();
+        $dashboardVisibility = $dashboardScope->visibility($user);
+
         // Summary Metrics
-        $totalPatients = Patient::count();
-        $newAppointments = Appointment::whereDate('created_at', now()->toDateString())->count();
-        $labTestsPending = LabTest::where('status', 'pending')->count();
-        $todaysRevenue = Billing::whereDate('created_at', now()->toDateString())
-            ->sum('total_amount');
+        $totalPatients = $dashboardVisibility['patients'] ? $dashboardScope->patients($user)->count() : 0;
+        $newAppointments = $dashboardVisibility['appointments']
+            ? $dashboardScope->appointments($user)->whereDate('created_at', now()->toDateString())->count()
+            : 0;
+        $todaysAppointments = $dashboardVisibility['appointments']
+            ? $dashboardScope->appointments($user)->whereDate('date', now()->toDateString())->count()
+            : 0;
+        $pendingAppointments = $dashboardVisibility['appointments']
+            ? $dashboardScope->appointments($user)->where('status', 'pending')->count()
+            : 0;
+        $approvedAppointments = $dashboardVisibility['appointments']
+            ? $dashboardScope->appointments($user)->where('status', 'approved')->count()
+            : 0;
+        $labTestsPending = $dashboardVisibility['lab_tests']
+            ? $dashboardScope->labTests($user)->where('status', 'pending')->count()
+            : 0;
+        $todaysRevenue = $dashboardVisibility['revenue']
+            ? $dashboardScope->billings($user)->whereDate('created_at', now()->toDateString())->sum('total_amount')
+            : 0;
+        $pendingInvoices = $dashboardVisibility['revenue']
+            ? $dashboardScope->billings($user)->where('status', 'pending')->count()
+            : 0;
+        $lowStockMedicines = $dashboardVisibility['pharmacy'] ? Medicine::query()->where('stock', '<=', 10)->count() : 0;
+        $medicineSalesQuery = BillingItem::query()
+            ->where('type', 'medicine')
+            ->whereHas('billing', fn ($billingQuery) => $billingQuery->where('status', 'paid'));
+        $medicineSoldQuantity = $dashboardVisibility['pharmacy'] ? (clone $medicineSalesQuery)->sum('quantity') : 0;
+        $medicineSalesAmount = $dashboardVisibility['pharmacy']
+            ? ((clone $medicineSalesQuery)->selectRaw('sum(quantity * price) as total')->value('total') ?? 0)
+            : 0;
+        $activeStaff = $dashboardVisibility['staff'] ? $dashboardScope->staff($user)->where('employment_status', 'active')->count() : 0;
 
         // Recent Appointments
-        $recentAppointments = Appointment::with('patient', 'doctor')
+        $recentAppointments = $dashboardVisibility['appointments']
+            ? $dashboardScope->appointments($user)
+            ->with('patient', 'doctor')
             ->orderByDesc('date')
             ->orderByDesc('time')
             ->limit(5)
-            ->get();
+            ->get()
+            : collect();
 
         // Bed Status
-        $availableBeds = Bed::where('status', 'available')->count();
-        $occupiedBeds = Bed::where('status', 'occupied')->count();
+        $availableBeds = $dashboardVisibility['beds'] ? $dashboardScope->beds($user)->where('status', 'available')->count() : 0;
+        $occupiedBeds = $dashboardVisibility['beds'] ? $dashboardScope->beds($user)->where('status', 'occupied')->count() : 0;
 
         // Notifications sample
         $notifications = [
@@ -40,8 +70,9 @@ class DashboardController extends Controller
 
         // Pass all data to blade
         return view('dashboard', compact(
-            'totalPatients','newAppointments','labTestsPending','todaysRevenue',
-            'recentAppointments','availableBeds','occupiedBeds','notifications'
+            'totalPatients','newAppointments','todaysAppointments','pendingAppointments','approvedAppointments','labTestsPending','todaysRevenue','pendingInvoices',
+            'recentAppointments','availableBeds','occupiedBeds','notifications', 'dashboardVisibility',
+            'lowStockMedicines', 'medicineSoldQuantity', 'medicineSalesAmount', 'activeStaff'
         ));
     }
 }

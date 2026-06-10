@@ -4,11 +4,9 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
-use App\Models\Bed;
-use App\Models\Billing;
-use App\Models\LabTest;
+use App\Models\BillingItem;
 use App\Models\Medicine;
-use App\Models\Patient;
+use App\Services\DashboardScopeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -45,66 +43,90 @@ class DashboardDataController extends Controller
         return compact('labels', 'data');
     }
 
-    private function groupSumByMonth(string $table, string $dateColumn, string $sumColumn, int $months): array
+    private function groupQueryCountByMonth($query, int $months): array
     {
-        $driver = DB::getDriverName();
         $start = now()->startOfMonth()->subMonths($months - 1)->startOfDay();
         $end = now()->endOfMonth()->endOfDay();
 
-        $keyExpr = match ($driver) {
-            'sqlite' => "strftime('%Y-%m', {$dateColumn})",
-            'pgsql' => "to_char({$dateColumn}, 'YYYY-MM')",
-            default => "DATE_FORMAT({$dateColumn}, '%Y-%m')",
-        };
-
-        $rows = DB::table($table)
-            ->selectRaw("{$keyExpr} as ym, sum({$sumColumn}) as total")
-            ->whereBetween($dateColumn, [$start, $end])
-            ->groupBy('ym')
-            ->orderBy('ym')
-            ->get()
-            ->keyBy('ym');
+        $rows = $query->whereBetween('created_at', [$start, $end])
+            ->get(['created_at'])
+            ->groupBy(fn ($row) => optional($row->created_at)->format('Y-m'));
 
         $labels = [];
         $data = [];
         for ($i = $months - 1; $i >= 0; $i--) {
             $ym = now()->startOfMonth()->subMonths($i)->format('Y-m');
             $labels[] = $ym;
-            $data[] = (float) ($rows[$ym]->total ?? 0);
+            $data[] = (int) ($rows[$ym]?->count() ?? 0);
         }
 
         return compact('labels', 'data');
     }
 
-    public function __invoke(Request $request)
+    private function groupQuerySumByMonth($query, string $sumColumn, int $months): array
+    {
+        $start = now()->startOfMonth()->subMonths($months - 1)->startOfDay();
+        $end = now()->endOfMonth()->endOfDay();
+
+        $rows = $query->whereBetween('created_at', [$start, $end])
+            ->get(['created_at', $sumColumn])
+            ->groupBy(fn ($row) => optional($row->created_at)->format('Y-m'));
+
+        $labels = [];
+        $data = [];
+        for ($i = $months - 1; $i >= 0; $i--) {
+            $ym = now()->startOfMonth()->subMonths($i)->format('Y-m');
+            $labels[] = $ym;
+            $data[] = (float) ($rows[$ym]?->sum($sumColumn) ?? 0);
+        }
+
+        return compact('labels', 'data');
+    }
+
+    public function __invoke(Request $request, DashboardScopeService $dashboardScope)
     {
         $today = now()->toDateString();
+        $user = $request->user();
+        $visibility = $dashboardScope->visibility($user);
 
-        $totalPatients = Patient::count();
-        $newAppointments = Appointment::whereDate('created_at', $today)->count();
-        $labTestsPending = LabTest::where('status', 'pending')->count();
-        $todaysRevenue = (float) Billing::whereDate('created_at', $today)->sum('total_amount');
+        $totalPatients = $visibility['patients'] ? $dashboardScope->patients($user)->count() : 0;
+        $newAppointments = $visibility['appointments'] ? $dashboardScope->appointments($user)->whereDate('created_at', $today)->count() : 0;
+        $todaysAppointments = $visibility['appointments'] ? $dashboardScope->appointments($user)->whereDate('date', $today)->count() : 0;
+        $pendingAppointments = $visibility['appointments'] ? $dashboardScope->appointments($user)->where('status', 'pending')->count() : 0;
+        $approvedAppointments = $visibility['appointments'] ? $dashboardScope->appointments($user)->where('status', 'approved')->count() : 0;
+        $labTestsPending = $visibility['lab_tests'] ? $dashboardScope->labTests($user)->where('status', 'pending')->count() : 0;
+        $todaysRevenue = $visibility['revenue'] ? (float) $dashboardScope->billings($user)->whereDate('created_at', $today)->sum('total_amount') : 0;
+        $pendingInvoices = $visibility['revenue'] ? $dashboardScope->billings($user)->where('status', 'pending')->count() : 0;
+        $lowStockMedicines = $visibility['pharmacy'] ? Medicine::query()->where('stock', '<=', 10)->count() : 0;
+        $medicineSalesQuery = BillingItem::query()
+            ->where('type', 'medicine')
+            ->whereHas('billing', fn ($billingQuery) => $billingQuery->where('status', 'paid'));
+        $medicineSoldQuantity = $visibility['pharmacy'] ? (clone $medicineSalesQuery)->sum('quantity') : 0;
+        $medicineSalesAmount = $visibility['pharmacy']
+            ? ((clone $medicineSalesQuery)->selectRaw('sum(quantity * price) as total')->value('total') ?? 0)
+            : 0;
+        $activeStaff = $visibility['staff'] ? $dashboardScope->staff($user)->where('employment_status', 'active')->count() : 0;
 
-        $recentAppointments = Appointment::query()
-            ->with(['patient', 'doctor'])
-            ->orderByDesc('date')
-            ->orderByDesc('time')
-            ->limit(5)
-            ->get()
-            ->map(function (Appointment $a) {
-                return [
-                    'id' => $a->id,
-                    'patient' => trim((string) (optional($a->patient)->first_name . ' ' . optional($a->patient)->last_name)) ?: '—',
-                    'doctor' => optional($a->doctor)->name ?? '—',
-                    'status' => (string) ($a->status ?? 'pending'),
-                ];
-            });
+        $recentAppointments = $visibility['appointments']
+            ? $dashboardScope->appointments($user)
+                ->with(['patient', 'doctor'])
+                ->orderByDesc('date')
+                ->orderByDesc('time')
+                ->limit(5)
+                ->get()
+                ->map(fn (Appointment $appointment) => [
+                    'id' => $appointment->id,
+                    'patient' => trim((string) (optional($appointment->patient)->first_name . ' ' . optional($appointment->patient)->last_name)) ?: '—',
+                    'doctor' => optional($appointment->doctor)->name ?? '—',
+                    'status' => (string) ($appointment->status ?? 'pending'),
+                ])
+            : collect();
 
-        $availableBeds = Bed::where('status', 'available')->count();
-        $occupiedBeds = Bed::where('status', 'occupied')->count();
+        $availableBeds = $visibility['beds'] ? $dashboardScope->beds($user)->where('status', 'available')->count() : 0;
+        $occupiedBeds = $visibility['beds'] ? $dashboardScope->beds($user)->where('status', 'occupied')->count() : 0;
 
-        $notifications = $request->user()
-            ? $request->user()->notifications()
+        $notifications = $user
+            ? $user->notifications()
                 ->latest()
                 ->limit(6)
                 ->get()
@@ -118,37 +140,59 @@ class DashboardDataController extends Controller
                 ->toArray()
             : [];
 
-        $patientsTrend = $this->groupCountByMonth('patients', 'created_at', 6);
-        $billingTrend = $this->groupSumByMonth('billings', 'created_at', 'total_amount', 6);
-        $labTrend = $this->groupCountByMonth('lab_tests', 'created_at', 6);
-        $medTrend = $this->groupCountByMonth('medicines', 'created_at', 6);
+        $patientsTrend = $visibility['patients']
+            ? $this->groupQueryCountByMonth($dashboardScope->patients($user), 6)
+            : ['labels' => [], 'data' => []];
+        $billingTrend = $visibility['revenue']
+            ? $this->groupQuerySumByMonth($dashboardScope->billings($user), 'total_amount', 6)
+            : ['labels' => [], 'data' => []];
+        $labTrend = $visibility['lab_tests']
+            ? $this->groupQueryCountByMonth($dashboardScope->labTests($user), 6)
+            : ['labels' => [], 'data' => []];
+        $medTrend = $visibility['pharmacy']
+            ? $this->groupCountByMonth('medicines', 'created_at', 6)
+            : ['labels' => $billingTrend['labels'], 'data' => []];
 
-        $appointmentsByStatus = Appointment::query()
-            ->whereDate('created_at', '>=', now()->subDays(30)->toDateString())
-            ->select('status', DB::raw('count(*) as total'))
-            ->groupBy('status')
-            ->get()
-            ->keyBy('status');
+        $appointmentsByStatus = $visibility['appointments']
+            ? $dashboardScope->appointments($user)
+                ->whereDate('created_at', '>=', now()->subDays(30)->toDateString())
+                ->select('status', DB::raw('count(*) as total'))
+                ->groupBy('status')
+                ->get()
+                ->keyBy('status')
+            : collect();
 
         $appointmentStatusLabels = ['pending', 'approved', 'completed', 'cancelled'];
         $appointmentStatusData = array_map(
-            fn ($s) => (int) ($appointmentsByStatus[$s]->total ?? 0),
+            fn ($status) => (int) ($appointmentsByStatus[$status]->total ?? 0),
             $appointmentStatusLabels
         );
+        $activityLabels = $visibility['revenue']
+            ? $billingTrend['labels']
+            : ($visibility['lab_tests'] ? $labTrend['labels'] : $medTrend['labels']);
 
         return response()->json([
             'total_patients' => $totalPatients,
             'new_appointments' => $newAppointments,
+            'todays_appointments' => $todaysAppointments,
+            'pending_appointments' => $pendingAppointments,
+            'approved_appointments' => $approvedAppointments,
             'lab_tests_pending' => $labTestsPending,
             'todays_revenue' => $todaysRevenue,
+            'pending_invoices' => $pendingInvoices,
+            'low_stock_medicines' => $lowStockMedicines,
+            'medicine_sold_quantity' => $medicineSoldQuantity,
+            'medicine_sales_amount' => $medicineSalesAmount,
+            'active_staff' => $activeStaff,
             'available_beds' => $availableBeds,
             'occupied_beds' => $occupiedBeds,
             'recent_appointments' => $recentAppointments,
             'notifications' => $notifications,
+            'visibility' => $visibility,
             'charts' => [
                 'patients_overview' => $patientsTrend,
                 'revenue_overview' => [
-                    'labels' => $billingTrend['labels'],
+                    'labels' => $activityLabels,
                     'billing' => $billingTrend['data'],
                     'lab_tests' => $labTrend['data'],
                     'medicines_added' => $medTrend['data'],

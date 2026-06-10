@@ -425,10 +425,39 @@
 <div class="dash-header">
     <div>
         <h2 class="dash-title">Dashboard</h2>
+        <p class="dash-subtitle">Showing data based on your role and department access.</p>
     </div>
 </div>
 
+@php
+    $dashboardVisibility = $dashboardVisibility ?? [
+        'patients' => true,
+        'appointments' => true,
+        'lab_tests' => true,
+        'revenue' => true,
+        'beds' => true,
+        'staff' => false,
+        'pharmacy' => false,
+    ];
+@endphp
+
+@if (auth()->user()?->hasAnyRole(['super_admin', 'admin']))
+    <div class="card" style="margin-bottom:18px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+            <div>
+                <div class="card-title">Admin Dashboard</div>
+                <div class="card-subtitle">Control hospital workflow approvals, department activity, and key alerts.</div>
+            </div>
+            <a href="{{ route('admin.appointments.index') }}"
+                style="padding:14px 22px; border-radius:14px; background:var(--primary); color:#fff; text-decoration:none; font-size:15px; font-weight:800;">
+                Manage Appointments
+            </a>
+        </div>
+    </div>
+@endif
+
 <div class="dash-stats">
+    @if ($dashboardVisibility['patients'])
     <div class="dash-stat dash-stat--blue">
         <div class="dash-stat__meta">
             <div class="dash-stat__label">Total Patients</div>
@@ -436,6 +465,9 @@
         </div>
         <div class="dash-stat__icon"><i class="fa-solid fa-user-group"></i></div>
     </div>
+    @endif
+
+    @if ($dashboardVisibility['appointments'])
     <div class="dash-stat dash-stat--green">
         <div class="dash-stat__meta">
             <div class="dash-stat__label">New Appointments</div>
@@ -443,6 +475,33 @@
         </div>
         <div class="dash-stat__icon"><i class="fa-regular fa-calendar-check"></i></div>
     </div>
+
+    <div class="dash-stat dash-stat--blue">
+        <div class="dash-stat__meta">
+            <div class="dash-stat__label">Today's Appointments</div>
+            <div class="dash-stat__value" id="dashTodaysAppointments">{{ number_format($todaysAppointments ?? 0) }}</div>
+        </div>
+        <div class="dash-stat__icon"><i class="fa-solid fa-calendar-day"></i></div>
+    </div>
+
+    <div class="dash-stat dash-stat--yellow">
+        <div class="dash-stat__meta">
+            <div class="dash-stat__label">Pending Appointments</div>
+            <div class="dash-stat__value" id="dashPendingAppointments">{{ number_format($pendingAppointments ?? 0) }}</div>
+        </div>
+        <div class="dash-stat__icon"><i class="fa-solid fa-hourglass-half"></i></div>
+    </div>
+
+    <div class="dash-stat dash-stat--green">
+        <div class="dash-stat__meta">
+            <div class="dash-stat__label">Approved Appointments</div>
+            <div class="dash-stat__value" id="dashApprovedAppointments">{{ number_format($approvedAppointments ?? 0) }}</div>
+        </div>
+        <div class="dash-stat__icon"><i class="fa-solid fa-circle-check"></i></div>
+    </div>
+    @endif
+
+    @if ($dashboardVisibility['lab_tests'])
     <div class="dash-stat dash-stat--yellow">
         <div class="dash-stat__meta">
             <div class="dash-stat__label">Lab Tests Pending</div>
@@ -450,6 +509,9 @@
         </div>
         <div class="dash-stat__icon"><i class="fa-solid fa-flask"></i></div>
     </div>
+    @endif
+
+    @if ($dashboardVisibility['revenue'])
     <div class="dash-stat dash-stat--purple">
         <div class="dash-stat__meta">
             <div class="dash-stat__label">Today's Revenue</div>
@@ -457,13 +519,63 @@
         </div>
         <div class="dash-stat__icon"><i class="fa-solid fa-sack-dollar"></i></div>
     </div>
+
+    <div class="dash-stat dash-stat--yellow">
+        <div class="dash-stat__meta">
+            <div class="dash-stat__label">Pending Invoices</div>
+            <div class="dash-stat__value" id="dashPendingInvoices">{{ number_format($pendingInvoices ?? 0) }}</div>
+        </div>
+        <div class="dash-stat__icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+    </div>
+    @endif
+
+    @if ($dashboardVisibility['pharmacy'])
+    <div class="dash-stat dash-stat--purple">
+        <div class="dash-stat__meta">
+            <div class="dash-stat__label">Low Stock Medicines</div>
+            <div class="dash-stat__value" id="dashLowStockMedicines">{{ number_format($lowStockMedicines ?? 0) }}</div>
+        </div>
+        <div class="dash-stat__icon"><i class="fa-solid fa-pills"></i></div>
+    </div>
+
+    <div class="dash-stat dash-stat--green">
+        <div class="dash-stat__meta">
+            <div class="dash-stat__label">Medicine Quantity Sold</div>
+            <div class="dash-stat__value" id="dashMedicineSoldQuantity">{{ number_format((int) ($medicineSoldQuantity ?? 0)) }}</div>
+        </div>
+        <div class="dash-stat__icon"><i class="fa-solid fa-capsules"></i></div>
+    </div>
+
+    <div class="dash-stat dash-stat--yellow">
+        <div class="dash-stat__meta">
+            <div class="dash-stat__label">Medicine Sales Amount</div>
+            <div class="dash-stat__value" id="dashMedicineSalesAmount">{{ number_format((float) ($medicineSalesAmount ?? 0), 2) }}</div>
+        </div>
+        <div class="dash-stat__icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+    </div>
+    @endif
+
+    @if ($dashboardVisibility['staff'])
+    <div class="dash-stat dash-stat--blue">
+        <div class="dash-stat__meta">
+            <div class="dash-stat__label">Active Staff</div>
+            <div class="dash-stat__value" id="dashActiveStaff">{{ number_format($activeStaff ?? 0) }}</div>
+        </div>
+        <div class="dash-stat__icon"><i class="fa-solid fa-user-doctor"></i></div>
+    </div>
+    @endif
 </div>
 
 <div class="dash-grid">
+    @if ($dashboardVisibility['appointments'])
     <div class="card">
         <div class="dash-card__head">
             <h3 class="dash-card__title">Recent Appointments</h3>
-            <a href="{{ route('appointments.index') }}" style="font-size:12px; color: var(--primary); text-decoration:none;">View All</a>
+            @if (auth()->user()?->hasAnyRole(['super_admin', 'admin']))
+                <a href="{{ route('admin.appointments.index', ['status' => 'pending']) }}" style="font-size:12px; color: var(--primary); text-decoration:none; font-weight:700;">View Pending</a>
+            @else
+                <a href="{{ route('appointments.index') }}" style="font-size:12px; color: var(--primary); text-decoration:none;">View All</a>
+            @endif
         </div>
         <table class="dash-table">
             <thead>
@@ -504,7 +616,9 @@
             </tbody>
         </table>
     </div>
+    @endif
 
+    @if ($dashboardVisibility['beds'])
     <div class="card">
         <div class="dash-card__head">
             <h3 class="dash-card__title">Bed Status</h3>
@@ -520,7 +634,9 @@
             </div>
         </div>
     </div>
+    @endif
 
+    @if ($dashboardVisibility['patients'])
     <div class="card">
         <div class="dash-card__head">
             <h3 class="dash-card__title">Patients Overview</h3>
@@ -529,6 +645,7 @@
             <svg id="dashPatientsChartSvg" viewBox="0 0 360 150" preserveAspectRatio="none" aria-hidden="true"></svg>
         </div>
     </div>
+    @endif
 </div>
 
 <div class="dash-lower">
@@ -572,21 +689,30 @@
         </div>
     </div>
 
+    @if ($dashboardVisibility['revenue'] || $dashboardVisibility['lab_tests'] || $dashboardVisibility['pharmacy'])
     <div class="card">
         <div class="dash-card__head">
-            <h3 class="dash-card__title">Hospital Revenue</h3>
+            <h3 class="dash-card__title">Department Activity</h3>
             <div class="dash-legend" aria-label="Legend">
+                @if ($dashboardVisibility['revenue'])
                 <span class="dash-legend__item"><span class="dash-legend__dot"></span>Billing</span>
+                @endif
+                @if ($dashboardVisibility['pharmacy'])
                 <span class="dash-legend__item"><span class="dash-legend__dot dash-legend__dot--green"></span>Pharmacy</span>
+                @endif
+                @if ($dashboardVisibility['lab_tests'])
                 <span class="dash-legend__item"><span class="dash-legend__dot dash-legend__dot--yellow"></span>Lab</span>
+                @endif
             </div>
         </div>
         <div class="dash-chart" role="img" aria-label="Hospital revenue chart (static)">
             <svg id="dashRevenueChartSvg" viewBox="0 0 520 190" preserveAspectRatio="none" aria-hidden="true"></svg>
         </div>
     </div>
+    @endif
 </div>
 
+@if ($dashboardVisibility['appointments'])
 <div class="card dash-appointment">
     <div class="dash-card__head">
         <h3 class="dash-card__title">Appointment Overview</h3>
@@ -601,6 +727,7 @@
         <svg id="dashAppointmentsChartSvg" viewBox="0 0 760 220" preserveAspectRatio="none" aria-hidden="true"></svg>
     </div>
 </div>
+@endif
 
 <script>
     (function() {
@@ -608,8 +735,16 @@
 
         const elTotalPatients = document.getElementById('dashTotalPatients');
         const elNewAppointments = document.getElementById('dashNewAppointments');
+        const elTodaysAppointments = document.getElementById('dashTodaysAppointments');
+        const elPendingAppointments = document.getElementById('dashPendingAppointments');
+        const elApprovedAppointments = document.getElementById('dashApprovedAppointments');
         const elLabPending = document.getElementById('dashLabPending');
         const elRevenue = document.getElementById('dashTodaysRevenue');
+        const elPendingInvoices = document.getElementById('dashPendingInvoices');
+        const elLowStockMedicines = document.getElementById('dashLowStockMedicines');
+        const elMedicineSoldQuantity = document.getElementById('dashMedicineSoldQuantity');
+        const elMedicineSalesAmount = document.getElementById('dashMedicineSalesAmount');
+        const elActiveStaff = document.getElementById('dashActiveStaff');
         const elBedsAvailable = document.getElementById('dashBedsAvailable');
         const elBedsOccupied = document.getElementById('dashBedsOccupied');
         const elRecentBody = document.getElementById('dashRecentAppointmentsBody');
@@ -860,8 +995,16 @@
 
                 if (elTotalPatients) elTotalPatients.textContent = formatNumber(data.total_patients ?? 0);
                 if (elNewAppointments) elNewAppointments.textContent = formatNumber(data.new_appointments ?? 0);
+                if (elTodaysAppointments) elTodaysAppointments.textContent = formatNumber(data.todays_appointments ?? 0);
+                if (elPendingAppointments) elPendingAppointments.textContent = formatNumber(data.pending_appointments ?? 0);
+                if (elApprovedAppointments) elApprovedAppointments.textContent = formatNumber(data.approved_appointments ?? 0);
                 if (elLabPending) elLabPending.textContent = formatNumber(data.lab_tests_pending ?? 0);
                 if (elRevenue) elRevenue.textContent = formatMoney(data.todays_revenue ?? 0);
+                if (elPendingInvoices) elPendingInvoices.textContent = formatNumber(data.pending_invoices ?? 0);
+                if (elLowStockMedicines) elLowStockMedicines.textContent = formatNumber(data.low_stock_medicines ?? 0);
+                if (elMedicineSoldQuantity) elMedicineSoldQuantity.textContent = formatNumber(data.medicine_sold_quantity ?? 0);
+                if (elMedicineSalesAmount) elMedicineSalesAmount.textContent = formatMoney(data.medicine_sales_amount ?? 0);
+                if (elActiveStaff) elActiveStaff.textContent = formatNumber(data.active_staff ?? 0);
                 if (elBedsAvailable) elBedsAvailable.textContent = formatNumber(data.available_beds ?? 0);
                 if (elBedsOccupied) elBedsOccupied.textContent = formatNumber(data.occupied_beds ?? 0);
                 if (elServerTime) elServerTime.textContent = safeText(data.server_time);
@@ -903,7 +1046,7 @@
                                 <div class="dash-notify__item" ${last ? 'style="border-bottom:0;"' : ''}>
                                     <div class="dash-notify__left">
                                         <span class="dash-dot"></span>
-                                        <div class="dash-notify__text">${safeText(n.text)}</div>
+                                        <div class="dash-notify__text">${safeText(n.message || n.text || n.title)}</div>
                                     </div>
                                     <div class="dash-notify__time">—</div>
                                 </div>
