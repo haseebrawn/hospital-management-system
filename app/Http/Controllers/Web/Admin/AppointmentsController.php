@@ -20,10 +20,14 @@ class AppointmentsController extends Controller
             ->with(['patient', 'doctor', 'department'])
             ->when($status !== '', fn ($query) => $query->where('status', $status))
             ->when($search !== '', function ($query) use ($search) {
-                $query->whereHas('patient', function ($patientQuery) use ($search) {
-                    $patientQuery->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%")
-                        ->orWhere('contact_number', 'like', "%{$search}%");
+                $query->where(function ($searchQuery) use ($search) {
+                    $searchQuery->whereHas('patient', function ($patientQuery) use ($search) {
+                        $patientQuery->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('contact_number', 'like', "%{$search}%");
+                    })
+                        ->orWhere('reason', 'like', "%{$search}%")
+                        ->orWhere('notes', 'like', "%{$search}%");
                 });
             })
             ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")

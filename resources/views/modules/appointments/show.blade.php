@@ -13,6 +13,25 @@
                 </div>
             </div>
             <div style="display:flex; gap: 10px; flex-wrap:wrap;">
+                @if ($appointment->canCheckIn())
+                    <form method="POST" action="{{ route('appointments.check-in', $appointment) }}">
+                        @csrf
+                        @method('PUT')
+                        <button type="submit"
+                            style="padding:8px 12px; border-radius:10px; border:1px solid rgba(5,150,105,0.30); background:rgba(5,150,105,0.08); color:#059669; cursor:pointer; font-size:13px; font-weight:700;">
+                            Check In
+                        </button>
+                    </form>
+                @elseif ($appointment->canCheckOut())
+                    <form method="POST" action="{{ route('appointments.check-out', $appointment) }}">
+                        @csrf
+                        @method('PUT')
+                        <button type="submit"
+                            style="padding:8px 12px; border-radius:10px; border:1px solid rgba(124,58,237,0.30); background:rgba(124,58,237,0.08); color:#7c3aed; cursor:pointer; font-size:13px; font-weight:700;">
+                            Check Out
+                        </button>
+                    </form>
+                @endif
                 <a href="{{ route('appointments.edit', $appointment) }}"
                     style="padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); background:#fff; text-decoration:none; color:inherit; font-size:13px;">
                     Edit
@@ -60,6 +79,36 @@
                     {{ optional($appointment->created_at)->format('Y-m-d H:i') }}
                 </div>
             </div>
+
+            <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
+                <div style="font-size:12px; color: var(--text-muted);">Visit Flow</div>
+                <div style="font-weight:600; margin-top:4px; text-transform:capitalize;">
+                    {{ str_replace('_', ' ', $appointment->visit_status) }}
+                </div>
+            </div>
+
+            <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
+                <div style="font-size:12px; color: var(--text-muted);">Check In / Out</div>
+                <div style="font-weight:600; margin-top:4px;">
+                    {{ optional($appointment->checked_in_at)->format('Y-m-d H:i') ?? '-' }}
+                    <span style="color:var(--text-muted);">→</span>
+                    {{ optional($appointment->checked_out_at)->format('Y-m-d H:i') ?? '-' }}
+                </div>
+            </div>
+
+            <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px; grid-column: 1 / -1;">
+                <div style="font-size:12px; color: var(--text-muted);">Reason / Complaint</div>
+                <div style="font-weight:600; margin-top:4px;">
+                    {{ $appointment->reason ?: '-' }}
+                </div>
+            </div>
+
+            <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px; grid-column: 1 / -1;">
+                <div style="font-size:12px; color: var(--text-muted);">Notes</div>
+                <div style="font-weight:600; margin-top:4px; white-space:pre-line;">
+                    {{ $appointment->notes ?: '-' }}
+                </div>
+            </div>
         </div>
 
         <div style="margin-top: 16px;">
@@ -69,4 +118,3 @@
         </div>
     </div>
 @endsection
-

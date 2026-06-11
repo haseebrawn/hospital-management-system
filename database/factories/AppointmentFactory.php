@@ -17,8 +17,11 @@ class AppointmentFactory extends Factory
             'department_id' => null,
             'date' => fake()->date(),
             'time' => fake()->time('H:i:s'),
+            'reason' => fake()->optional()->sentence(6),
+            'notes' => fake()->optional()->paragraph(),
             'status' => fake()->randomElement(['pending', 'approved', 'completed', 'cancelled']),
+            'checked_in_at' => null,
+            'checked_out_at' => null,
         ];
     }
 }
-

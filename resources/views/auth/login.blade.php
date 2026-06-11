@@ -58,12 +58,8 @@
                         <button type="submit" class="btn-primary">Login</button>
                     </div>
 
-                    <!-- Sign Up Link -->
                     <div style="text-align: center; margin-top: 15px; font-size: 13px; color: #6b7280;">
-                        Create a new account?
-                        <a href="{{ route('register') }}" style="color: #1e88e5; text-decoration: none; font-weight: 500;">
-                            Sign Up
-                        </a>
+                        Need an account? Please contact the hospital administrator.
                     </div>
                 </form>
             </div>

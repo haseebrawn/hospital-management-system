@@ -110,6 +110,43 @@ class AppointmentController extends Controller
         ]);
     }
 
+    public function checkIn($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+
+        if (! $appointment->canCheckIn()) {
+            return response()->json(['message' => 'Appointment cannot be checked in.'], 422);
+        }
+
+        $appointment->forceFill([
+            'checked_in_at' => now(),
+        ])->save();
+
+        return response()->json([
+            'message' => 'Patient checked in successfully.',
+            'appointment' => new AppointmentResource($appointment->fresh(['patient', 'doctor'])),
+        ]);
+    }
+
+    public function checkOut($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+
+        if (! $appointment->canCheckOut()) {
+            return response()->json(['message' => 'Appointment cannot be checked out.'], 422);
+        }
+
+        $appointment->forceFill([
+            'checked_out_at' => now(),
+            'status' => $appointment->status === 'approved' ? 'completed' : $appointment->status,
+        ])->save();
+
+        return response()->json([
+            'message' => 'Patient checked out successfully.',
+            'appointment' => new AppointmentResource($appointment->fresh(['patient', 'doctor'])),
+        ]);
+    }
+
     /**
      *  Cancel/Delete Appointment
      */

@@ -15,6 +15,7 @@ class PatientController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            'mrn' => 'nullable|string|max:50|unique:patients,mrn',
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'contact_number' => 'required|string',
@@ -41,7 +42,17 @@ class PatientController extends Controller
     public function update(Request $request, $id)
     {
         $patient = Patient::findOrFail($id);
-        $patient->update($request->all());
+        $data = $request->validate([
+            'mrn' => 'sometimes|nullable|string|max:50|unique:patients,mrn,' . $patient->id,
+            'first_name' => 'sometimes|required|string',
+            'last_name' => 'sometimes|required|string',
+            'contact_number' => 'sometimes|required|string',
+            'gender' => 'sometimes|required|string',
+            'address' => 'nullable|string',
+            'department_id' => 'nullable|integer|exists:departments,id',
+        ]);
+
+        $patient->update($data);
 
         return response()->json(['message' => 'Patient updated successfully']);
     }
@@ -53,4 +64,3 @@ class PatientController extends Controller
         return response()->json(['message' => 'Patient deleted successfully']);
     }
 }
-

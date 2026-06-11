@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class PrescriptionRequest extends FormRequest
 {
@@ -11,7 +12,9 @@ class PrescriptionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        $user = Auth::user();
+
+        return $user?->hasAnyRole(['super_admin', 'admin', 'doctor']) ?? false;
     }
 
     /**
@@ -25,6 +28,7 @@ class PrescriptionRequest extends FormRequest
             'appointment_id' => 'required|exists:appointments,id',
             'description' => 'required|string',
             'medicines' => 'nullable|string',
+            'status' => 'nullable|in:pending,dispensed,cancelled',
         ];
     }
 }

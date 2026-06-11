@@ -11,7 +11,7 @@
             </div>
 
             <form method="GET" action="{{ route('admin.appointments.index') }}" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <input name="q" value="{{ $search ?? '' }}" placeholder="Search patient name / phone"
+                <input name="q" value="{{ $search ?? '' }}" placeholder="Search patient / phone / reason"
                     style="padding:9px 11px; border:1px solid var(--border-color); border-radius:11px; font-size:13px; min-width:240px;">
 
                 <select name="status"
@@ -38,10 +38,12 @@
                         <th>ID</th>
                         <th>Patient</th>
                         <th>Phone</th>
+                        <th>Reason</th>
                         <th>Doctor</th>
                         <th>Department</th>
                         <th>Date & Time</th>
                         <th>Status</th>
+                        <th>Visit Flow</th>
                         <th style="text-align:right;">Admin Action</th>
                     </tr>
                 </thead>
@@ -55,10 +57,12 @@
                                 </a>
                             </td>
                             <td>{{ optional($appointment->patient)->contact_number ?? '-' }}</td>
+                            <td>{{ $appointment->reason ?: '-' }}</td>
                             <td>{{ optional($appointment->doctor)->name ?? '-' }}</td>
                             <td>{{ optional($appointment->department)->name ?? '-' }}</td>
                             <td>{{ $appointment->date }} {{ substr((string) $appointment->time, 0, 5) }}</td>
                             <td style="text-transform:capitalize; font-weight:700;">{{ str_replace('_', ' ', $appointment->status) }}</td>
+                            <td style="text-transform:capitalize; font-weight:700;">{{ str_replace('_', ' ', $appointment->visit_status) }}</td>
                             <td style="text-align:right;">
                                 <form method="POST" action="{{ route('admin.appointments.status', $appointment) }}"
                                     style="display:inline-flex; gap:8px; align-items:center; justify-content:flex-end;">
@@ -81,7 +85,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" style="padding:16px;">No appointments found for this admin panel filter.</td>
+                            <td colspan="10" style="padding:16px;">No appointments found for this admin panel filter.</td>
                         </tr>
                     @endforelse
                 </tbody>

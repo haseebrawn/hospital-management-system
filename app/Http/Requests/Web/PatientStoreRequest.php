@@ -28,6 +28,7 @@ class PatientStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'mrn' => ['nullable', 'string', 'max:50', 'unique:patients,mrn'],
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'contact_number' => ['required', 'string', 'max:50'],
@@ -37,4 +38,3 @@ class PatientStoreRequest extends FormRequest
         ];
     }
 }
-

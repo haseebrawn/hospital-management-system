@@ -4,8 +4,10 @@ namespace Tests\Feature\Web;
 
 use App\Models\Appointment;
 use App\Models\Department;
+use App\Models\DoctorAvailability;
 use App\Models\Patient;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -28,6 +30,17 @@ class AppointmentsWebTest extends TestCase
         return $user;
     }
 
+    private function addAvailability(User $doctor, string $date, string $start = '09:00', string $end = '17:00'): DoctorAvailability
+    {
+        return DoctorAvailability::create([
+            'doctor_id' => $doctor->id,
+            'day_of_week' => Carbon::parse($date)->dayOfWeek,
+            'start_time' => $start,
+            'end_time' => $end,
+            'is_active' => true,
+        ]);
+    }
+
     public function test_appointments_index_loads(): void
     {
         $this->actingAsSuperAdmin();
@@ -46,6 +59,7 @@ class AppointmentsWebTest extends TestCase
         $patient = Patient::factory()->create(['department_id' => $department->id]);
         $doctor = User::factory()->create(['department_id' => $department->id]);
         $doctor->assignRole('doctor');
+        $this->addAvailability($doctor, '2026-05-22');
 
         $response = $this->post('/appointments', [
             'patient_id' => $patient->id,
@@ -53,6 +67,8 @@ class AppointmentsWebTest extends TestCase
             'department_id' => $department->id,
             'date' => '2026-05-22',
             'time' => '10:30',
+            'reason' => 'High fever and headache',
+            'notes' => 'Patient requested morning slot.',
             'status' => 'pending',
         ]);
 
@@ -62,7 +78,149 @@ class AppointmentsWebTest extends TestCase
             'doctor_id' => $doctor->id,
             'department_id' => $department->id,
             'date' => '2026-05-22',
+            'reason' => 'High fever and headache',
+            'notes' => 'Patient requested morning slot.',
             'status' => 'pending',
+        ]);
+    }
+
+    public function test_appointment_cannot_be_created_outside_doctor_availability(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $department = Department::factory()->create();
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+        $doctor = User::factory()->create(['department_id' => $department->id]);
+        $doctor->assignRole('doctor');
+        $this->addAvailability($doctor, '2026-05-22', '09:00', '11:00');
+
+        $response = $this->post('/appointments', [
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $department->id,
+            'date' => '2026-05-22',
+            'time' => '14:30',
+            'reason' => 'Outside slot',
+            'status' => 'pending',
+        ]);
+
+        $response->assertSessionHasErrors('doctor_id');
+        $this->assertDatabaseMissing('appointments', [
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'reason' => 'Outside slot',
+        ]);
+    }
+
+    public function test_doctor_cannot_be_double_booked_for_same_date_and_time(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $department = Department::factory()->create();
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+        $otherPatient = Patient::factory()->create(['department_id' => $department->id]);
+        $doctor = User::factory()->create(['department_id' => $department->id]);
+        $doctor->assignRole('doctor');
+        $this->addAvailability($doctor, '2026-05-22');
+
+        Appointment::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $department->id,
+            'date' => '2026-05-22',
+            'time' => '10:30',
+            'status' => 'approved',
+        ]);
+
+        $response = $this->post('/appointments', [
+            'patient_id' => $otherPatient->id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $department->id,
+            'date' => '2026-05-22',
+            'time' => '10:30',
+            'reason' => 'Conflict slot',
+            'status' => 'pending',
+        ]);
+
+        $response->assertSessionHasErrors('doctor_id');
+        $this->assertDatabaseMissing('appointments', [
+            'patient_id' => $otherPatient->id,
+            'doctor_id' => $doctor->id,
+            'reason' => 'Conflict slot',
+        ]);
+    }
+
+    public function test_cancelled_appointment_does_not_block_same_slot(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $department = Department::factory()->create();
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+        $otherPatient = Patient::factory()->create(['department_id' => $department->id]);
+        $doctor = User::factory()->create(['department_id' => $department->id]);
+        $doctor->assignRole('doctor');
+        $this->addAvailability($doctor, '2026-05-22');
+
+        Appointment::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $department->id,
+            'date' => '2026-05-22',
+            'time' => '10:30',
+            'status' => 'cancelled',
+        ]);
+
+        $response = $this->post('/appointments', [
+            'patient_id' => $otherPatient->id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $department->id,
+            'date' => '2026-05-22',
+            'time' => '10:30',
+            'reason' => 'Replacement slot',
+            'status' => 'pending',
+        ]);
+
+        $response->assertRedirect('/appointments');
+        $this->assertDatabaseHas('appointments', [
+            'patient_id' => $otherPatient->id,
+            'doctor_id' => $doctor->id,
+            'reason' => 'Replacement slot',
+        ]);
+    }
+
+    public function test_appointment_update_ignores_its_own_booking_slot(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $department = Department::factory()->create();
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+        $doctor = User::factory()->create(['department_id' => $department->id]);
+        $doctor->assignRole('doctor');
+        $this->addAvailability($doctor, '2026-05-22');
+
+        $appointment = Appointment::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $department->id,
+            'date' => '2026-05-22',
+            'time' => '10:30',
+            'status' => 'pending',
+        ]);
+
+        $response = $this->put("/appointments/{$appointment->id}", [
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $department->id,
+            'date' => '2026-05-22',
+            'time' => '10:30',
+            'reason' => 'Updated reason',
+            'status' => 'pending',
+        ]);
+
+        $response->assertRedirect("/appointments/{$appointment->id}");
+        $this->assertDatabaseHas('appointments', [
+            'id' => $appointment->id,
+            'reason' => 'Updated reason',
         ]);
     }
 
@@ -81,5 +239,82 @@ class AppointmentsWebTest extends TestCase
         $response->assertOk();
         $response->assertSee('Appointment');
     }
-}
 
+    public function test_appointment_show_displays_reason_and_notes(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $appointment = Appointment::factory()->create([
+            'department_id' => Department::factory()->create()->id,
+            'patient_id' => Patient::factory()->create()->id,
+            'reason' => 'Routine follow-up',
+            'notes' => 'Bring previous lab report.',
+            'status' => 'pending',
+        ]);
+
+        $response = $this->get("/appointments/{$appointment->id}");
+
+        $response->assertOk();
+        $response->assertSee('Routine follow-up');
+        $response->assertSee('Bring previous lab report.');
+    }
+
+    public function test_appointments_can_be_searched_by_reason(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        Appointment::factory()->create([
+            'department_id' => Department::factory()->create()->id,
+            'patient_id' => Patient::factory()->create()->id,
+            'reason' => 'Migraine review',
+            'status' => 'pending',
+        ]);
+
+        $response = $this->get('/appointments?q=Migraine');
+
+        $response->assertOk();
+        $response->assertSee('Migraine review');
+    }
+
+    public function test_approved_appointment_can_be_checked_in_and_checked_out(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $appointment = Appointment::factory()->create([
+            'department_id' => Department::factory()->create()->id,
+            'patient_id' => Patient::factory()->create()->id,
+            'status' => 'approved',
+        ]);
+
+        $this->put("/appointments/{$appointment->id}/check-in")
+            ->assertRedirect();
+
+        $appointment->refresh();
+        $this->assertNotNull($appointment->checked_in_at);
+        $this->assertSame('checked_in', $appointment->visit_status);
+
+        $this->put("/appointments/{$appointment->id}/check-out")
+            ->assertRedirect();
+
+        $appointment->refresh();
+        $this->assertNotNull($appointment->checked_out_at);
+        $this->assertSame('completed', $appointment->status);
+        $this->assertSame('checked_out', $appointment->visit_status);
+    }
+
+    public function test_pending_appointment_cannot_be_checked_in(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $appointment = Appointment::factory()->create([
+            'department_id' => Department::factory()->create()->id,
+            'patient_id' => Patient::factory()->create()->id,
+            'status' => 'pending',
+        ]);
+
+        $this->put("/appointments/{$appointment->id}/check-in")
+            ->assertStatus(422);
+
+        $this->assertNull($appointment->fresh()->checked_in_at);
+    }
+}

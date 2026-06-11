@@ -40,7 +40,8 @@ class SearchController extends Controller
     private function patients(string $query)
     {
         return Patient::query()
-            ->where('first_name', 'like', "%{$query}%")
+            ->where('mrn', 'like', "%{$query}%")
+            ->orWhere('first_name', 'like', "%{$query}%")
             ->orWhere('last_name', 'like', "%{$query}%")
             ->orWhere('contact_number', 'like', "%{$query}%")
             ->latest()
@@ -48,7 +49,7 @@ class SearchController extends Controller
             ->get()
             ->map(fn (Patient $patient) => [
                 'title' => trim("{$patient->first_name} {$patient->last_name}"),
-                'subtitle' => "Patient • {$patient->contact_number}",
+                'subtitle' => "Patient • {$patient->mrn} • {$patient->contact_number}",
                 'icon' => 'fa-solid fa-user-plus',
                 'url' => route('patients.show', $patient),
             ]);
@@ -60,6 +61,8 @@ class SearchController extends Controller
             ->with('patient')
             ->where('status', 'like', "%{$query}%")
             ->orWhere('date', 'like', "%{$query}%")
+            ->orWhere('reason', 'like', "%{$query}%")
+            ->orWhere('notes', 'like', "%{$query}%")
             ->orWhereHas('patient', function ($patientQuery) use ($query) {
                 $patientQuery->where('first_name', 'like', "%{$query}%")
                     ->orWhere('last_name', 'like', "%{$query}%");

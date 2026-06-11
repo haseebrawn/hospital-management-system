@@ -5,14 +5,26 @@ namespace App\Services;
 use App\Models\User;
 use App\Notifications\HospitalSystemNotification;
 use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Role;
 use Throwable;
 
 class HospitalNotificationService
 {
     public function notifyRoles(array $roles, array $payload, ?User $except = null): void
     {
+        $existingRoles = Role::query()
+            ->where('guard_name', 'api')
+            ->whereIn('name', $roles)
+            ->pluck('name')
+            ->all();
+
+        if ($existingRoles === []) {
+            return;
+        }
+
         $users = User::query()
-            ->role($roles, 'api')
+            ->role($existingRoles, 'api')
+            ->when($except, fn ($query) => $query->whereKeyNot($except->id))
             ->get();
 
         $this->notifyUsers($users, $payload);

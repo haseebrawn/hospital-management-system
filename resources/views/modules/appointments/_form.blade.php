@@ -21,6 +21,8 @@
         $status = old('status', $appointment?->status ?? 'pending');
         $date = old('date', $appointment?->date);
         $time = old('time', $appointment?->time ? substr((string) $appointment->time, 0, 5) : null);
+        $reason = old('reason', $appointment?->reason);
+        $notes = old('notes', $appointment?->notes);
     @endphp
 
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
@@ -31,12 +33,12 @@
                 <option value="" disabled {{ $patientId ? '' : 'selected' }}>Select patient</option>
                 @foreach ($patients as $p)
                     <option value="{{ $p->id }}" {{ (string) $patientId === (string) $p->id ? 'selected' : '' }}>
-                        #{{ $p->id }} — {{ $p->first_name }} {{ $p->last_name }} ({{ $p->contact_number }})
+                        {{ $p->mrn ?? ('#' . $p->id) }} — {{ $p->first_name }} {{ $p->last_name }} ({{ $p->contact_number }})
                     </option>
                 @endforeach
             </select>
             <div style="margin-top:6px; font-size:12px; color: var(--text-muted);">
-                Tip: if the patient is not listed, create the patient first in Patients module.
+                Tip: appointments with a selected doctor must match an active doctor availability slot.
             </div>
         </div>
 
@@ -79,6 +81,22 @@
         </div>
 
         <div style="grid-column: 1 / -1;">
+            <label style="display:block; font-size:12px; color: var(--text-muted); margin-bottom:6px;">Reason / Complaint</label>
+            <input name="reason"
+                value="{{ $reason }}"
+                placeholder="e.g. Fever, follow-up, chest pain"
+                style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px;">
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+            <label style="display:block; font-size:12px; color: var(--text-muted); margin-bottom:6px;">Notes</label>
+            <textarea name="notes"
+                rows="4"
+                placeholder="Optional appointment notes for doctor/reception/admin"
+                style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px; resize:vertical;">{{ $notes }}</textarea>
+        </div>
+
+        <div style="grid-column: 1 / -1;">
             <label style="display:block; font-size:12px; color: var(--text-muted); margin-bottom:6px;">Status</label>
             <select name="status" required
                 style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px; background:#fff;">
@@ -102,4 +120,3 @@
         </button>
     </div>
 </form>
-

@@ -30,6 +30,11 @@
 
         <div style="margin-top: 14px; display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
             <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
+                <div style="font-size:12px; color: var(--text-muted);">MRN / Registration No.</div>
+                <div style="font-weight:600; margin-top:4px;">{{ $patient->mrn ?? '-' }}</div>
+            </div>
+
+            <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
                 <div style="font-size:12px; color: var(--text-muted);">Contact</div>
                 <div style="font-weight:600; margin-top:4px;">{{ $patient->contact_number }}</div>
             </div>
@@ -54,4 +59,3 @@
         </div>
     </div>
 @endsection
-

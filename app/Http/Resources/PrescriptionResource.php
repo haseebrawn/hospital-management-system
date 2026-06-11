@@ -17,10 +17,11 @@ class PrescriptionResource extends JsonResource
         return [
             'id' => $this->id,
             'appointment_id' => $this->appointment_id,
-            'doctor' => $this->doctor->name,
-            'patient' => $this->patient->name,
+            'doctor' => $this->doctor?->name,
+            'patient' => $this->patient ? trim(($this->patient->first_name ?? '') . ' ' . ($this->patient->last_name ?? '')) : null,
             'description' => $this->description,
             'medicines' => $this->medicines,
+            'status' => $this->status,
             'created_at' => $this->created_at->format('d-m-Y H:i'),
         ];
     }

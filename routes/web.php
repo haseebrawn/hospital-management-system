@@ -5,7 +5,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Web\PatientsController;
 use App\Http\Controllers\Web\AppointmentsController;
+use App\Http\Controllers\Web\DoctorAvailabilitiesController;
 use App\Http\Controllers\Web\LabTestsController;
+use App\Http\Controllers\Web\PrescriptionsController;
 use App\Http\Controllers\Web\MedicinesController;
 use App\Http\Controllers\Web\BillingController as WebBillingController;
 use App\Http\Controllers\Web\StaffController;
@@ -30,8 +32,8 @@ Route::middleware('guest')->group(function () {
         ->middleware('throttle:10,1')
         ->name('login.post');
 
-    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-    Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+    Route::get('/register', [AuthController::class, 'registrationDisabled'])->name('register');
+    Route::post('/register', [AuthController::class, 'registrationDisabled'])->name('register.post');
 
     // Forgot / Reset Password (web)
     Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
@@ -73,9 +75,17 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [AppointmentsController::class, 'index'])->name('appointments.index');
             Route::get('/create', [AppointmentsController::class, 'create'])->name('appointments.create');
             Route::post('/', [AppointmentsController::class, 'store'])->name('appointments.store');
+            Route::get('/doctor-availability', [DoctorAvailabilitiesController::class, 'index'])->name('doctor-availabilities.index');
+            Route::get('/doctor-availability/create', [DoctorAvailabilitiesController::class, 'create'])->name('doctor-availabilities.create');
+            Route::post('/doctor-availability', [DoctorAvailabilitiesController::class, 'store'])->name('doctor-availabilities.store');
+            Route::get('/doctor-availability/{doctorAvailability}/edit', [DoctorAvailabilitiesController::class, 'edit'])->name('doctor-availabilities.edit');
+            Route::put('/doctor-availability/{doctorAvailability}', [DoctorAvailabilitiesController::class, 'update'])->name('doctor-availabilities.update');
+            Route::delete('/doctor-availability/{doctorAvailability}', [DoctorAvailabilitiesController::class, 'destroy'])->name('doctor-availabilities.destroy');
             Route::get('/{appointment}', [AppointmentsController::class, 'show'])->name('appointments.show');
             Route::get('/{appointment}/edit', [AppointmentsController::class, 'edit'])->name('appointments.edit');
             Route::put('/{appointment}', [AppointmentsController::class, 'update'])->name('appointments.update');
+            Route::put('/{appointment}/check-in', [AppointmentsController::class, 'checkIn'])->name('appointments.check-in');
+            Route::put('/{appointment}/check-out', [AppointmentsController::class, 'checkOut'])->name('appointments.check-out');
             Route::delete('/{appointment}', [AppointmentsController::class, 'destroy'])->name('appointments.destroy');
         });
 
@@ -89,6 +99,18 @@ Route::middleware('auth')->group(function () {
             Route::get('/{labTest}/edit', [LabTestsController::class, 'edit'])->name('lab-tests.edit');
             Route::put('/{labTest}', [LabTestsController::class, 'update'])->name('lab-tests.update');
             Route::delete('/{labTest}', [LabTestsController::class, 'destroy'])->name('lab-tests.destroy');
+        });
+
+    Route::prefix('prescriptions')
+        ->middleware('role:super_admin|admin|doctor')
+        ->group(function () {
+            Route::get('/', [PrescriptionsController::class, 'index'])->name('prescriptions.index');
+            Route::get('/create', [PrescriptionsController::class, 'create'])->name('prescriptions.create');
+            Route::post('/', [PrescriptionsController::class, 'store'])->name('prescriptions.store');
+            Route::get('/{prescription}', [PrescriptionsController::class, 'show'])->name('prescriptions.show');
+            Route::get('/{prescription}/edit', [PrescriptionsController::class, 'edit'])->name('prescriptions.edit');
+            Route::put('/{prescription}', [PrescriptionsController::class, 'update'])->name('prescriptions.update');
+            Route::delete('/{prescription}', [PrescriptionsController::class, 'destroy'])->name('prescriptions.destroy');
         });
 
     Route::prefix('pharmacy')
@@ -183,13 +205,15 @@ Route::middleware('auth')->group(function () {
             Route::put('/appointments/{appointment}/status', [AdminAppointmentsController::class, 'updateStatus'])->name('admin.appointments.status');
 
             Route::get('/users', [AdminUsersController::class, 'index'])->name('admin.users.index');
+            Route::get('/users/create', [AdminUsersController::class, 'create'])->name('admin.users.create');
+            Route::post('/users', [AdminUsersController::class, 'store'])->name('admin.users.store');
             Route::put('/users/{user}/role', [AdminUsersController::class, 'assignRole'])->name('admin.users.role.assign');
             Route::delete('/users/{user}/role', [AdminUsersController::class, 'removeRole'])->name('admin.users.role.remove');
             Route::put('/users/{user}/department', [AdminUsersController::class, 'updateDepartment'])->name('admin.users.department.update');
         });
 
     Route::prefix('system')
-        ->middleware('role:super_admin|admin')
+        ->middleware('role:super_admin')
         ->group(function () {
             Route::get('/backups', [SystemBackupsController::class, 'index'])->name('system.backups.index');
             Route::post('/backups', [SystemBackupsController::class, 'store'])->name('system.backups.store');

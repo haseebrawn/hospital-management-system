@@ -17,7 +17,7 @@
                         <option value="">All patients</option>
                         @foreach ($patients as $p)
                             <option value="{{ $p->id }}" {{ ($patientId ?? '') == $p->id ? 'selected' : '' }}>
-                                #{{ $p->id }} — {{ $p->first_name }} {{ $p->last_name }}
+                                {{ $p->mrn ?? ('#' . $p->id) }} — {{ $p->first_name }} {{ $p->last_name }}
                             </option>
                         @endforeach
                     </select>

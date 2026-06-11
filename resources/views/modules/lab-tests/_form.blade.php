@@ -31,7 +31,7 @@
                 <option value="" disabled {{ $patientId ? '' : 'selected' }}>Select patient</option>
                 @foreach ($patients as $p)
                     <option value="{{ $p->id }}" {{ (string) $patientId === (string) $p->id ? 'selected' : '' }}>
-                        #{{ $p->id }} — {{ $p->first_name }} {{ $p->last_name }} ({{ $p->contact_number }})
+                        {{ $p->mrn ?? ('#' . $p->id) }} — {{ $p->first_name }} {{ $p->last_name }} ({{ $p->contact_number }})
                     </option>
                 @endforeach
             </select>
@@ -99,4 +99,3 @@
         </button>
     </div>
 </form>
-

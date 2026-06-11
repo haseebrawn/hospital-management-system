@@ -42,6 +42,7 @@ class PrescriptionController extends Controller
             'patient_id' => $appointment->patient_id,
             'description' => $request->description,
             'medicines' => $request->medicines,
+            'status' => $request->input('status', 'pending'),
         ]);
 
         return response()->json([

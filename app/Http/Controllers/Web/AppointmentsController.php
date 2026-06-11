@@ -23,10 +23,14 @@ class AppointmentsController extends Controller
             ->with(['patient', 'doctor', 'department'])
             ->when($status !== '', fn ($q) => $q->where('status', $status))
             ->when($search !== '', function ($query) use ($search) {
-                $query->whereHas('patient', function ($q) use ($search) {
-                    $q->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%")
-                        ->orWhere('contact_number', 'like', "%{$search}%");
+                $query->where(function ($searchQuery) use ($search) {
+                    $searchQuery->whereHas('patient', function ($q) use ($search) {
+                        $q->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('contact_number', 'like', "%{$search}%");
+                    })
+                        ->orWhere('reason', 'like', "%{$search}%")
+                        ->orWhere('notes', 'like', "%{$search}%");
                 });
             })
             ->orderByDesc('date')
@@ -115,6 +119,33 @@ class AppointmentsController extends Controller
             ->with('status', 'Appointment updated successfully.');
     }
 
+    public function checkIn(Request $request, Appointment $appointment, HospitalNotificationService $notifications)
+    {
+        abort_unless($appointment->canCheckIn(), 422, 'Appointment cannot be checked in.');
+
+        $appointment->forceFill([
+            'checked_in_at' => now(),
+        ])->save();
+
+        $this->notifyVisitWorkflow($request, $notifications, $appointment, 'Patient checked in');
+
+        return back()->with('status', 'Patient checked in successfully.');
+    }
+
+    public function checkOut(Request $request, Appointment $appointment, HospitalNotificationService $notifications)
+    {
+        abort_unless($appointment->canCheckOut(), 422, 'Appointment cannot be checked out.');
+
+        $appointment->forceFill([
+            'checked_out_at' => now(),
+            'status' => $appointment->status === 'approved' ? 'completed' : $appointment->status,
+        ])->save();
+
+        $this->notifyVisitWorkflow($request, $notifications, $appointment, 'Patient checked out');
+
+        return back()->with('status', 'Patient checked out successfully.');
+    }
+
     public function destroy(Appointment $appointment)
     {
         $appointment->delete();
@@ -122,5 +153,27 @@ class AppointmentsController extends Controller
         return redirect()
             ->route('appointments.index')
             ->with('status', 'Appointment deleted successfully.');
+    }
+
+    private function notifyVisitWorkflow(
+        Request $request,
+        HospitalNotificationService $notifications,
+        Appointment $appointment,
+        string $title
+    ): void {
+        $appointment->load(['patient', 'doctor']);
+        $patientName = trim((string) (($appointment->patient->first_name ?? '') . ' ' . ($appointment->patient->last_name ?? '')));
+
+        $payload = [
+            'title' => $title,
+            'message' => "{$patientName} visit status is now " . str_replace('_', ' ', $appointment->visit_status) . '.',
+            'module' => 'appointments',
+            'type' => 'info',
+            'url' => route('appointments.show', $appointment),
+            'icon' => 'fa-solid fa-clipboard-check',
+        ];
+
+        $notifications->notifyRoles(['super_admin', 'admin', 'receptionist', 'nurse'], $payload, $request->user());
+        $notifications->notifyUsers([$appointment->doctor], $payload);
     }
 }

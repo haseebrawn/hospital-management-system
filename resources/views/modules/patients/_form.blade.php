@@ -12,6 +12,14 @@
     @endif
 
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+        <div style="grid-column: 1 / -1;">
+            <label style="display:block; font-size:12px; color: var(--text-muted); margin-bottom:6px;">MRN / Registration No.</label>
+            <input name="mrn"
+                value="{{ old('mrn', $patient?->mrn) }}"
+                placeholder="Auto generated if left empty"
+                style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px;">
+        </div>
+
         <div>
             <label style="display:block; font-size:12px; color: var(--text-muted); margin-bottom:6px;">First name</label>
             <input name="first_name"
@@ -86,4 +94,3 @@
         </button>
     </div>
 </form>
-

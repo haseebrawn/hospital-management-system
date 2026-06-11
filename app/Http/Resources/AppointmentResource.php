@@ -16,11 +16,16 @@ class AppointmentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'patient' => $this->patient->name,
-            'doctor' => $this->doctor->name,
-            'scheduled_at' => $this->scheduled_at,
+            'patient' => $this->whenLoaded('patient', fn () => trim(($this->patient->first_name ?? '') . ' ' . ($this->patient->last_name ?? ''))),
+            'doctor' => $this->whenLoaded('doctor', fn () => $this->doctor?->name),
+            'date' => $this->date,
+            'time' => $this->time,
+            'reason' => $this->reason,
+            'notes' => $this->notes,
             'status' => $this->status,
-            'created_by' => $this->createdBy?->name,
+            'visit_status' => $this->visit_status,
+            'checked_in_at' => optional($this->checked_in_at)->toIso8601String(),
+            'checked_out_at' => optional($this->checked_out_at)->toIso8601String(),
         ];
     }
 }

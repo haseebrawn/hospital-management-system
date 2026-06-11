@@ -32,6 +32,12 @@
                     <span class="app-sidebar__icon"><i class="fa-regular fa-calendar-check"></i></span>
                     <span class="app-sidebar__label">Appointments</span>
                 </a>
+
+                <a class="app-sidebar__item {{ request()->routeIs('doctor-availabilities.*') ? 'is-active' : '' }}"
+                    href="{{ route('doctor-availabilities.index') }}">
+                    <span class="app-sidebar__icon"><i class="fa-solid fa-calendar-days"></i></span>
+                    <span class="app-sidebar__label">Doctor Availability</span>
+                </a>
             @endif
         @endauth
 
@@ -41,6 +47,16 @@
                     href="{{ route('lab-tests.index') }}">
                     <span class="app-sidebar__icon"><i class="fa-solid fa-flask"></i></span>
                     <span class="app-sidebar__label">Lab Tests</span>
+                </a>
+            @endif
+        @endauth
+
+        @auth
+            @if (auth()->user()->hasAnyRole(['super_admin', 'admin', 'doctor']))
+                <a class="app-sidebar__item {{ request()->routeIs('prescriptions.*') ? 'is-active' : '' }}"
+                    href="{{ route('prescriptions.index') }}">
+                    <span class="app-sidebar__icon"><i class="fa-solid fa-prescription-bottle-medical"></i></span>
+                    <span class="app-sidebar__label">Prescriptions</span>
                 </a>
             @endif
         @endauth
@@ -118,7 +134,9 @@
                     <span class="app-sidebar__icon"><i class="fa-solid fa-users-gear"></i></span>
                     <span class="app-sidebar__label">Admin Users</span>
                 </a>
+            @endif
 
+            @if (auth()->user()->hasRole('super_admin'))
                 <a class="app-sidebar__item {{ request()->routeIs('system.backups.*') ? 'is-active' : '' }}"
                     href="{{ route('system.backups.index') }}">
                     <span class="app-sidebar__icon"><i class="fa-solid fa-database"></i></span>

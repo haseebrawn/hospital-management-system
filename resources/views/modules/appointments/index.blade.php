@@ -12,7 +12,7 @@
 
             <div style="display:flex; gap: 10px; align-items:center; flex-wrap:wrap;">
                 <form method="GET" action="{{ route('appointments.index') }}" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                    <input name="q" value="{{ $search ?? '' }}" placeholder="Search patient name / phone"
+                    <input name="q" value="{{ $search ?? '' }}" placeholder="Search patient / phone / reason"
                         style="padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px; min-width:240px;">
 
                     <select name="status"
@@ -52,9 +52,11 @@
                         <th>Date</th>
                         <th>Time</th>
                         <th>Patient Name</th>
+                        <th>Reason</th>
                         <th>Doctor</th>
                         <th>Department</th>
                         <th>Status</th>
+                        <th>Visit Flow</th>
                         <th style="text-align:right;">Actions</th>
                     </tr>
                 </thead>
@@ -69,10 +71,31 @@
                                     {{ optional($appt->patient)->first_name }} {{ optional($appt->patient)->last_name }}
                                 </a>
                             </td>
+                            <td>{{ $appt->reason ?: '-' }}</td>
                             <td>{{ optional($appt->doctor)->name ?? '-' }}</td>
                             <td>{{ optional($appt->department)->name ?? '-' }}</td>
                             <td class="u-nowrap" style="text-transform:capitalize;">{{ str_replace('_', ' ', $appt->status) }}</td>
+                            <td class="u-nowrap" style="text-transform:capitalize;">{{ str_replace('_', ' ', $appt->visit_status) }}</td>
                             <td style="text-align:right;">
+                                @if ($appt->canCheckIn())
+                                    <form method="POST" action="{{ route('appointments.check-in', $appt) }}" style="display:inline;">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit"
+                                            style="font-size:13px; color:#059669; background:transparent; border:none; cursor:pointer; margin-right:10px;">
+                                            Check In
+                                        </button>
+                                    </form>
+                                @elseif ($appt->canCheckOut())
+                                    <form method="POST" action="{{ route('appointments.check-out', $appt) }}" style="display:inline;">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit"
+                                            style="font-size:13px; color:#7c3aed; background:transparent; border:none; cursor:pointer; margin-right:10px;">
+                                            Check Out
+                                        </button>
+                                    </form>
+                                @endif
                                 <a href="{{ route('appointments.edit', $appt) }}"
                                     style="font-size:13px; color: var(--primary); text-decoration:none; margin-right:10px;">
                                     Edit
@@ -90,7 +113,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" style="padding: 16px;">No appointments found.</td>
+                            <td colspan="10" style="padding: 16px;">No appointments found.</td>
                         </tr>
                     @endforelse
                 </tbody>

@@ -11,7 +11,7 @@
             </div>
             <div style="display:flex; gap: 10px; align-items:center; flex-wrap:wrap;">
                 <form method="GET" action="{{ route('patients.index') }}" style="display:flex; gap:10px; align-items:center;">
-                    <input name="q" value="{{ $search ?? '' }}" placeholder="Search name / phone"
+                    <input name="q" value="{{ $search ?? '' }}" placeholder="Search MRN / name / phone"
                         style="padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px; min-width:240px;">
                     <button type="submit"
                         style="padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); background:#fff; cursor:pointer;">
@@ -36,6 +36,7 @@
                 <thead>
                     <tr>
                         <th class="u-nowrap">ID</th>
+                        <th class="u-nowrap">MRN</th>
                         <th>Patient Name</th>
                         <th>Phone</th>
                         <th>Gender</th>
@@ -47,6 +48,7 @@
                     @forelse ($patients as $patient)
                         <tr>
                             <td class="u-nowrap">{{ $patient->id }}</td>
+                            <td class="u-nowrap" style="font-weight:700;">{{ $patient->mrn ?? '-' }}</td>
                             <td style="font-weight:600;">
                                 <a href="{{ route('patients.show', $patient) }}" style="color:inherit; text-decoration:none;">
                                     {{ $patient->first_name }} {{ $patient->last_name }}
@@ -73,7 +75,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" style="padding: 16px;">No patients found.</td>
+                            <td colspan="7" style="padding: 16px;">No patients found.</td>
                         </tr>
                     @endforelse
                 </tbody>

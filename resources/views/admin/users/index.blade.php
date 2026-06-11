@@ -4,10 +4,18 @@
 
 @section('content')
     <div class="card">
-        <div class="card-title">Users</div>
-        <div class="card-subtitle">Manage departments and roles for users.</div>
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+            <div>
+                <div class="card-title">Users</div>
+                <div class="card-subtitle">Create users, assign roles, and manage department access.</div>
+            </div>
+            <a href="{{ route('admin.users.create') }}"
+                style="padding:8px 12px; border-radius:10px; background:var(--primary); color:#fff; text-decoration:none; font-size:13px;">
+                + Create User
+            </a>
+        </div>
 
-        <div style="overflow:auto;">
+        <div style="overflow:auto; margin-top:16px;">
             <table class="dash-table" style="min-width: 820px;">
                 <thead>
                     <tr>

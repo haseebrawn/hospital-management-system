@@ -1,0 +1,21 @@
+@extends('layouts.app')
+
+@section('title', 'Edit Prescription')
+
+@section('content')
+    <div class="card">
+        <div class="card-title">Edit Prescription</div>
+        <div class="card-subtitle">Update prescription details and status.</div>
+
+        <div style="margin-top:16px;">
+            @include('modules.prescriptions._form', [
+                'prescription' => $prescription,
+                'appointments' => $appointments,
+                'doctors' => $doctors,
+                'statusOptions' => $statusOptions,
+                'action' => route('prescriptions.update', $prescription),
+                'method' => 'PUT',
+            ])
+        </div>
+    </div>
+@endsection

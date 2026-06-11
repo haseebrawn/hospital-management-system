@@ -27,6 +27,19 @@ class AuthController extends Controller
         return view('auth.register', compact('departments'));
     }
 
+    public function registrationDisabled(Request $request)
+    {
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'message' => 'Public registration is disabled. Please contact an administrator.',
+            ], 403);
+        }
+
+        return redirect()
+            ->route('login')
+            ->with('status', 'Public registration is disabled. Please contact an administrator.');
+    }
+
     public function showForgotPasswordForm()
     {
         return view('auth.forgot-password');

@@ -69,15 +69,27 @@ class RolePermissionSeeder extends Seeder
             'pharmacist',
             'accountant',
             'hr_manager',
-            'view logs',
-            'manage backups',
-            'manage security',
-            'view backups'
         ];
 
         foreach ($roles as $role) {
             Role::firstOrCreate(['name' => $role, 'guard_name' => 'api']);
         }
+
+        $permissionLikeRoles = [
+            'view logs',
+            'manage backups',
+            'manage security',
+            'view backups',
+        ];
+
+        Role::where('guard_name', 'api')
+            ->whereIn('name', $permissionLikeRoles)
+            ->get()
+            ->each(function (Role $role) {
+                $role->users()->detach();
+                $role->permissions()->detach();
+                $role->delete();
+            });
 
         // Assign Permissions
         $superAdminRole = Role::findByName('super_admin');
@@ -102,12 +114,10 @@ class RolePermissionSeeder extends Seeder
             'view shifts'
         ]);
 
-        // Admin same as HR Manager
+        // Department Admin manages only their department workflow.
         $adminRole = Role::where('name', 'admin')->first();
         $adminRole?->syncPermissions([
             'manage users',
-            'manage roles',
-            'manage departments',
             'view patients',
             'edit patients',
             'create appointments',
@@ -120,9 +130,6 @@ class RolePermissionSeeder extends Seeder
             'view staff',
             'assign shifts',
             'view shifts',
-            'manage backups',
-            'view backups',
-            'view logs',
         ]);
 
         // Doctor & HOD Department Admin only view staff & shift

@@ -4,6 +4,7 @@ namespace App\Http\Requests\Web;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class PatientUpdateRequest extends FormRequest
 {
@@ -28,6 +29,12 @@ class PatientUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'mrn' => [
+                'nullable',
+                'string',
+                'max:50',
+                Rule::unique('patients', 'mrn')->ignore($this->route('patient')),
+            ],
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'contact_number' => ['required', 'string', 'max:50'],
@@ -37,4 +44,3 @@ class PatientUpdateRequest extends FormRequest
         ];
     }
 }
-

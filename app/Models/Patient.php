@@ -10,6 +10,7 @@ class Patient extends Model
     use HasFactory;
 
     protected $fillable = [
+        'mrn',
         'first_name', 
         'last_name', 
         'contact_number', 
@@ -18,6 +19,33 @@ class Patient extends Model
         'address', 
         'department_id'
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Patient $patient) {
+            if (! empty($patient->mrn)) {
+                $patient->mrn = static::normalizeMrn($patient->mrn);
+                return;
+            }
+
+            $patient->mrn = static::generateMrn(((int) static::max('id')) + 1);
+        });
+    }
+
+    public static function generateMrn(int $number): string
+    {
+        return 'HMS-' . str_pad((string) $number, 6, '0', STR_PAD_LEFT);
+    }
+
+    public static function normalizeMrn(string $mrn): string
+    {
+        return strtoupper(trim($mrn));
+    }
+
+    public function setMrnAttribute(?string $value): void
+    {
+        $this->attributes['mrn'] = $value ? static::normalizeMrn($value) : null;
+    }
 
     public function department()
     {

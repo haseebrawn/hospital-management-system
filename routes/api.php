@@ -109,6 +109,12 @@ Route::prefix('v1')->group(function () {
             Route::put('/{id}', [AppointmentController::class, 'update'])
                 ->middleware('role:super_admin|admin|doctor|nurse|receptionist');
 
+            Route::put('/{id}/check-in', [AppointmentController::class, 'checkIn'])
+                ->middleware('role:super_admin|admin|doctor|nurse|receptionist');
+
+            Route::put('/{id}/check-out', [AppointmentController::class, 'checkOut'])
+                ->middleware('role:super_admin|admin|doctor|nurse|receptionist');
+
             Route::delete('/{id}', [AppointmentController::class, 'destroy'])
                 ->middleware('role:super_admin|admin');
 
@@ -306,7 +312,7 @@ Route::prefix('v1')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::middleware(['auth:sanctum','role:super_admin|admin|accountant'])->group(function () {
+    Route::middleware(['auth:sanctum','role:super_admin'])->group(function () {
 
         Route::get('/admin/backups', [BackupController::class, 'index']);
         Route::post('/admin/backups', [BackupController::class, 'create'])
@@ -318,7 +324,7 @@ Route::prefix('v1')->group(function () {
     });
 
 
-    Route::middleware(['auth:sanctum','role:super_admin|admin|hr_manager'])->group(function () {
+    Route::middleware(['auth:sanctum','role:super_admin'])->group(function () {
 
         Route::get('/admin/logs/activity', [AuditController::class, 'activity']);
         Route::get('/admin/logs/logins', [AuditController::class, 'logins']);

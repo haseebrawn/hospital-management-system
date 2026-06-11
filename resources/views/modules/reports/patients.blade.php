@@ -48,7 +48,7 @@
             <table class="dash-table" style="min-width: 920px;">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th>MRN</th>
                         <th>Name</th>
                         <th>Phone</th>
                         <th>Gender</th>
@@ -58,7 +58,7 @@
                 <tbody>
                     @foreach ($recent as $p)
                         <tr>
-                            <td>{{ $p->id }}</td>
+                            <td style="font-weight:700;">{{ $p->mrn ?? '-' }}</td>
                             <td style="font-weight:700;">{{ $p->first_name }} {{ $p->last_name }}</td>
                             <td>{{ $p->contact_number }}</td>
                             <td style="text-transform:capitalize;">{{ $p->gender }}</td>

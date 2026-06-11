@@ -52,8 +52,10 @@
                         <th>Date</th>
                         <th>Time</th>
                         <th>Patient</th>
+                        <th>Reason</th>
                         <th>Doctor</th>
                         <th>Status</th>
+                        <th>Visit Flow</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -63,8 +65,10 @@
                             <td>{{ $a->date }}</td>
                             <td>{{ substr((string) $a->time, 0, 5) }}</td>
                             <td>{{ optional($a->patient)->first_name }} {{ optional($a->patient)->last_name }}</td>
+                            <td>{{ $a->reason ?: '-' }}</td>
                             <td>{{ optional($a->doctor)->name ?? '-' }}</td>
                             <td style="text-transform:capitalize;">{{ $a->status }}</td>
+                            <td style="text-transform:capitalize;">{{ str_replace('_', ' ', $a->visit_status) }}</td>
                         </tr>
                     @endforeach
                 </tbody>

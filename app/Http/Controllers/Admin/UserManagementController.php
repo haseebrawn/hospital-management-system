@@ -27,6 +27,9 @@ class UserManagementController extends Controller
         } else if ($user->hasRole('admin')) {
             $users = User::with('department', 'roles')
                 ->where('department_id', $user->department_id)
+                ->whereDoesntHave('roles', function ($query) {
+                    $query->whereIn('name', ['super_admin', 'admin']);
+                })
                 ->paginate(20);
         } else {
             return response()->json(['message' => 'Forbidden'], 403);
@@ -48,6 +51,17 @@ class UserManagementController extends Controller
         }
 
         $roleName = $request->input('role');
+        $actor = $request->user();
+
+        if (! $actor->hasRole('super_admin')) {
+            if ($user->department_id !== $actor->department_id) {
+                return response()->json(['message' => 'Forbidden - cannot modify users from other departments'], 403);
+            }
+
+            if ($user->hasAnyRole(['super_admin', 'admin']) || in_array($roleName, ['super_admin', 'admin'], true)) {
+                return response()->json(['message' => 'Forbidden - department admins cannot assign elevated roles'], 403);
+            }
+        }
 
         $role = Role::findByName($roleName);
         if (! $role) {
@@ -105,12 +119,19 @@ class UserManagementController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        if ($actor->hasRole('admin') && $actor->department_id !== $user->department_id && ! $actor->hasRole('super_admin')) {
-            return response()->json(['message' => 'Forbidden - cannot modify users from other departments'], 403);
+        $role = $request->input('role');
+
+        if (! $actor->hasRole('super_admin')) {
+            if ($actor->department_id !== $user->department_id) {
+                return response()->json(['message' => 'Forbidden - cannot modify users from other departments'], 403);
+            }
+
+            if ($user->hasAnyRole(['super_admin', 'admin']) || in_array($role, ['super_admin', 'admin'], true)) {
+                return response()->json(['message' => 'Forbidden - department admins cannot remove elevated roles'], 403);
+            }
         }
 
         // If role param passed, remove only that role; otherwise remove all roles
-        $role = $request->input('role');
         if ($role) {
             $user->removeRole($role);
         } else {
