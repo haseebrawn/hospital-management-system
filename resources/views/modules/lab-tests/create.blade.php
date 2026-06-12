@@ -8,7 +8,7 @@
         <div class="card-subtitle">Add a new lab test request.</div>
 
         @include('modules.lab-tests._form', [
-            'labTest' => null,
+            'labTest' => $labTest,
             'patients' => $patients,
             'doctors' => $doctors,
             'technicians' => $technicians,
@@ -18,4 +18,3 @@
         ])
     </div>
 @endsection
-

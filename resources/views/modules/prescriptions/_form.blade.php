@@ -2,6 +2,7 @@
     'prescription' => null,
     'appointments' => collect(),
     'doctors' => collect(),
+    'medicines' => collect(),
     'statusOptions' => ['pending', 'dispensed', 'cancelled'],
     'action' => '#',
     'method' => 'POST',
@@ -19,6 +20,25 @@
         $description = old('description', $prescription?->description);
         $medicines = old('medicines', $prescription?->medicines);
         $status = old('status', $prescription?->status ?? 'pending');
+        $existingItems = old('items');
+
+        if ($existingItems === null) {
+            $existingItems = $prescription?->items?->map(fn ($item) => [
+                'medicine_id' => $item->medicine_id,
+                'medicine_name' => $item->medicine_name,
+                'dosage' => $item->dosage,
+                'frequency' => $item->frequency,
+                'duration' => $item->duration,
+                'quantity' => $item->quantity,
+                'instructions' => $item->instructions,
+            ])->values()->all() ?? [];
+        }
+
+        $itemRows = collect($existingItems);
+
+        while ($itemRows->count() < 3) {
+            $itemRows->push([]);
+        }
     @endphp
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
@@ -59,12 +79,45 @@
         </div>
 
         <div style="grid-column:1 / -1;">
-            <label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:6px;">Medicines</label>
-            <textarea name="medicines" rows="4" placeholder="Example: Paracetamol 500mg - twice daily - 3 days"
-                style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px; resize:vertical;">{{ $medicines }}</textarea>
-            <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
-                Structured medicine items will be added in the next Phase C step.
+            <label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:6px;">Prescription Items</label>
+            <div style="display:grid; gap:10px;">
+                @foreach ($itemRows as $index => $item)
+                    <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px; background:#fff;">
+                        <div style="display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr 0.7fr; gap:10px;">
+                            <select name="items[{{ $index }}][medicine_id]"
+                                style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px; background:#fff;">
+                                <option value="">Custom medicine</option>
+                                @foreach ($medicines as $medicineOption)
+                                    <option value="{{ $medicineOption->id }}" {{ (string) ($item['medicine_id'] ?? '') === (string) $medicineOption->id ? 'selected' : '' }}>
+                                        {{ $medicineOption->name }} (stock: {{ $medicineOption->stock }})
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            <input name="items[{{ $index }}][medicine_name]" value="{{ $item['medicine_name'] ?? '' }}" placeholder="Medicine name"
+                                style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px;">
+                            <input name="items[{{ $index }}][dosage]" value="{{ $item['dosage'] ?? '' }}" placeholder="Dosage"
+                                style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px;">
+                            <input name="items[{{ $index }}][frequency]" value="{{ $item['frequency'] ?? '' }}" placeholder="Frequency"
+                                style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px;">
+                            <input type="number" min="1" name="items[{{ $index }}][quantity]" value="{{ $item['quantity'] ?? '' }}" placeholder="Qty"
+                                style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px;">
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 2fr; gap:10px; margin-top:10px;">
+                            <input name="items[{{ $index }}][duration]" value="{{ $item['duration'] ?? '' }}" placeholder="Duration"
+                                style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px;">
+                            <input name="items[{{ $index }}][instructions]" value="{{ $item['instructions'] ?? '' }}" placeholder="Special instructions"
+                                style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px;">
+                        </div>
+                    </div>
+                @endforeach
             </div>
+        </div>
+
+        <div style="grid-column:1 / -1;">
+            <label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:6px;">Legacy Medicines Note</label>
+            <textarea name="medicines" rows="3" placeholder="Optional free-text medicine notes"
+                style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px; resize:vertical;">{{ $medicines }}</textarea>
         </div>
 
         <div style="grid-column:1 / -1;">

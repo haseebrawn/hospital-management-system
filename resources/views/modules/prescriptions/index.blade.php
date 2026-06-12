@@ -64,7 +64,13 @@
                             </td>
                             <td>{{ optional($prescription->doctor)->name ?? '-' }}</td>
                             <td>{{ \Illuminate\Support\Str::limit($prescription->description ?: '-', 45) }}</td>
-                            <td>{{ \Illuminate\Support\Str::limit($prescription->medicines ?: '-', 45) }}</td>
+                            <td>
+                                @if ($prescription->items->isNotEmpty())
+                                    {{ \Illuminate\Support\Str::limit($prescription->items->pluck('medicine_name')->join(', '), 45) }}
+                                @else
+                                    {{ \Illuminate\Support\Str::limit($prescription->medicines ?: '-', 45) }}
+                                @endif
+                            </td>
                             <td style="text-transform:capitalize; font-weight:700;">{{ $prescription->status }}</td>
                             <td>{{ optional($prescription->created_at)->format('Y-m-d H:i') }}</td>
                             <td style="text-align:right;">

@@ -23,6 +23,14 @@ class PrescriptionUpdateRequest extends FormRequest
             'description' => ['required', 'string', 'max:5000'],
             'medicines' => ['nullable', 'string', 'max:5000'],
             'status' => ['required', Rule::in(['pending', 'dispensed', 'cancelled'])],
+            'items' => ['nullable', 'array'],
+            'items.*.medicine_id' => ['nullable', 'integer', 'exists:medicines,id'],
+            'items.*.medicine_name' => ['nullable', 'string', 'max:255'],
+            'items.*.dosage' => ['nullable', 'string', 'max:255'],
+            'items.*.frequency' => ['nullable', 'string', 'max:255'],
+            'items.*.duration' => ['nullable', 'string', 'max:255'],
+            'items.*.quantity' => ['nullable', 'integer', 'min:1', 'max:100000'],
+            'items.*.instructions' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }

@@ -63,7 +63,41 @@
             </div>
 
             <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px; grid-column:1 / -1;">
-                <div style="font-size:12px; color:var(--text-muted);">Medicines</div>
+                <div style="font-size:12px; color:var(--text-muted);">Prescription Items</div>
+                @if ($prescription->items->isNotEmpty())
+                    <div style="margin-top:8px; overflow:auto;">
+                        <table class="dash-table" style="min-width:760px;">
+                            <thead>
+                                <tr>
+                                    <th>Medicine</th>
+                                    <th>Dosage</th>
+                                    <th>Frequency</th>
+                                    <th>Duration</th>
+                                    <th>Qty</th>
+                                    <th>Instructions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($prescription->items as $item)
+                                    <tr>
+                                        <td style="font-weight:700;">{{ $item->medicine_name }}</td>
+                                        <td>{{ $item->dosage ?: '-' }}</td>
+                                        <td>{{ $item->frequency ?: '-' }}</td>
+                                        <td>{{ $item->duration ?: '-' }}</td>
+                                        <td>{{ $item->quantity ?: '-' }}</td>
+                                        <td>{{ $item->instructions ?: '-' }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div style="font-weight:600; margin-top:4px;">No structured items added.</div>
+                @endif
+            </div>
+
+            <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px; grid-column:1 / -1;">
+                <div style="font-size:12px; color:var(--text-muted);">Legacy Medicines Note</div>
                 <div style="font-weight:600; margin-top:4px; white-space:pre-line;">{{ $prescription->medicines ?: '-' }}</div>
             </div>
         </div>

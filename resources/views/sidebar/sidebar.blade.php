@@ -53,6 +53,12 @@
 
         @auth
             @if (auth()->user()->hasAnyRole(['super_admin', 'admin', 'doctor']))
+                <a class="app-sidebar__item {{ request()->routeIs('medical-records.*') ? 'is-active' : '' }}"
+                    href="{{ route('medical-records.index') }}">
+                    <span class="app-sidebar__icon"><i class="fa-solid fa-notes-medical"></i></span>
+                    <span class="app-sidebar__label">Medical Records</span>
+                </a>
+
                 <a class="app-sidebar__item {{ request()->routeIs('prescriptions.*') ? 'is-active' : '' }}"
                     href="{{ route('prescriptions.index') }}">
                     <span class="app-sidebar__icon"><i class="fa-solid fa-prescription-bottle-medical"></i></span>

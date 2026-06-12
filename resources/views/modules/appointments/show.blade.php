@@ -32,6 +32,22 @@
                         </button>
                     </form>
                 @endif
+                @if (auth()->user()->hasAnyRole(['super_admin', 'admin', 'doctor']))
+                    <a href="{{ route('medical-records.create', ['appointment_id' => $appointment->id]) }}"
+                        style="padding:8px 12px; border-radius:10px; border:1px solid rgba(37,99,235,0.30); background:rgba(37,99,235,0.08); color:#2563eb; text-decoration:none; font-size:13px; font-weight:700;">
+                        Add Medical Record
+                    </a>
+                    <a href="{{ route('prescriptions.create', ['appointment_id' => $appointment->id]) }}"
+                        style="padding:8px 12px; border-radius:10px; border:1px solid rgba(124,58,237,0.30); background:rgba(124,58,237,0.08); color:#7c3aed; text-decoration:none; font-size:13px; font-weight:700;">
+                        Add Prescription
+                    </a>
+                @endif
+                @if (auth()->user()->hasAnyRole(['super_admin', 'admin', 'doctor', 'lab_technician']))
+                    <a href="{{ route('lab-tests.create', ['appointment_id' => $appointment->id]) }}"
+                        style="padding:8px 12px; border-radius:10px; border:1px solid rgba(5,150,105,0.30); background:rgba(5,150,105,0.08); color:#059669; text-decoration:none; font-size:13px; font-weight:700;">
+                        Request Lab Test
+                    </a>
+                @endif
                 <a href="{{ route('appointments.edit', $appointment) }}"
                     style="padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); background:#fff; text-decoration:none; color:inherit; font-size:13px;">
                     Edit

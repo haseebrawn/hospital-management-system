@@ -61,4 +61,9 @@ class Appointment extends Model
     public function department() {
         return $this->belongsTo(Department::class);
     }
+
+    public function medicalRecords()
+    {
+        return $this->hasMany(MedicalRecord::class);
+    }
 }

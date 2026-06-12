@@ -4,6 +4,7 @@ namespace Tests\Feature\Web;
 
 use App\Models\Appointment;
 use App\Models\Department;
+use App\Models\Medicine;
 use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\User;
@@ -59,6 +60,7 @@ class PrescriptionsWebTest extends TestCase
         $doctor = User::factory()->create(['department_id' => $department->id]);
         $doctor->assignRole('doctor');
         $appointment = $this->appointmentForDoctor($doctor);
+        $medicine = Medicine::factory()->create(['name' => 'Paracetamol']);
 
         $response = $this->post('/prescriptions', [
             'appointment_id' => $appointment->id,
@@ -66,6 +68,16 @@ class PrescriptionsWebTest extends TestCase
             'description' => 'Viral fever with body pain.',
             'medicines' => 'Paracetamol 500mg twice daily for 3 days.',
             'status' => 'pending',
+            'items' => [
+                [
+                    'medicine_id' => $medicine->id,
+                    'dosage' => '500mg',
+                    'frequency' => 'Twice daily',
+                    'duration' => '3 days',
+                    'quantity' => 6,
+                    'instructions' => 'After meal',
+                ],
+            ],
         ]);
 
         $prescription = Prescription::first();
@@ -77,6 +89,16 @@ class PrescriptionsWebTest extends TestCase
             'patient_id' => $appointment->patient_id,
             'description' => 'Viral fever with body pain.',
             'status' => 'pending',
+        ]);
+        $this->assertDatabaseHas('prescription_items', [
+            'prescription_id' => $prescription->id,
+            'medicine_id' => $medicine->id,
+            'medicine_name' => 'Paracetamol',
+            'dosage' => '500mg',
+            'frequency' => 'Twice daily',
+            'duration' => '3 days',
+            'quantity' => 6,
+            'instructions' => 'After meal',
         ]);
     }
 
@@ -101,6 +123,58 @@ class PrescriptionsWebTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Routine care instructions.');
+    }
+
+    public function test_prescription_items_can_be_updated_from_web(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $department = Department::factory()->create();
+        $doctor = User::factory()->create(['department_id' => $department->id]);
+        $doctor->assignRole('doctor');
+        $appointment = $this->appointmentForDoctor($doctor);
+
+        $prescription = Prescription::factory()->create([
+            'appointment_id' => $appointment->id,
+            'doctor_id' => $doctor->id,
+            'patient_id' => $appointment->patient_id,
+            'status' => 'pending',
+        ]);
+
+        $prescription->items()->create([
+            'medicine_name' => 'Old medicine',
+            'dosage' => '250mg',
+        ]);
+
+        $response = $this->put("/prescriptions/{$prescription->id}", [
+            'appointment_id' => $appointment->id,
+            'doctor_id' => $doctor->id,
+            'description' => 'Updated care plan.',
+            'medicines' => null,
+            'status' => 'pending',
+            'items' => [
+                [
+                    'medicine_name' => 'Custom syrup',
+                    'dosage' => '10ml',
+                    'frequency' => 'Night',
+                    'duration' => '5 days',
+                    'quantity' => 1,
+                    'instructions' => 'Shake well',
+                ],
+            ],
+        ]);
+
+        $response->assertRedirect("/prescriptions/{$prescription->id}");
+        $this->assertDatabaseMissing('prescription_items', [
+            'prescription_id' => $prescription->id,
+            'medicine_name' => 'Old medicine',
+        ]);
+        $this->assertDatabaseHas('prescription_items', [
+            'prescription_id' => $prescription->id,
+            'medicine_name' => 'Custom syrup',
+            'dosage' => '10ml',
+            'frequency' => 'Night',
+        ]);
     }
 
     public function test_doctor_sees_only_own_prescriptions(): void

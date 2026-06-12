@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\LabTestStoreRequest;
 use App\Http\Requests\Web\LabTestUpdateRequest;
+use App\Models\Appointment;
 use App\Models\LabTest;
 use App\Models\Patient;
 use App\Models\User;
@@ -40,14 +41,29 @@ class LabTestsController extends Controller
         return view('modules.lab-tests.index', compact('tests', 'search', 'status', 'statusOptions'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        $labTest = null;
+
+        if ($request->filled('appointment_id')) {
+            $appointment = Appointment::find($request->query('appointment_id'));
+
+            if ($appointment) {
+                $labTest = new LabTest([
+                    'patient_id' => $appointment->patient_id,
+                    'doctor_id' => $appointment->doctor_id,
+                    'results' => $appointment->reason,
+                    'status' => 'pending',
+                ]);
+            }
+        }
+
         $patients = Patient::query()->orderByDesc('id')->limit(200)->get();
         $doctors = User::query()->role('doctor')->orderBy('name')->get();
         $technicians = User::query()->role('lab_technician')->orderBy('name')->get();
         $statusOptions = ['pending', 'in_process', 'completed'];
 
-        return view('modules.lab-tests.create', compact('patients', 'doctors', 'technicians', 'statusOptions'));
+        return view('modules.lab-tests.create', compact('labTest', 'patients', 'doctors', 'technicians', 'statusOptions'));
     }
 
     public function store(LabTestStoreRequest $request, HospitalNotificationService $notifications)

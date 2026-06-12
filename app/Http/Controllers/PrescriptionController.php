@@ -16,10 +16,10 @@ class PrescriptionController extends Controller
        $user = Auth::user();
 
         if ($user->hasRole('super_admin')) {
-            $prescriptions = Prescription::with(['appointment','doctor','patient'])->get();
+            $prescriptions = Prescription::with(['appointment','doctor','patient', 'items'])->get();
         } else {
             // Doctors see only their own prescriptions
-            $prescriptions = Prescription::where('doctor_id', $user->id)->get();
+            $prescriptions = Prescription::with('items')->where('doctor_id', $user->id)->get();
         }
 
         return PrescriptionResource::collection($prescriptions);
@@ -44,6 +44,8 @@ class PrescriptionController extends Controller
             'medicines' => $request->medicines,
             'status' => $request->input('status', 'pending'),
         ]);
+
+        $prescription->load('items');
 
         return response()->json([
             'message' => 'Prescription created successfully!',

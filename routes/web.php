@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\AppointmentsController;
 use App\Http\Controllers\Web\DoctorAvailabilitiesController;
 use App\Http\Controllers\Web\LabTestsController;
 use App\Http\Controllers\Web\PrescriptionsController;
+use App\Http\Controllers\Web\MedicalRecordsController;
 use App\Http\Controllers\Web\MedicinesController;
 use App\Http\Controllers\Web\BillingController as WebBillingController;
 use App\Http\Controllers\Web\StaffController;
@@ -111,6 +112,18 @@ Route::middleware('auth')->group(function () {
             Route::get('/{prescription}/edit', [PrescriptionsController::class, 'edit'])->name('prescriptions.edit');
             Route::put('/{prescription}', [PrescriptionsController::class, 'update'])->name('prescriptions.update');
             Route::delete('/{prescription}', [PrescriptionsController::class, 'destroy'])->name('prescriptions.destroy');
+        });
+
+    Route::prefix('medical-records')
+        ->middleware('role:super_admin|admin|doctor')
+        ->group(function () {
+            Route::get('/', [MedicalRecordsController::class, 'index'])->name('medical-records.index');
+            Route::get('/create', [MedicalRecordsController::class, 'create'])->name('medical-records.create');
+            Route::post('/', [MedicalRecordsController::class, 'store'])->name('medical-records.store');
+            Route::get('/{medicalRecord}', [MedicalRecordsController::class, 'show'])->name('medical-records.show');
+            Route::get('/{medicalRecord}/edit', [MedicalRecordsController::class, 'edit'])->name('medical-records.edit');
+            Route::put('/{medicalRecord}', [MedicalRecordsController::class, 'update'])->name('medical-records.update');
+            Route::delete('/{medicalRecord}', [MedicalRecordsController::class, 'destroy'])->name('medical-records.destroy');
         });
 
     Route::prefix('pharmacy')

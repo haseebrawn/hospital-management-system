@@ -12,6 +12,7 @@
                 'prescription' => $prescription,
                 'appointments' => $appointments,
                 'doctors' => $doctors,
+                'medicines' => $medicines,
                 'statusOptions' => $statusOptions,
                 'action' => route('prescriptions.update', $prescription),
                 'method' => 'PUT',

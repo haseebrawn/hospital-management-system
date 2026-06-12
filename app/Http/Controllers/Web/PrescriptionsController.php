@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\PrescriptionStoreRequest;
 use App\Http\Requests\Web\PrescriptionUpdateRequest;
 use App\Models\Appointment;
+use App\Models\Medicine;
 use App\Models\Prescription;
 use App\Models\User;
 use App\Services\HospitalNotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PrescriptionsController extends Controller
 {
@@ -22,7 +24,7 @@ class PrescriptionsController extends Controller
         $user = $request->user();
 
         $prescriptions = Prescription::query()
-            ->with(['appointment', 'doctor', 'patient'])
+            ->with(['appointment', 'doctor', 'patient', 'items'])
             ->when($user->hasRole('doctor') && ! $user->hasAnyRole(['super_admin', 'admin']), fn ($query) => $query->where('doctor_id', $user->id))
             ->when($user->hasRole('admin') && ! $user->hasRole('super_admin'), function ($query) use ($user) {
                 $query->whereHas('patient', fn ($patientQuery) => $patientQuery->where('department_id', $user->department_id));
@@ -32,6 +34,7 @@ class PrescriptionsController extends Controller
                 $query->where(function ($searchQuery) use ($search) {
                     $searchQuery->where('description', 'like', "%{$search}%")
                         ->orWhere('medicines', 'like', "%{$search}%")
+                        ->orWhereHas('items', fn ($itemQuery) => $itemQuery->where('medicine_name', 'like', "%{$search}%"))
                         ->orWhereHas('patient', function ($patientQuery) use ($search) {
                             $patientQuery->where('mrn', 'like', "%{$search}%")
                                 ->orWhere('first_name', 'like', "%{$search}%")
@@ -51,18 +54,39 @@ class PrescriptionsController extends Controller
 
     public function create(Request $request)
     {
+        $prescription = null;
+
+        if ($request->filled('appointment_id')) {
+            $appointment = Appointment::find($request->query('appointment_id'));
+
+            if ($appointment) {
+                $prescription = new Prescription([
+                    'appointment_id' => $appointment->id,
+                    'doctor_id' => $appointment->doctor_id,
+                    'patient_id' => $appointment->patient_id,
+                    'description' => trim((string) ($appointment->reason ?: $appointment->notes)),
+                ]);
+            }
+        }
+
         $appointments = $this->appointmentOptions($request);
         $doctors = $this->doctorOptions($request);
+        $medicines = $this->medicineOptions();
         $statusOptions = $this->statusOptions;
 
-        return view('modules.prescriptions.create', compact('appointments', 'doctors', 'statusOptions'));
+        return view('modules.prescriptions.create', compact('prescription', 'appointments', 'doctors', 'medicines', 'statusOptions'));
     }
 
     public function store(PrescriptionStoreRequest $request, HospitalNotificationService $notifications)
     {
-        $data = $this->payloadFromRequest($request);
-        $prescription = Prescription::create($data);
-        $prescription->load(['patient', 'doctor']);
+        $prescription = DB::transaction(function () use ($request) {
+            $prescription = Prescription::create($this->payloadFromRequest($request));
+            $this->syncItems($prescription, $request);
+
+            return $prescription;
+        });
+
+        $prescription->load(['patient', 'doctor', 'items']);
 
         $this->notifyPrescription($request, $notifications, $prescription, 'Prescription created');
 
@@ -74,7 +98,7 @@ class PrescriptionsController extends Controller
     public function show(Prescription $prescription)
     {
         $this->authorizePrescriptionAccess(request(), $prescription);
-        $prescription->load(['appointment', 'doctor', 'patient']);
+        $prescription->load(['appointment', 'doctor', 'patient', 'items.medicine']);
 
         return view('modules.prescriptions.show', compact('prescription'));
     }
@@ -85,17 +109,24 @@ class PrescriptionsController extends Controller
 
         $appointments = $this->appointmentOptions($request);
         $doctors = $this->doctorOptions($request);
+        $medicines = $this->medicineOptions();
         $statusOptions = $this->statusOptions;
 
-        return view('modules.prescriptions.edit', compact('prescription', 'appointments', 'doctors', 'statusOptions'));
+        $prescription->load('items');
+
+        return view('modules.prescriptions.edit', compact('prescription', 'appointments', 'doctors', 'medicines', 'statusOptions'));
     }
 
     public function update(PrescriptionUpdateRequest $request, Prescription $prescription, HospitalNotificationService $notifications)
     {
         $this->authorizePrescriptionAccess($request, $prescription);
 
-        $prescription->update($this->payloadFromRequest($request));
-        $prescription->load(['patient', 'doctor']);
+        DB::transaction(function () use ($request, $prescription) {
+            $prescription->update($this->payloadFromRequest($request));
+            $this->syncItems($prescription, $request);
+        });
+
+        $prescription->load(['patient', 'doctor', 'items']);
 
         $this->notifyPrescription($request, $notifications, $prescription, 'Prescription updated');
 
@@ -167,6 +198,44 @@ class PrescriptionsController extends Controller
             })
             ->orderBy('name')
             ->get();
+    }
+
+    private function medicineOptions()
+    {
+        return Medicine::query()
+            ->orderBy('name')
+            ->get(['id', 'name', 'stock', 'status']);
+    }
+
+    private function syncItems(Prescription $prescription, Request $request): void
+    {
+        $items = collect($request->input('items', []))
+            ->map(function (array $item) {
+                $medicine = ! empty($item['medicine_id']) ? Medicine::find($item['medicine_id']) : null;
+                $medicineName = trim((string) ($item['medicine_name'] ?? ''));
+
+                if ($medicine && $medicineName === '') {
+                    $medicineName = $medicine->name;
+                }
+
+                return [
+                    'medicine_id' => $medicine?->id,
+                    'medicine_name' => $medicineName,
+                    'dosage' => filled($item['dosage'] ?? null) ? $item['dosage'] : null,
+                    'frequency' => filled($item['frequency'] ?? null) ? $item['frequency'] : null,
+                    'duration' => filled($item['duration'] ?? null) ? $item['duration'] : null,
+                    'quantity' => filled($item['quantity'] ?? null) ? (int) $item['quantity'] : null,
+                    'instructions' => filled($item['instructions'] ?? null) ? $item['instructions'] : null,
+                ];
+            })
+            ->filter(fn (array $item) => $item['medicine_name'] !== '')
+            ->values();
+
+        $prescription->items()->delete();
+
+        if ($items->isNotEmpty()) {
+            $prescription->items()->createMany($items->all());
+        }
     }
 
     private function authorizePrescriptionAccess(Request $request, Prescription $prescription): void
