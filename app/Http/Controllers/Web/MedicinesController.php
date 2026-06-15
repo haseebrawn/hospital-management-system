@@ -7,11 +7,13 @@ use App\Http\Requests\Web\MedicineStoreRequest;
 use App\Http\Requests\Web\MedicineUpdateRequest;
 use App\Models\Medicine;
 use App\Services\HospitalNotificationService;
+use App\Services\PharmacyAlertService;
+use App\Services\PharmacyDispenseService;
 use Illuminate\Http\Request;
 
 class MedicinesController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, PharmacyAlertService $pharmacyAlertService)
     {
         $search = trim((string) $request->query('q', ''));
         $status = trim((string) $request->query('status', ''));
@@ -26,8 +28,9 @@ class MedicinesController extends Controller
             ->withQueryString();
 
         $statusOptions = ['available', 'unavailable'];
+        $alerts = $pharmacyAlertService->collectAlerts();
 
-        return view('modules.medicines.index', compact('medicines', 'search', 'status', 'statusOptions'));
+        return view('modules.medicines.index', compact('medicines', 'search', 'status', 'statusOptions', 'alerts'));
     }
 
     public function create()
@@ -37,9 +40,10 @@ class MedicinesController extends Controller
         return view('modules.medicines.create', compact('statusOptions'));
     }
 
-    public function store(MedicineStoreRequest $request, HospitalNotificationService $notifications)
+    public function store(MedicineStoreRequest $request, HospitalNotificationService $notifications, PharmacyDispenseService $pharmacyDispenseService)
     {
         $medicine = Medicine::create($request->validated());
+        $pharmacyDispenseService->recordOpeningStock($medicine, $request->user(), (int) $medicine->stock);
 
         $notifications->notifyRoles(['super_admin', 'admin', 'pharmacist'], [
             'title' => 'Medicine added',
@@ -57,6 +61,8 @@ class MedicinesController extends Controller
 
     public function show(Medicine $medicine)
     {
+        $medicine->load(['stockMovements.performer', 'stockMovements.prescription']);
+
         return view('modules.medicines.show', compact('medicine'));
     }
 
@@ -67,11 +73,23 @@ class MedicinesController extends Controller
         return view('modules.medicines.edit', compact('medicine', 'statusOptions'));
     }
 
-    public function update(MedicineUpdateRequest $request, Medicine $medicine, HospitalNotificationService $notifications)
+    public function update(MedicineUpdateRequest $request, Medicine $medicine, HospitalNotificationService $notifications, PharmacyDispenseService $pharmacyDispenseService)
     {
+        $stockBefore = (int) $medicine->stock;
         $medicine->update($request->validated());
+        $medicine->forceFill([
+            'expiry_alert_sent' => false,
+            'reorder_alert_sent' => false,
+        ])->saveQuietly();
+        $pharmacyDispenseService->recordStockAdjustment(
+            $medicine,
+            $request->user(),
+            $stockBefore,
+            (int) $medicine->stock,
+            'Manual stock adjustment from medicine edit screen.'
+        );
 
-        $type = ((int) $medicine->stock <= 10 || $medicine->status === 'unavailable') ? 'warning' : 'info';
+        $type = ((int) $medicine->stock <= (int) ($medicine->reorder_level ?? 10) || $medicine->status === 'unavailable') ? 'warning' : 'info';
         $message = $type === 'warning'
             ? "{$medicine->name} needs pharmacy attention. Stock: {$medicine->stock}, status: {$medicine->status}."
             : "{$medicine->name} pharmacy details were updated.";

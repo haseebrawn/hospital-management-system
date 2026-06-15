@@ -74,6 +74,18 @@
                     <span class="app-sidebar__icon"><i class="fa-solid fa-pills"></i></span>
                     <span class="app-sidebar__label">Pharmacy</span>
                 </a>
+
+                <a class="app-sidebar__item {{ request()->routeIs('pharmacy.dispense.*') ? 'is-active' : '' }}"
+                    href="{{ route('pharmacy.dispense.index') }}">
+                    <span class="app-sidebar__icon"><i class="fa-solid fa-prescription-bottle-medical"></i></span>
+                    <span class="app-sidebar__label">Dispense Queue</span>
+                </a>
+
+                <a class="app-sidebar__item {{ request()->routeIs('pharmacy.ledger.*') ? 'is-active' : '' }}"
+                    href="{{ route('pharmacy.ledger.index') }}">
+                    <span class="app-sidebar__icon"><i class="fa-solid fa-clipboard-list"></i></span>
+                    <span class="app-sidebar__label">Stock Ledger</span>
+                </a>
             @endif
         @endauth
 

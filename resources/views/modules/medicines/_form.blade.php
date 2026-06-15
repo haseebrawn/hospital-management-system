@@ -15,6 +15,7 @@
         $name = old('name', $medicine?->name);
         $description = old('description', $medicine?->description);
         $stock = old('stock', $medicine?->stock ?? 0);
+        $reorderLevel = old('reorder_level', $medicine?->reorder_level ?? 10);
         $price = old('price', $medicine?->price);
         $expiryDate = old('expiry_date', $medicine?->expiry_date);
         $status = old('status', $medicine?->status ?? 'available');
@@ -30,6 +31,12 @@
         <div>
             <label style="display:block; font-size:12px; color: var(--text-muted); margin-bottom:6px;">Stock</label>
             <input type="number" min="0" name="stock" value="{{ $stock }}" required
+                style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px;">
+        </div>
+
+        <div>
+            <label style="display:block; font-size:12px; color: var(--text-muted); margin-bottom:6px;">Reorder level</label>
+            <input type="number" min="0" name="reorder_level" value="{{ $reorderLevel }}" required
                 style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px;">
         </div>
 
@@ -75,4 +82,3 @@
         </button>
     </div>
 </form>
-

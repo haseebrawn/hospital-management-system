@@ -8,6 +8,8 @@ use App\Http\Controllers\Web\AppointmentsController;
 use App\Http\Controllers\Web\DoctorAvailabilitiesController;
 use App\Http\Controllers\Web\LabTestsController;
 use App\Http\Controllers\Web\PrescriptionsController;
+use App\Http\Controllers\Web\PharmacyDispensesController;
+use App\Http\Controllers\Web\PharmacyLedgerController;
 use App\Http\Controllers\Web\MedicalRecordsController;
 use App\Http\Controllers\Web\MedicinesController;
 use App\Http\Controllers\Web\BillingController as WebBillingController;
@@ -136,6 +138,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/medicines/{medicine}/edit', [MedicinesController::class, 'edit'])->name('medicines.edit');
             Route::put('/medicines/{medicine}', [MedicinesController::class, 'update'])->name('medicines.update');
             Route::delete('/medicines/{medicine}', [MedicinesController::class, 'destroy'])->name('medicines.destroy');
+            Route::get('/dispense', [PharmacyDispensesController::class, 'index'])->name('pharmacy.dispense.index');
+            Route::post('/dispense/{prescription}', [PharmacyDispensesController::class, 'store'])->name('pharmacy.dispense.store');
+            Route::get('/ledger', [PharmacyLedgerController::class, 'index'])->name('pharmacy.ledger.index');
         });
 
     Route::prefix('billing')

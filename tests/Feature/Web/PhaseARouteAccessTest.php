@@ -55,6 +55,8 @@ class PhaseARouteAccessTest extends TestCase
         $this->actingAs($this->userWithRole('pharmacist'));
 
         $this->get('/pharmacy/medicines')->assertOk();
+        $this->get('/pharmacy/dispense')->assertOk();
+        $this->get('/pharmacy/ledger')->assertOk();
         $this->get('/reports')->assertOk();
         $this->get('/patients')->assertForbidden();
         $this->get('/billing')->assertForbidden();

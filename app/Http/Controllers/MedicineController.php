@@ -29,12 +29,17 @@ class MedicineController extends Controller
             'name' => 'required|string',
             'description' => 'nullable|string',
             'stock' => 'required|integer|min:0',
+            'reorder_level' => 'required|integer|min:0',
             'price' => 'required|numeric|min:0',
             'expiry_date' => 'nullable|date',
             'status' => 'required|in:available,unavailable'
         ]);
 
         $medicine = Medicine::create($request->all());
+        $medicine->forceFill([
+            'expiry_alert_sent' => false,
+            'reorder_alert_sent' => false,
+        ])->saveQuietly();
 
         return response()->json([
             'message' => 'Medicine created successfully',
@@ -52,11 +57,15 @@ class MedicineController extends Controller
 
         $request->validate([
             'stock' => 'integer|min:0',
+            'reorder_level' => 'integer|min:0',
             'price' => 'numeric|min:0',
             'status' => 'in:available,unavailable'
         ]);
 
         $medicine->update($request->all());
+        $medicine->forceFill([
+            'reorder_alert_sent' => false,
+        ])->saveQuietly();
 
         return response()->json(['message' => 'Medicine updated successfully']);
     }

@@ -13,6 +13,16 @@
                 </div>
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                @if ($prescription->status === 'pending' && auth()->user()->hasAnyRole(['super_admin', 'admin', 'pharmacist']))
+                    <form method="POST" action="{{ route('pharmacy.dispense.store', $prescription) }}">
+                        @csrf
+                        <button type="submit"
+                            onclick="return confirm('Dispense this prescription and deduct stock?')"
+                            style="padding:8px 12px; border-radius:10px; border:1px solid rgba(5,150,105,0.30); background:rgba(5,150,105,0.08); color:#059669; cursor:pointer; font-size:13px; font-weight:700;">
+                            Dispense
+                        </button>
+                    </form>
+                @endif
                 <a href="{{ route('prescriptions.edit', $prescription) }}"
                     style="padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); background:#fff; text-decoration:none; color:inherit; font-size:13px;">
                     Edit
@@ -100,6 +110,27 @@
                 <div style="font-size:12px; color:var(--text-muted);">Legacy Medicines Note</div>
                 <div style="font-weight:600; margin-top:4px; white-space:pre-line;">{{ $prescription->medicines ?: '-' }}</div>
             </div>
+
+            @if ($prescription->items->isNotEmpty())
+                <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px; grid-column:1 / -1;">
+                    <div style="font-size:12px; color:var(--text-muted);">Dispense Summary</div>
+                    <div style="margin-top:8px; display:grid; gap:8px;">
+                        @foreach ($prescription->items as $item)
+                            <div style="display:flex; justify-content:space-between; gap:12px; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px;">
+                                <div>
+                                    <div style="font-weight:700;">{{ $item->medicine_name }}</div>
+                                    <div style="font-size:12px; color:var(--text-muted);">
+                                        Qty: {{ $item->quantity ?: 1 }} | {{ $item->dosage ?: '-' }} | {{ $item->frequency ?: '-' }}
+                                    </div>
+                                </div>
+                                <div style="font-size:12px; color:var(--text-muted); align-self:center;">
+                                    {{ $item->medicine?->stock ?? 'linked medicine' }} in stock
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </div>
 
         <div style="margin-top:16px;">

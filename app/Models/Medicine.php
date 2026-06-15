@@ -13,8 +13,17 @@ class Medicine extends Model
         'name',
         'description',
         'stock',
+        'reorder_level',
         'price',
         'expiry_date',
+        'expiry_alert_date',
+        'expiry_alert_sent',
+        'reorder_alert_sent',
         'status'
     ];
+
+    public function stockMovements()
+    {
+        return $this->hasMany(MedicineStockMovement::class);
+    }
 }

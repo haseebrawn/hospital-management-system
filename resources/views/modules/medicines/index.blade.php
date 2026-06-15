@@ -44,6 +44,46 @@
             </div>
         </div>
 
+        <div style="margin-top:16px; padding:12px; border:1px solid var(--border-color); border-radius:14px; background:linear-gradient(135deg, rgba(245,158,11,0.08), rgba(239,68,68,0.06));">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                <div>
+                    <div style="font-weight:700;">Expiry and Reorder Alerts</div>
+                    <div style="font-size:12px; color:var(--text-muted);">
+                        Medicines expiring within 30 days or at/below reorder level.
+                    </div>
+                </div>
+                <div style="font-size:13px; font-weight:700;">{{ $alerts->count() }} alert(s)</div>
+            </div>
+
+            <div style="margin-top:10px; display:grid; gap:10px;">
+                @forelse ($alerts as $alert)
+                    <div style="display:flex; justify-content:space-between; gap:12px; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; background:#fff;">
+                        <div>
+                            <div style="font-weight:700;">{{ $alert['name'] }}</div>
+                            <div style="font-size:12px; color:var(--text-muted);">
+                                Stock {{ $alert['stock'] }} / Reorder {{ $alert['reorder_level'] }}
+                                @if ($alert['expiry_date'])
+                                    | Expiry {{ $alert['expiry_date'] }}
+                                @endif
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                            @if ($alert['is_expired'])
+                                <span style="padding:5px 10px; border-radius:999px; background:rgba(239,68,68,0.12); color:#dc2626; font-size:12px; font-weight:700;">Expired</span>
+                            @elseif ($alert['is_expiring'])
+                                <span style="padding:5px 10px; border-radius:999px; background:rgba(245,158,11,0.14); color:#b45309; font-size:12px; font-weight:700;">Expiring Soon</span>
+                            @endif
+                            @if ($alert['is_low_stock'])
+                                <span style="padding:5px 10px; border-radius:999px; background:rgba(37,99,235,0.12); color:#2563eb; font-size:12px; font-weight:700;">Low Stock</span>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <div style="font-size:13px; color:var(--text-muted);">No active expiry or reorder alerts.</div>
+                @endforelse
+            </div>
+        </div>
+
         <div style="margin-top: 16px; overflow:auto;">
             <table class="dash-table" style="min-width: 1040px;">
                 <thead>
@@ -51,6 +91,7 @@
                         <th class="u-nowrap">ID</th>
                         <th>Name</th>
                         <th>Stock</th>
+                        <th>Reorder</th>
                         <th>Price</th>
                         <th>Expiry</th>
                         <th>Status</th>
@@ -67,6 +108,7 @@
                                 </a>
                             </td>
                             <td class="u-nowrap">{{ $med->stock }}</td>
+                            <td class="u-nowrap">{{ $med->reorder_level ?? 10 }}</td>
                             <td class="u-nowrap">{{ number_format((float) $med->price, 2) }}</td>
                             <td class="u-nowrap">{{ $med->expiry_date ?? '-' }}</td>
                             <td class="u-nowrap" style="text-transform:capitalize;">{{ $med->status }}</td>
@@ -88,7 +130,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" style="padding: 16px;">No medicines found.</td>
+                            <td colspan="8" style="padding: 16px;">No medicines found.</td>
                         </tr>
                     @endforelse
                 </tbody>

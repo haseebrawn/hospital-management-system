@@ -25,10 +25,10 @@ class MedicineUpdateRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'stock' => ['required', 'integer', 'min:0'],
+            'reorder_level' => ['required', 'integer', 'min:0'],
             'price' => ['required', 'numeric', 'min:0'],
             'expiry_date' => ['nullable', 'date'],
             'status' => ['required', 'in:available,unavailable'],
         ];
     }
 }
-

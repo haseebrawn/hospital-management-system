@@ -44,6 +44,7 @@ class MedicinesWebTest extends TestCase
             'name' => 'Paracetamol',
             'description' => '500mg tablet',
             'stock' => 10,
+            'reorder_level' => 8,
             'price' => 25.50,
             'expiry_date' => '2026-12-31',
             'status' => 'available',
@@ -53,7 +54,14 @@ class MedicinesWebTest extends TestCase
         $this->assertDatabaseHas('medicines', [
             'name' => 'Paracetamol',
             'stock' => 10,
+            'reorder_level' => 8,
             'status' => 'available',
+        ]);
+        $this->assertDatabaseHas('medicine_stock_movements', [
+            'movement_type' => 'opening',
+            'quantity' => 10,
+            'stock_before' => 0,
+            'stock_after' => 10,
         ]);
     }
 
@@ -68,5 +76,24 @@ class MedicinesWebTest extends TestCase
         $response->assertOk();
         $response->assertSee($medicine->name);
     }
-}
 
+    public function test_medicines_index_shows_expiry_and_reorder_alerts(): void
+    {
+        $this->actingAsPharmacist();
+
+        Medicine::factory()->create([
+            'name' => 'Expiring Medicine',
+            'stock' => 2,
+            'reorder_level' => 5,
+            'expiry_date' => now()->addDays(10)->toDateString(),
+        ]);
+
+        $response = $this->get('/pharmacy/medicines');
+
+        $response->assertOk();
+        $response->assertSee('Expiry and Reorder Alerts');
+        $response->assertSee('Expiring Medicine');
+        $response->assertSee('Expiring Soon');
+        $response->assertSee('Low Stock');
+    }
+}
