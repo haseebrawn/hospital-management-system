@@ -11,7 +11,7 @@ class BillingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -28,6 +28,9 @@ class BillingRequest extends FormRequest
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.price' => 'required|numeric|min:1',
             'items.*.type' => 'required|in:lab,medicine,appointment,other',
+            'items.*.source_type' => 'nullable|in:appointment,lab_test,medicine,medical_record,other',
+            'items.*.source_id' => 'nullable|integer|min:1',
+            'items.*.source_name' => 'nullable|string|max:255',
         ];
     }
 }

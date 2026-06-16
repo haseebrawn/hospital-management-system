@@ -21,6 +21,10 @@ Run all feature tests:
 - Lab tests web UI: `tests/Feature/Web/LabTestsWebTest.php`
 - Medicines web UI: `tests/Feature/Web/MedicinesWebTest.php`
 - Billing web UI: `tests/Feature/Web/BillingWebTest.php`
+  - invoice creation
+  - partial payment recording
+  - full payment quick action
+  - printable receipt page
 
 ## Phase 4 — HR + Shifts + Wards/Beds
 
@@ -33,4 +37,3 @@ Run all feature tests:
 - Admin users management: `tests/Feature/Web/AdminUsersWebTest.php`
 - Reports pages: `tests/Feature/Web/ReportsWebTest.php`
 - System tools (backups/logs): `tests/Feature/Web/SystemWebTest.php`
-

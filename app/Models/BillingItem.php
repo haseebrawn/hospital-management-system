@@ -14,7 +14,10 @@ class BillingItem extends Model
         'service_name',
         'price',
         'quantity',
-        'type'
+        'type',
+        'source_type',
+        'source_id',
+        'source_name',
     ];
 
     public function billing()

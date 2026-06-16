@@ -10,11 +10,15 @@ class Billing extends Model
     use HasFactory;
 
     protected $fillable = [
+        'invoice_number',
         'patient_id',
         'created_by',
         'approved_by',
         'total_amount',
-        'status'
+        'status',
+        'payment_method',
+        'paid_amount',
+        'balance_due',
     ];
 
     public function patient()
@@ -25,6 +29,21 @@ class Billing extends Model
     public function items()
     {
         return $this->hasMany(BillingItem::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(BillingPayment::class);
+    }
+
+    public function getAmountPaidAttribute(): float
+    {
+        return (float) ($this->paid_amount ?? 0);
+    }
+
+    public function getAmountDueAttribute(): float
+    {
+        return max(0, (float) ($this->balance_due ?? 0));
     }
 
     public function creator()

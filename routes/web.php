@@ -151,6 +151,8 @@ Route::middleware('auth')->group(function () {
             Route::post('/', [WebBillingController::class, 'store'])->name('billing.store');
             Route::get('/{billing}', [WebBillingController::class, 'show'])->name('billing.show');
             Route::put('/{billing}/pay', [WebBillingController::class, 'pay'])->name('billing.pay');
+            Route::post('/{billing}/payments', [WebBillingController::class, 'storePayment'])->name('billing.payments.store');
+            Route::get('/{billing}/receipt', [WebBillingController::class, 'receipt'])->name('billing.receipt');
             Route::put('/{billing}/cancel', [WebBillingController::class, 'cancel'])->name('billing.cancel');
             Route::delete('/{billing}', [WebBillingController::class, 'destroy'])->name('billing.destroy');
         });

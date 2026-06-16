@@ -188,6 +188,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('/', [BillingController::class, 'index']);
                 Route::get('/{id}', [BillingController::class, 'show']);
                 Route::put('/{id}/pay', [BillingController::class, 'markAsPaid']);
+                Route::post('/{id}/payments', [BillingController::class, 'storePayment']);
                 Route::put('/{id}/cancel', [BillingController::class, 'cancelInvoice']);
 
             });

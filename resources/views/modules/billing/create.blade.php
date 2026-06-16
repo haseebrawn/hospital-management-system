@@ -18,7 +18,7 @@
                         <option value="" disabled {{ old('patient_id') ? '' : 'selected' }}>Select patient</option>
                         @foreach ($patients as $p)
                             <option value="{{ $p->id }}" {{ (string) old('patient_id') === (string) $p->id ? 'selected' : '' }}>
-                                {{ $p->mrn ?? ('#' . $p->id) }} — {{ $p->first_name }} {{ $p->last_name }} ({{ $p->contact_number }})
+                                {{ $p->mrn ?? ('#' . $p->id) }} - {{ $p->first_name }} {{ $p->last_name }} ({{ $p->contact_number }})
                             </option>
                         @endforeach
                     </select>
@@ -35,21 +35,24 @@
                 </div>
 
                 <div style="margin-top: 10px; overflow:auto;">
-                    <table class="dash-table" style="min-width: 980px;">
+                    <table class="dash-table" style="min-width: 1220px;">
                         <thead>
                             <tr>
-                                <th style="width:38%;">Service</th>
-                                <th style="width:18%;">Type</th>
-                                <th style="width:12%;">Qty</th>
-                                <th style="width:16%;">Price</th>
-                                <th style="width:16%;">Line total</th>
+                                <th style="width:24%;">Service</th>
+                                <th style="width:12%;">Type</th>
+                                <th style="width:10%;">Qty</th>
+                                <th style="width:12%;">Price</th>
+                                <th style="width:14%;">Source Type</th>
+                                <th style="width:12%;">Source ID</th>
+                                <th style="width:14%;">Source Name</th>
+                                <th style="width:12%;">Line total</th>
                                 <th style="text-align:right;">Action</th>
                             </tr>
                         </thead>
                         <tbody id="itemsBody">
                             @php
                                 $oldItems = old('items', [
-                                    ['service_name' => '', 'type' => 'other', 'quantity' => 1, 'price' => 0],
+                                    ['service_name' => '', 'type' => 'other', 'quantity' => 1, 'price' => 0, 'source_type' => '', 'source_id' => '', 'source_name' => ''],
                                 ]);
                             @endphp
 
@@ -77,6 +80,25 @@
                                     <td>
                                         <input type="number" step="0.01" min="0" name="items[{{ $i }}][price]" value="{{ $item['price'] ?? 0 }}" required
                                             class="price-input"
+                                            style="width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px;">
+                                    </td>
+                                    <td>
+                                        <select name="items[{{ $i }}][source_type]"
+                                            style="width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px; background:#fff;">
+                                            <option value="">None</option>
+                                            @foreach ($sourceTypeOptions as $sourceType)
+                                                <option value="{{ $sourceType }}" {{ ($item['source_type'] ?? '') === $sourceType ? 'selected' : '' }}>
+                                                    {{ ucfirst(str_replace('_', ' ', $sourceType)) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" min="1" name="items[{{ $i }}][source_id]" value="{{ $item['source_id'] ?? '' }}"
+                                            style="width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px;">
+                                    </td>
+                                    <td>
+                                        <input name="items[{{ $i }}][source_name]" value="{{ $item['source_name'] ?? '' }}"
                                             style="width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px;">
                                     </td>
                                     <td class="line-total" style="font-weight:600;">0.00</td>
@@ -118,6 +140,7 @@
             const addBtn = document.getElementById('addItemBtn');
             const grandTotalEl = document.getElementById('grandTotal');
             const typeOptions = @json($typeOptions);
+            const sourceTypeOptions = @json($sourceTypeOptions);
 
             function recalc() {
                 let grand = 0;
@@ -136,14 +159,13 @@
             function reindex() {
                 const rows = body.querySelectorAll('.item-row');
                 rows.forEach((row, index) => {
-                    const service = row.querySelector('input[name^="items["][name$="[service_name]"]');
-                    const type = row.querySelector('select[name^="items["][name$="[type]"]');
-                    const qty = row.querySelector('input[name^="items["][name$="[quantity]"]');
-                    const price = row.querySelector('input[name^="items["][name$="[price]"]');
-                    if (service) service.name = `items[${index}][service_name]`;
-                    if (type) type.name = `items[${index}][type]`;
-                    if (qty) qty.name = `items[${index}][quantity]`;
-                    if (price) price.name = `items[${index}][price]`;
+                    const fields = ['service_name', 'type', 'quantity', 'price', 'source_type', 'source_id', 'source_name'];
+                    fields.forEach((field) => {
+                        const control = row.querySelector(`[name^="items["][name$="[${field}]"]`);
+                        if (control) {
+                            control.name = `items[${index}][${field}]`;
+                        }
+                    });
                 });
             }
 
@@ -152,45 +174,38 @@
                 const tr = document.createElement('tr');
                 tr.className = 'item-row';
                 tr.innerHTML = `
+                    <td><input name="items[${index}][service_name]" required style="width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px;"></td>
                     <td>
-                        <input name="items[${index}][service_name]" required
-                            style="width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px;">
-                    </td>
-                    <td>
-                        <select name="items[${index}][type]"
-                            style="width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px; background:#fff;">
+                        <select name="items[${index}][type]" style="width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px; background:#fff;">
                             ${typeOptions.map(t => `<option value="${t}">${t.charAt(0).toUpperCase() + t.slice(1)}</option>`).join('')}
                         </select>
                     </td>
+                    <td><input type="number" min="1" name="items[${index}][quantity]" value="1" required class="qty-input" style="width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px;"></td>
+                    <td><input type="number" step="0.01" min="0" name="items[${index}][price]" value="0" required class="price-input" style="width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px;"></td>
                     <td>
-                        <input type="number" min="1" name="items[${index}][quantity]" value="1" required class="qty-input"
-                            style="width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px;">
+                        <select name="items[${index}][source_type]" style="width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px; background:#fff;">
+                            <option value="">None</option>
+                            ${sourceTypeOptions.map(t => `<option value="${t}">${t.replaceAll('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>`).join('')}
+                        </select>
                     </td>
-                    <td>
-                        <input type="number" step="0.01" min="0" name="items[${index}][price]" value="0" required class="price-input"
-                            style="width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px;">
-                    </td>
+                    <td><input type="number" min="1" name="items[${index}][source_id]" style="width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px;"></td>
+                    <td><input name="items[${index}][source_name]" style="width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px;"></td>
                     <td class="line-total" style="font-weight:600;">0.00</td>
-                    <td style="text-align:right;">
-                        <button type="button" class="remove-btn"
-                            style="font-size:13px; color:#dc2626; background:transparent; border:none; cursor:pointer;">
-                            Remove
-                        </button>
-                    </td>
+                    <td style="text-align:right;"><button type="button" class="remove-btn" style="font-size:13px; color:#dc2626; background:transparent; border:none; cursor:pointer;">Remove</button></td>
                 `;
                 body.appendChild(tr);
                 recalc();
             }
 
-            body.addEventListener('input', function (e) {
-                if (e.target.classList.contains('qty-input') || e.target.classList.contains('price-input')) {
+            body.addEventListener('input', function (event) {
+                if (event.target.classList.contains('qty-input') || event.target.classList.contains('price-input')) {
                     recalc();
                 }
             });
 
-            body.addEventListener('click', function (e) {
-                if (e.target.classList.contains('remove-btn')) {
-                    const row = e.target.closest('.item-row');
+            body.addEventListener('click', function (event) {
+                if (event.target.classList.contains('remove-btn')) {
+                    const row = event.target.closest('.item-row');
                     if (!row) return;
                     row.remove();
                     reindex();
