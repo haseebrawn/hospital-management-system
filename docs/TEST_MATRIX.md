@@ -35,5 +35,8 @@ Run all feature tests:
 ## Phase 5 — Admin + Reports + System
 
 - Admin users management: `tests/Feature/Web/AdminUsersWebTest.php`
-- Reports pages: `tests/Feature/Web/ReportsWebTest.php`
+- Reports pages and exports: `tests/Feature/Web/ReportsWebTest.php`
+  - report page access
+  - CSV export
+  - department filter scoping
 - System tools (backups/logs): `tests/Feature/Web/SystemWebTest.php`

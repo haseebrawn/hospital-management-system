@@ -3,11 +3,30 @@
 @section('title', 'Pharmacy Report')
 
 @section('content')
+    <style>
+        @media print {
+            .report-actions, .report-nav, .report-form {
+                display: none !important;
+            }
+
+            .card {
+                box-shadow: none !important;
+                border: none !important;
+            }
+        }
+    </style>
+
     <div class="card">
         <div class="card-title">Pharmacy Report</div>
         <div class="card-subtitle">Medicine stock, availability, and low-stock overview.</div>
 
-        <form method="GET" action="{{ route('reports.pharmacy') }}" style="display:flex; gap:10px; align-items:end; flex-wrap:wrap;">
+        <div class="report-actions" style="display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; margin-top: 10px;">
+            <a href="{{ request()->fullUrlWithQuery(['export' => 'csv']) }}" style="padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); text-decoration:none; color:inherit; background:#fff;">Export CSV</a>
+            <a href="{{ request()->fullUrlWithQuery(['export' => 'pdf']) }}" style="padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); text-decoration:none; color:inherit; background:#fff;">Export PDF</a>
+            <button type="button" onclick="window.print(); return false;" style="padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); background:#fff; cursor:pointer;">Print</button>
+        </div>
+
+        <form method="GET" action="{{ route('reports.pharmacy') }}" class="report-form" style="display:flex; gap:10px; align-items:end; flex-wrap:wrap; margin-top: 12px;">
             <div>
                 <div style="font-size:12px; color: var(--text-muted); margin-bottom:6px;">Sales From</div>
                 <input type="date" name="from" value="{{ $from }}"
@@ -58,6 +77,8 @@
                 <div style="font-size:11px; color: var(--text-muted); margin-top:3px;">From {{ number_format((int) $medicineInvoiceCount) }} paid invoices</div>
             </div>
         </div>
+
+        @includeWhen(isset($chartData), 'modules.reports._simple-chart', ['chartTitle' => 'Top Selling Medicines', 'chartData' => $chartData])
 
         <div style="margin-top: 14px; display:grid; grid-template-columns: 0.8fr 1.2fr; gap:14px;">
             <div style="overflow:auto;">
@@ -136,7 +157,7 @@
             </table>
         </div>
 
-        <div style="margin-top: 14px;">
+        <div class="report-nav" style="margin-top: 14px;">
             <a href="{{ route('reports.index') }}" style="font-size:13px; color: var(--primary); text-decoration:none;">
                 ← Back to reports
             </a>

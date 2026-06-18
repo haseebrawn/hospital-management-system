@@ -3,11 +3,30 @@
 @section('title', 'Staff Report')
 
 @section('content')
+    <style>
+        @media print {
+            .report-actions, .report-nav, .report-form, .pagination-wrapper {
+                display: none !important;
+            }
+
+            .card {
+                box-shadow: none !important;
+                border: none !important;
+            }
+        }
+    </style>
+
     <div class="card">
         <div class="card-title">Staff Report</div>
         <div class="card-subtitle">Staff directory based on your role and department access.</div>
 
-        <form method="GET" action="{{ route('reports.staff') }}" style="display:flex; gap:10px; align-items:end; flex-wrap:wrap;">
+        <div class="report-actions" style="display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; margin-top: 10px;">
+            <a href="{{ request()->fullUrlWithQuery(['export' => 'csv']) }}" style="padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); text-decoration:none; color:inherit; background:#fff;">Export CSV</a>
+            <a href="{{ request()->fullUrlWithQuery(['export' => 'pdf']) }}" style="padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); text-decoration:none; color:inherit; background:#fff;">Export PDF</a>
+            <button type="button" onclick="window.print(); return false;" style="padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); background:#fff; cursor:pointer;">Print</button>
+        </div>
+
+        <form method="GET" action="{{ route('reports.staff') }}" class="report-form" style="display:flex; gap:10px; align-items:end; flex-wrap:wrap; margin-top: 12px;">
             <div>
                 <div style="font-size:12px; color: var(--text-muted); margin-bottom:6px;">Department</div>
                 <select name="department_id"
@@ -29,7 +48,7 @@
             </a>
         </form>
 
-        <div style="margin-top: 14px; overflow:auto;">
+        <div style="margin-top: 16px; overflow:auto;">
             <table class="dash-table" style="min-width: 980px;">
                 <thead>
                     <tr>
@@ -60,11 +79,11 @@
             </table>
         </div>
 
-        <div style="margin-top: 14px;">
+        <div class="pagination-wrapper" style="margin-top: 14px;">
             {{ $staff->links() }}
         </div>
 
-        <div style="margin-top: 14px;">
+        <div class="report-nav" style="margin-top: 14px;">
             <a href="{{ route('reports.index') }}" style="font-size:13px; color: var(--primary); text-decoration:none;">
                 ← Back to reports
             </a>
