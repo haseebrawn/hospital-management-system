@@ -32,12 +32,13 @@ class BackupsController extends Controller
 
     public function download(Backup $backup)
     {
-        $path = storage_path('app/' . $backup->storage_path);
-        if (! file_exists($path)) {
+        $basePath = realpath(storage_path('app'));
+        $path = realpath(storage_path('app/' . ltrim($backup->storage_path, '/')));
+
+        if (! $path || ! $basePath || ! str_starts_with($path, $basePath) || ! file_exists($path)) {
             abort(404, 'File not found');
         }
 
         return response()->download($path, $backup->filename);
     }
 }
-

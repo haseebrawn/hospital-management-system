@@ -2,11 +2,12 @@
 
 namespace App\Notifications;
 
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
-class HospitalSystemNotification extends Notification
+class HospitalSystemNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

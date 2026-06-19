@@ -7,6 +7,7 @@ use App\Models\Backup;
 use App\Models\Department;
 use App\Models\LoginLog;
 use App\Models\User;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -17,11 +18,11 @@ class SystemWebTest extends TestCase
 
     private function actingAsAdmin(): User
     {
-        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'api']);
+        Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'api']);
 
         $dept = Department::factory()->create();
         $user = User::factory()->create(['department_id' => $dept->id]);
-        $user->assignRole('admin');
+        $user->assignRole('super_admin');
 
         $this->actingAs($user);
 
@@ -63,6 +64,26 @@ class SystemWebTest extends TestCase
         ]);
 
         $this->get("/system/backups/{$backup->id}/download")->assertOk();
+    }
+
+    public function test_backup_command_creates_backup_file_and_record(): void
+    {
+        $user = $this->actingAsAdmin();
+
+        $code = Artisan::call('db:backup', [
+            '--notes' => 'system test backup',
+            '--retain' => 14,
+        ]);
+
+        $this->assertSame(0, $code);
+
+        $backup = Backup::query()->latest('id')->first();
+        $this->assertNotNull($backup);
+        $this->assertStringStartsWith('backup_', $backup->filename);
+
+        $path = storage_path('app/' . $backup->storage_path);
+        $this->assertFileExists($path);
+        $this->assertGreaterThan(0, filesize($path));
     }
 
     public function test_activity_logs_page_loads(): void

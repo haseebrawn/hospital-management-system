@@ -40,3 +40,9 @@ Run all feature tests:
   - CSV export
   - department filter scoping
 - System tools (backups/logs): `tests/Feature/Web/SystemWebTest.php`
+
+## Phase 6 — Production Readiness
+
+- System backup automation: `tests/Feature/Web/SystemWebTest.php`
+- Queueable notification contract: `tests/Unit/HospitalSystemNotificationTest.php`
+- Report exports and filters: `tests/Feature/Web/ReportsWebTest.php`

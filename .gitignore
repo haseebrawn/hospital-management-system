@@ -20,6 +20,12 @@
 /storage/pail
 /vendor
 docs/*.md
+!docs/HMS_PROJECT_AUDIT_AND_NEXT_STEPS.md
+!docs/ROLE_ACCESS_MATRIX.md
+!docs/TEST_MATRIX.md
+!docs/FRONTEND_PHASES.md
+!docs/API_REFERENCE.md
+!docs/DEPLOYMENT_GUIDE.md
 Homestead.json
 Homestead.yaml
 Thumbs.db
