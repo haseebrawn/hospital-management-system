@@ -11,6 +11,7 @@ class LabTest extends Model
 
     protected $fillable = [
         'patient_id',
+        'appointment_id',
         'doctor_id',
         'lab_technician_id',
         'test_type',
@@ -21,6 +22,11 @@ class LabTest extends Model
     public function patient()
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    public function appointment()
+    {
+        return $this->belongsTo(Appointment::class);
     }
 
     public function doctor()

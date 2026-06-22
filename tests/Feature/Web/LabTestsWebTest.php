@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Web;
 
+use App\Models\Appointment;
 use App\Models\Department;
 use App\Models\LabTest;
 use App\Models\Patient;
@@ -58,6 +59,35 @@ class LabTestsWebTest extends TestCase
         ]);
     }
 
+    public function test_appointment_workflow_prefills_lab_test_form_context(): void
+    {
+        $this->actingAsLabTech();
+        Role::firstOrCreate(['name' => 'doctor', 'guard_name' => 'api']);
+
+        $department = Department::factory()->create();
+        $doctor = User::factory()->create(['department_id' => $department->id, 'name' => 'Workflow Doctor']);
+        $doctor->assignRole('doctor');
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+        $appointment = Appointment::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $department->id,
+            'reason' => 'Chest pain',
+            'notes' => 'Needs ECG',
+            'status' => 'completed',
+        ]);
+
+        $response = $this->get("/lab-tests/create?appointment_id={$appointment->id}");
+
+        $response->assertOk();
+        $response->assertSee('Linked Appointment Context');
+        $response->assertSee((string) $appointment->id);
+        $response->assertSee('Chest pain');
+        $response->assertSee('Needs ECG');
+        $response->assertSee('Workflow Doctor');
+        $response->assertSee((string) $patient->id);
+    }
+
     public function test_lab_test_show_loads(): void
     {
         $tech = $this->actingAsLabTech();
@@ -73,4 +103,3 @@ class LabTestsWebTest extends TestCase
             ->assertSee($labTest->test_type);
     }
 }
-

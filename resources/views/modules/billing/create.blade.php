@@ -5,7 +5,37 @@
 @section('content')
     <div class="card">
         <div class="card-title">Create Invoice</div>
-        <div class="card-subtitle">Select patient and add invoice items.</div>
+        <div class="card-subtitle">Select patient and add invoice items. Linked appointment context is shown when available.</div>
+
+        @if (! empty($linkedSource))
+            <div style="margin-top:16px; padding:14px; border:1px solid rgba(37,99,235,0.18); border-radius:14px; background:rgba(37,99,235,0.05);">
+                <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">{{ $linkedSource['title'] }}</div>
+                <div style="display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:12px;">
+                    <div>
+                        <div style="font-size:12px; color:var(--text-muted);">Type / ID</div>
+                        <div style="font-weight:700;">{{ ucfirst($linkedSource['type']) }} #{{ $linkedSource['id'] }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--text-muted);">Patient</div>
+                        <div style="font-weight:700;">{{ $linkedSource['patient_name'] }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--text-muted);">Doctor</div>
+                        <div style="font-weight:700;">{{ $linkedSource['doctor_name'] }}</div>
+                    </div>
+                </div>
+                <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div>
+                        <div style="font-size:12px; color:var(--text-muted);">Reason</div>
+                        <div style="font-weight:600;">{{ $linkedSource['reason'] }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--text-muted);">Notes</div>
+                        <div style="font-weight:600;">{{ $linkedSource['notes'] }}</div>
+                    </div>
+                </div>
+            </div>
+        @endif
 
         <form method="POST" action="{{ route('billing.store') }}" id="billingForm">
             @csrf
@@ -15,13 +45,16 @@
                     <label style="display:block; font-size:12px; color: var(--text-muted); margin-bottom:6px;">Patient</label>
                     <select name="patient_id" required
                         style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px; background:#fff;">
-                        <option value="" disabled {{ old('patient_id') ? '' : 'selected' }}>Select patient</option>
+                        <option value="" disabled {{ old('patient_id', $prefilledPatientId ?? null) ? '' : 'selected' }}>Select patient</option>
                         @foreach ($patients as $p)
-                            <option value="{{ $p->id }}" {{ (string) old('patient_id') === (string) $p->id ? 'selected' : '' }}>
+                            <option value="{{ $p->id }}" {{ (string) old('patient_id', $prefilledPatientId ?? null) === (string) $p->id ? 'selected' : '' }}>
                                 {{ $p->mrn ?? ('#' . $p->id) }} - {{ $p->first_name }} {{ $p->last_name }} ({{ $p->contact_number }})
                             </option>
                         @endforeach
                     </select>
+                    <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
+                        The selected patient should match the linked source record when available.
+                    </div>
                 </div>
             </div>
 
@@ -51,9 +84,7 @@
                         </thead>
                         <tbody id="itemsBody">
                             @php
-                                $oldItems = old('items', [
-                                    ['service_name' => '', 'type' => 'other', 'quantity' => 1, 'price' => 0, 'source_type' => '', 'source_id' => '', 'source_name' => ''],
-                                ]);
+                                $oldItems = $defaultItems;
                             @endphp
 
                             @foreach ($oldItems as $i => $item)

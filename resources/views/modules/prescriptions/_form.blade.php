@@ -1,5 +1,6 @@
 @props([
     'prescription' => null,
+    'linkedAppointment' => null,
     'appointments' => collect(),
     'doctors' => collect(),
     'medicines' => collect(),
@@ -18,7 +19,7 @@
         $appointmentId = old('appointment_id', $prescription?->appointment_id);
         $doctorId = old('doctor_id', $prescription?->doctor_id);
         $description = old('description', $prescription?->description);
-        $medicines = old('medicines', $prescription?->medicines);
+        $legacyMedicinesNote = old('medicines', $prescription?->medicines);
         $status = old('status', $prescription?->status ?? 'pending');
         $existingItems = old('items');
 
@@ -41,6 +42,36 @@
         }
     @endphp
 
+    @if ($linkedAppointment)
+        <div style="margin-bottom:14px; padding:14px; border:1px solid rgba(37,99,235,0.18); border-radius:14px; background:rgba(37,99,235,0.05);">
+            <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Linked Appointment Context</div>
+            <div style="display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:12px;">
+                <div>
+                    <div style="font-size:12px; color:var(--text-muted);">Appointment</div>
+                    <div style="font-weight:700;">#{{ $linkedAppointment->id }} — {{ $linkedAppointment->date }} {{ substr((string) $linkedAppointment->time, 0, 5) }}</div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:var(--text-muted);">Patient</div>
+                    <div style="font-weight:700;">{{ optional($linkedAppointment->patient)->mrn ?? 'No MRN' }} — {{ optional($linkedAppointment->patient)->first_name }} {{ optional($linkedAppointment->patient)->last_name }}</div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:var(--text-muted);">Doctor</div>
+                    <div style="font-weight:700;">{{ optional($linkedAppointment->doctor)->name ?? 'Use selected doctor' }}</div>
+                </div>
+            </div>
+            <div style="margin-top:12px; display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                <div>
+                    <div style="font-size:12px; color:var(--text-muted);">Reason</div>
+                    <div style="font-weight:600;">{{ $linkedAppointment->reason ?: '-' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:var(--text-muted);">Notes</div>
+                    <div style="font-weight:600;">{{ $linkedAppointment->notes ?: '-' }}</div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
         <div style="grid-column:1 / -1;">
             <label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:6px;">Appointment</label>
@@ -55,6 +86,9 @@
                     </option>
                 @endforeach
             </select>
+            <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
+                The selected appointment automatically carries the patient and doctor context into the prescription.
+            </div>
         </div>
 
         @if (! auth()->user()->hasRole('doctor'))
@@ -69,6 +103,9 @@
                         </option>
                     @endforeach
                 </select>
+                <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
+                    Defaults to the appointment doctor when available.
+                </div>
             </div>
         @endif
 
@@ -117,7 +154,7 @@
         <div style="grid-column:1 / -1;">
             <label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:6px;">Legacy Medicines Note</label>
             <textarea name="medicines" rows="3" placeholder="Optional free-text medicine notes"
-                style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px; resize:vertical;">{{ $medicines }}</textarea>
+                style="width:100%; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; font-size:13px; resize:vertical;">{{ $legacyMedicinesNote }}</textarea>
         </div>
 
         <div style="grid-column:1 / -1;">

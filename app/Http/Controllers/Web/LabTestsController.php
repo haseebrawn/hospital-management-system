@@ -20,7 +20,7 @@ class LabTestsController extends Controller
         $status = trim((string) $request->query('status', ''));
 
         $tests = LabTest::query()
-            ->with(['patient', 'doctor', 'technician'])
+            ->with(['appointment.patient', 'patient', 'doctor', 'technician'])
             ->when($status !== '', fn ($q) => $q->where('status', $status))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
@@ -44,26 +44,31 @@ class LabTestsController extends Controller
     public function create(Request $request)
     {
         $labTest = null;
+        $linkedAppointment = null;
 
         if ($request->filled('appointment_id')) {
-            $appointment = Appointment::find($request->query('appointment_id'));
+            $appointment = Appointment::with(['patient', 'doctor'])->find($request->query('appointment_id'));
 
             if ($appointment) {
+                $linkedAppointment = $appointment;
                 $labTest = new LabTest([
+                    'appointment_id' => $appointment->id,
                     'patient_id' => $appointment->patient_id,
                     'doctor_id' => $appointment->doctor_id,
-                    'results' => $appointment->reason,
+                    'test_type' => trim((string) ($appointment->reason ?: 'Lab test request')),
+                    'results' => trim((string) ($appointment->notes ?: '')),
                     'status' => 'pending',
                 ]);
             }
         }
 
         $patients = Patient::query()->orderByDesc('id')->limit(200)->get();
+        $appointments = $this->appointmentOptions($request);
         $doctors = User::query()->role('doctor')->orderBy('name')->get();
         $technicians = User::query()->role('lab_technician')->orderBy('name')->get();
         $statusOptions = ['pending', 'in_process', 'completed'];
 
-        return view('modules.lab-tests.create', compact('labTest', 'patients', 'doctors', 'technicians', 'statusOptions'));
+        return view('modules.lab-tests.create', compact('labTest', 'linkedAppointment', 'appointments', 'patients', 'doctors', 'technicians', 'statusOptions'));
     }
 
     public function store(LabTestStoreRequest $request, HospitalNotificationService $notifications)
@@ -98,14 +103,16 @@ class LabTestsController extends Controller
 
     public function edit(LabTest $labTest)
     {
-        $labTest->load(['patient', 'doctor', 'technician']);
+        $labTest->load(['appointment.patient', 'appointment.doctor', 'patient', 'doctor', 'technician']);
+        $linkedAppointment = $labTest->appointment;
 
         $patients = Patient::query()->orderByDesc('id')->limit(200)->get();
+        $appointments = $this->appointmentOptions(request());
         $doctors = User::query()->role('doctor')->orderBy('name')->get();
         $technicians = User::query()->role('lab_technician')->orderBy('name')->get();
         $statusOptions = ['pending', 'in_process', 'completed'];
 
-        return view('modules.lab-tests.edit', compact('labTest', 'patients', 'doctors', 'technicians', 'statusOptions'));
+        return view('modules.lab-tests.edit', compact('labTest', 'linkedAppointment', 'appointments', 'patients', 'doctors', 'technicians', 'statusOptions'));
     }
 
     public function update(LabTestUpdateRequest $request, LabTest $labTest, HospitalNotificationService $notifications)
@@ -138,5 +145,21 @@ class LabTestsController extends Controller
         return redirect()
             ->route('lab-tests.index')
             ->with('status', 'Lab test deleted successfully.');
+    }
+
+    private function appointmentOptions(Request $request)
+    {
+        $user = $request->user();
+
+        return Appointment::query()
+            ->with(['patient', 'doctor'])
+            ->when($user->hasRole('doctor') && ! $user->hasAnyRole(['super_admin', 'admin']), fn ($query) => $query->where('doctor_id', $user->id))
+            ->when($user->hasRole('admin') && ! $user->hasRole('super_admin'), function ($query) use ($user) {
+                $query->whereHas('patient', fn ($patientQuery) => $patientQuery->where('department_id', $user->department_id));
+            })
+            ->orderByDesc('date')
+            ->orderByDesc('time')
+            ->limit(300)
+            ->get();
     }
 }

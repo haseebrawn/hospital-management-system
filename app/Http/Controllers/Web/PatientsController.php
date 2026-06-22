@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\PatientStoreRequest;
 use App\Http\Requests\Web\PatientUpdateRequest;
+use App\Models\Appointment;
 use App\Models\Department;
 use App\Models\Patient;
+use App\Models\Prescription;
 use App\Services\HospitalNotificationService;
 use Illuminate\Http\Request;
 
@@ -65,6 +67,36 @@ class PatientsController extends Controller
         return view('modules.patients.show', compact('patient'));
     }
 
+    public function history(Request $request, Patient $patient)
+    {
+        $this->authorizePatientAccess($request, $patient);
+
+        $patient->load('department');
+
+        $medicalRecords = $patient->medicalRecords()
+            ->with(['doctor', 'appointment'])
+            ->latest()
+            ->limit(25)
+            ->get();
+
+        $prescriptions = Prescription::query()
+            ->with(['doctor', 'appointment', 'items.medicine'])
+            ->where('patient_id', $patient->id)
+            ->latest()
+            ->limit(25)
+            ->get();
+
+        $appointments = Appointment::query()
+            ->with('doctor')
+            ->where('patient_id', $patient->id)
+            ->latest('date')
+            ->latest('time')
+            ->limit(25)
+            ->get();
+
+        return view('modules.patients.history', compact('patient', 'medicalRecords', 'prescriptions', 'appointments'));
+    }
+
     public function edit(Patient $patient)
     {
         $departments = Department::query()->orderBy('name')->get();
@@ -97,5 +129,21 @@ class PatientsController extends Controller
         return redirect()
             ->route('patients.index')
             ->with('status', 'Patient deleted successfully.');
+    }
+
+    private function authorizePatientAccess(Request $request, Patient $patient): void
+    {
+        $user = $request->user();
+
+        if ($user->hasRole('super_admin')) {
+            return;
+        }
+
+        if ($user->hasAnyRole(['doctor', 'nurse', 'receptionist'])) {
+            abort_unless((int) $patient->department_id === (int) $user->department_id, 403);
+            return;
+        }
+
+        abort(403);
     }
 }

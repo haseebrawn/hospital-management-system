@@ -102,6 +102,31 @@ class PrescriptionsWebTest extends TestCase
         ]);
     }
 
+    public function test_appointment_workflow_prefills_prescription_form_context(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $department = Department::factory()->create();
+        $doctor = User::factory()->create(['department_id' => $department->id, 'name' => 'Workflow Doctor']);
+        $doctor->assignRole('doctor');
+        $appointment = $this->appointmentForDoctor($doctor);
+        $appointment->load('patient');
+        $appointment->update([
+            'reason' => 'Severe headache',
+            'notes' => 'Needs medicine review',
+        ]);
+
+        $response = $this->get("/prescriptions/create?appointment_id={$appointment->id}");
+
+        $response->assertOk();
+        $response->assertSee('Linked Appointment Context');
+        $response->assertSee((string) $appointment->id);
+        $response->assertSee('Severe headache');
+        $response->assertSee('Needs medicine review');
+        $response->assertSee('Workflow Doctor');
+        $response->assertSee((string) $appointment->patient->id);
+    }
+
     public function test_prescription_show_loads(): void
     {
         $this->actingAsSuperAdmin();

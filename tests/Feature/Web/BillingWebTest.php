@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Web;
 
+use App\Models\Appointment;
 use App\Models\Billing;
 use App\Models\BillingItem;
 use App\Models\BillingPayment;
@@ -91,6 +92,37 @@ class BillingWebTest extends TestCase
             'source_id' => 7,
             'source_name' => 'CBC Panel',
         ]);
+    }
+
+    public function test_billing_create_prefills_linked_appointment_context(): void
+    {
+        $this->actingAsAccountant();
+
+        Role::firstOrCreate(['name' => 'doctor', 'guard_name' => 'api']);
+
+        $department = Department::factory()->create();
+        $doctor = User::factory()->create(['department_id' => $department->id, 'name' => 'Billing Doctor']);
+        $doctor->assignRole('doctor');
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+        $appointment = Appointment::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $department->id,
+            'reason' => 'Follow-up consultation',
+            'notes' => 'Charge consultation and review',
+            'status' => 'completed',
+        ]);
+
+        $response = $this->get("/billing/create?appointment_id={$appointment->id}");
+
+        $response->assertOk();
+        $response->assertSee('Linked Appointment');
+        $response->assertSee('Follow-up consultation');
+        $response->assertSee('Charge consultation and review');
+        $response->assertSee((string) $appointment->id);
+        $response->assertSee('appointment');
+        $response->assertSee('Billing Doctor');
+        $response->assertSee((string) $patient->id);
     }
 
     public function test_invoice_can_receive_partial_payment_from_web(): void

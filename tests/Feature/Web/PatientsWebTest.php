@@ -3,7 +3,11 @@
 namespace Tests\Feature\Web;
 
 use App\Models\Department;
+use App\Models\Appointment;
+use App\Models\MedicalRecord;
+use App\Models\Prescription;
 use App\Models\Patient;
+use App\Models\Medicine;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
@@ -71,6 +75,53 @@ class PatientsWebTest extends TestCase
         $response->assertOk();
         $response->assertSee($patient->first_name);
         $response->assertSee($patient->mrn);
+    }
+
+    public function test_patient_history_page_loads(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        Role::firstOrCreate(['name' => 'doctor', 'guard_name' => 'api']);
+        $department = Department::factory()->create();
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+        $doctor = User::factory()->create(['department_id' => $department->id]);
+        $doctor->assignRole('doctor');
+        $appointment = Appointment::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $department->id,
+            'status' => 'completed',
+        ]);
+
+        MedicalRecord::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'appointment_id' => $appointment->id,
+            'chief_complaint' => 'Fever',
+            'diagnosis' => 'Viral fever',
+        ]);
+
+        $prescription = Prescription::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'appointment_id' => $appointment->id,
+            'status' => 'pending',
+            'description' => 'Rest and fluids',
+        ]);
+
+        $medicine = Medicine::factory()->create(['name' => 'Paracetamol']);
+        $prescription->items()->create([
+            'medicine_id' => $medicine->id,
+            'medicine_name' => $medicine->name,
+            'quantity' => 5,
+        ]);
+
+        $response = $this->get("/patients/{$patient->id}/history");
+
+        $response->assertOk();
+        $response->assertSee('Medical History');
+        $response->assertSee('Viral fever');
+        $response->assertSee('Rest and fluids');
     }
 
     public function test_patient_can_be_created_with_custom_unique_mrn(): void

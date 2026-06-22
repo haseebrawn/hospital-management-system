@@ -28,6 +28,7 @@ class LabTestStoreRequest extends FormRequest
     {
         return [
             'patient_id' => ['required', 'integer', 'exists:patients,id'],
+            'appointment_id' => ['nullable', 'integer', 'exists:appointments,id'],
             'doctor_id' => ['nullable', 'integer', 'exists:users,id'],
             'lab_technician_id' => ['required', 'integer', 'exists:users,id'],
             'test_type' => ['required', 'string', 'max:255'],
@@ -36,4 +37,3 @@ class LabTestStoreRequest extends FormRequest
         ];
     }
 }
-

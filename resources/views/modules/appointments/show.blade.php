@@ -13,6 +13,12 @@
                 </div>
             </div>
             <div style="display:flex; gap: 10px; flex-wrap:wrap;">
+                @if ($appointment->patient)
+                    <a href="{{ route('patients.history', $appointment->patient) }}"
+                        style="padding:8px 12px; border-radius:10px; border:1px solid rgba(37,99,235,0.30); background:rgba(37,99,235,0.08); color:#2563eb; text-decoration:none; font-size:13px; font-weight:700;">
+                        Patient History
+                    </a>
+                @endif
                 @if ($appointment->canCheckIn())
                     <form method="POST" action="{{ route('appointments.check-in', $appointment) }}">
                         @csrf
@@ -65,6 +71,29 @@
         </div>
 
         <div style="margin-top: 14px; display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px; grid-column:1 / -1; background:rgba(37,99,235,0.04);">
+                <div style="font-size:12px; color: var(--text-muted);">Care Workflow</div>
+                <div style="font-weight:700; margin-top:6px;">Use patient history first, then continue with the medical record and prescription for a complete visit flow.</div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+                    @if ($appointment->patient)
+                        <a href="{{ route('patients.history', $appointment->patient) }}"
+                            style="padding:8px 12px; border-radius:10px; border:1px solid rgba(37,99,235,0.30); background:#fff; text-decoration:none; color:#2563eb; font-size:13px; font-weight:700;">
+                            Open Patient History
+                        </a>
+                    @endif
+                    @if (auth()->user()->hasAnyRole(['super_admin', 'admin', 'doctor']))
+                        <a href="{{ route('medical-records.create', ['appointment_id' => $appointment->id]) }}"
+                            style="padding:8px 12px; border-radius:10px; border:1px solid rgba(37,99,235,0.30); background:#fff; text-decoration:none; color:#2563eb; font-size:13px; font-weight:700;">
+                            Start Medical Record
+                        </a>
+                        <a href="{{ route('prescriptions.create', ['appointment_id' => $appointment->id]) }}"
+                            style="padding:8px 12px; border-radius:10px; border:1px solid rgba(124,58,237,0.30); background:#fff; text-decoration:none; color:#7c3aed; font-size:13px; font-weight:700;">
+                            Start Prescription
+                        </a>
+                    @endif
+                </div>
+            </div>
+
             <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
                 <div style="font-size:12px; color: var(--text-muted);">Patient</div>
                 <div style="font-weight:600; margin-top:4px;">

@@ -1,5 +1,6 @@
 @props([
     'medicalRecord' => null,
+    'linkedAppointment' => null,
     'patients' => collect(),
     'doctors' => collect(),
     'appointments' => collect(),
@@ -21,6 +22,36 @@
         $visitType = old('visit_type', $medicalRecord?->visit_type ?? 'consultation');
     @endphp
 
+    @if ($linkedAppointment)
+        <div style="margin-bottom:14px; padding:14px; border:1px solid rgba(37,99,235,0.18); border-radius:14px; background:rgba(37,99,235,0.05);">
+            <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Linked Appointment Context</div>
+            <div style="display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:12px;">
+                <div>
+                    <div style="font-size:12px; color:var(--text-muted);">Appointment</div>
+                    <div style="font-weight:700;">#{{ $linkedAppointment->id }} — {{ $linkedAppointment->date }} {{ substr((string) $linkedAppointment->time, 0, 5) }}</div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:var(--text-muted);">Patient</div>
+                    <div style="font-weight:700;">{{ optional($linkedAppointment->patient)->mrn ?? 'No MRN' }} — {{ optional($linkedAppointment->patient)->first_name }} {{ optional($linkedAppointment->patient)->last_name }}</div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:var(--text-muted);">Doctor</div>
+                    <div style="font-weight:700;">{{ optional($linkedAppointment->doctor)->name ?? 'No linked doctor' }}</div>
+                </div>
+            </div>
+            <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div>
+                    <div style="font-size:12px; color:var(--text-muted);">Reason</div>
+                    <div style="font-weight:600;">{{ $linkedAppointment->reason ?: '-' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:var(--text-muted);">Notes</div>
+                    <div style="font-weight:600;">{{ $linkedAppointment->notes ?: '-' }}</div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
         <div>
             <label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:6px;">Patient</label>
@@ -33,6 +64,9 @@
                     </option>
                 @endforeach
             </select>
+            <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
+                Pick the appointment to keep the record linked to the visit.
+            </div>
         </div>
 
         <div>
@@ -48,6 +82,9 @@
                     </option>
                 @endforeach
             </select>
+            <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
+                The selected appointment should match the chosen patient.
+            </div>
         </div>
 
         @if (! auth()->user()->hasRole('doctor'))
@@ -75,6 +112,9 @@
                     </option>
                 @endforeach
             </select>
+            <div style="margin-top:6px; font-size:12px; color:var(--text-muted);">
+                Uses the appointment doctor when available.
+            </div>
         </div>
 
         <div style="grid-column:1 / -1;">

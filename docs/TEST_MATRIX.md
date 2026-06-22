@@ -14,14 +14,24 @@ Run all feature tests:
 ## Phase 2 — Patients + Appointments
 
 - Patients web UI: `tests/Feature/Web/PatientsWebTest.php`
+  - patient history page
 - Appointments web UI: `tests/Feature/Web/AppointmentsWebTest.php`
+  - patient history shortcut
+  - care workflow panel
+- Medical records web UI: `tests/Feature/Web/MedicalRecordsWebTest.php`
+  - appointment workflow prefill
+  - linked appointment context
 
 ## Phase 3 — Lab + Pharmacy + Billing
 
 - Lab tests web UI: `tests/Feature/Web/LabTestsWebTest.php`
+  - appointment workflow prefill
 - Medicines web UI: `tests/Feature/Web/MedicinesWebTest.php`
+- Prescriptions web UI: `tests/Feature/Web/PrescriptionsWebTest.php`
+  - appointment workflow prefill
 - Billing web UI: `tests/Feature/Web/BillingWebTest.php`
   - invoice creation
+  - appointment workflow prefill
   - partial payment recording
   - full payment quick action
   - printable receipt page

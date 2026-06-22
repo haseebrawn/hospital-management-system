@@ -5,10 +5,12 @@
 @section('content')
     <div class="card">
         <div class="card-title">Edit Lab Test</div>
-        <div class="card-subtitle">Update test details and results.</div>
+        <div class="card-subtitle">Update test details, results, and the linked appointment, patient, and doctor context.</div>
 
         @include('modules.lab-tests._form', [
             'labTest' => $labTest,
+            'linkedAppointment' => $linkedAppointment,
+            'appointments' => $appointments,
             'patients' => $patients,
             'doctors' => $doctors,
             'technicians' => $technicians,
@@ -18,4 +20,3 @@
         ])
     </div>
 @endsection
-

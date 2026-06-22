@@ -109,6 +109,26 @@ class MedicalRecordsWebTest extends TestCase
         $formResponse->assertSee((string) $doctor->id);
     }
 
+    public function test_medical_record_form_shows_linked_appointment_context(): void
+    {
+        $this->actingAsSuperAdmin();
+        [$doctor, $patient, $appointment] = $this->doctorWithAppointment();
+        $appointment->update([
+            'reason' => 'Follow-up visit',
+            'notes' => 'Review labs and blood pressure',
+        ]);
+
+        $response = $this->get("/medical-records/create?appointment_id={$appointment->id}");
+
+        $response->assertOk();
+        $response->assertSee('Linked Appointment Context');
+        $response->assertSee('Follow-up visit');
+        $response->assertSee('Review labs and blood pressure');
+        $response->assertSee((string) $appointment->id);
+        $response->assertSee((string) $patient->id);
+        $response->assertSee((string) $doctor->id);
+    }
+
     public function test_medical_record_show_loads(): void
     {
         $this->actingAsSuperAdmin();

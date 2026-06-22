@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\BillingPaymentRequest;
 use App\Http\Requests\Web\BillingStoreRequest;
+use App\Models\Appointment;
 use App\Models\Billing;
 use App\Models\BillingItem;
 use App\Models\BillingPayment;
@@ -40,14 +41,48 @@ class BillingController extends Controller
         return view('modules.billing.index', compact('billings', 'search', 'status', 'statusOptions'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $patients = Patient::query()->orderByDesc('id')->limit(200)->get();
         $typeOptions = ['lab', 'medicine', 'appointment', 'other'];
         $sourceTypeOptions = ['appointment', 'lab_test', 'medicine', 'medical_record', 'other'];
         $paymentMethods = ['cash', 'card', 'bank_transfer', 'online', 'insurance'];
+        $linkedSource = null;
+        $prefilledPatientId = old('patient_id');
+        $defaultItems = old('items', [
+            ['service_name' => '', 'type' => 'other', 'quantity' => 1, 'price' => 0, 'source_type' => '', 'source_id' => '', 'source_name' => ''],
+        ]);
 
-        return view('modules.billing.create', compact('patients', 'typeOptions', 'sourceTypeOptions', 'paymentMethods'));
+        if ($request->filled('appointment_id')) {
+            $appointment = Appointment::with(['patient', 'doctor'])->find($request->query('appointment_id'));
+
+            if ($appointment) {
+                $linkedSource = [
+                    'title' => 'Linked Appointment',
+                    'type' => 'appointment',
+                    'id' => $appointment->id,
+                    'patient_name' => trim((string) (($appointment->patient->first_name ?? '') . ' ' . ($appointment->patient->last_name ?? ''))),
+                    'doctor_name' => optional($appointment->doctor)->name ?? '-',
+                    'reason' => $appointment->reason ?: '-',
+                    'notes' => $appointment->notes ?: '-',
+                ];
+
+                $prefilledPatientId = $appointment->patient_id;
+                $defaultItems = [
+                    [
+                        'service_name' => trim((string) ($appointment->reason ?: 'Appointment consultation')),
+                        'type' => 'appointment',
+                        'quantity' => 1,
+                        'price' => 0,
+                        'source_type' => 'appointment',
+                        'source_id' => $appointment->id,
+                        'source_name' => trim((string) ($appointment->reason ?: ('Appointment #' . $appointment->id))),
+                    ],
+                ];
+            }
+        }
+
+        return view('modules.billing.create', compact('patients', 'typeOptions', 'sourceTypeOptions', 'paymentMethods', 'linkedSource', 'prefilledPatientId', 'defaultItems'));
     }
 
     public function store(BillingStoreRequest $request, HospitalNotificationService $notifications)

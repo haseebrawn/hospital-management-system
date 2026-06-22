@@ -55,11 +55,13 @@ class PrescriptionsController extends Controller
     public function create(Request $request)
     {
         $prescription = null;
+        $linkedAppointment = null;
 
         if ($request->filled('appointment_id')) {
-            $appointment = Appointment::find($request->query('appointment_id'));
+            $appointment = Appointment::with(['patient', 'doctor'])->find($request->query('appointment_id'));
 
             if ($appointment) {
+                $linkedAppointment = $appointment;
                 $prescription = new Prescription([
                     'appointment_id' => $appointment->id,
                     'doctor_id' => $appointment->doctor_id,
@@ -74,7 +76,7 @@ class PrescriptionsController extends Controller
         $medicines = $this->medicineOptions();
         $statusOptions = $this->statusOptions;
 
-        return view('modules.prescriptions.create', compact('prescription', 'appointments', 'doctors', 'medicines', 'statusOptions'));
+        return view('modules.prescriptions.create', compact('prescription', 'linkedAppointment', 'appointments', 'doctors', 'medicines', 'statusOptions'));
     }
 
     public function store(PrescriptionStoreRequest $request, HospitalNotificationService $notifications)
@@ -112,9 +114,10 @@ class PrescriptionsController extends Controller
         $medicines = $this->medicineOptions();
         $statusOptions = $this->statusOptions;
 
-        $prescription->load('items');
+        $prescription->load(['items', 'appointment.patient', 'appointment.doctor']);
+        $linkedAppointment = $prescription->appointment;
 
-        return view('modules.prescriptions.edit', compact('prescription', 'appointments', 'doctors', 'medicines', 'statusOptions'));
+        return view('modules.prescriptions.edit', compact('prescription', 'linkedAppointment', 'appointments', 'doctors', 'medicines', 'statusOptions'));
     }
 
     public function update(PrescriptionUpdateRequest $request, Prescription $prescription, HospitalNotificationService $notifications)

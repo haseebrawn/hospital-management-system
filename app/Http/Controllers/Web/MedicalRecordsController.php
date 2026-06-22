@@ -53,11 +53,13 @@ class MedicalRecordsController extends Controller
     public function create(Request $request)
     {
         $medicalRecord = null;
+        $linkedAppointment = null;
 
         if ($request->filled('appointment_id')) {
-            $appointment = Appointment::find($request->query('appointment_id'));
+            $appointment = Appointment::with(['patient', 'doctor'])->find($request->query('appointment_id'));
 
             if ($appointment) {
+                $linkedAppointment = $appointment;
                 $medicalRecord = new MedicalRecord([
                     'appointment_id' => $appointment->id,
                     'patient_id' => $appointment->patient_id,
@@ -73,7 +75,7 @@ class MedicalRecordsController extends Controller
         $appointments = $this->appointmentOptions($request);
         $visitTypes = $this->visitTypes;
 
-        return view('modules.medical-records.create', compact('medicalRecord', 'patients', 'doctors', 'appointments', 'visitTypes'));
+        return view('modules.medical-records.create', compact('medicalRecord', 'linkedAppointment', 'patients', 'doctors', 'appointments', 'visitTypes'));
     }
 
     public function store(MedicalRecordStoreRequest $request, HospitalNotificationService $notifications)
@@ -105,8 +107,10 @@ class MedicalRecordsController extends Controller
         $doctors = $this->doctorOptions($request);
         $appointments = $this->appointmentOptions($request);
         $visitTypes = $this->visitTypes;
+        $medicalRecord->loadMissing('appointment.patient', 'appointment.doctor');
+        $linkedAppointment = $medicalRecord->appointment;
 
-        return view('modules.medical-records.edit', compact('medicalRecord', 'patients', 'doctors', 'appointments', 'visitTypes'));
+        return view('modules.medical-records.edit', compact('medicalRecord', 'linkedAppointment', 'patients', 'doctors', 'appointments', 'visitTypes'));
     }
 
     public function update(MedicalRecordUpdateRequest $request, MedicalRecord $medicalRecord, HospitalNotificationService $notifications)

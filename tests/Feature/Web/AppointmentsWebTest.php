@@ -259,6 +259,26 @@ class AppointmentsWebTest extends TestCase
         $response->assertSee('Bring previous lab report.');
     }
 
+    public function test_appointment_show_links_to_patient_history_and_care_workflow(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $patient = Patient::factory()->create();
+        $appointment = Appointment::factory()->create([
+            'department_id' => Department::factory()->create()->id,
+            'patient_id' => $patient->id,
+            'status' => 'completed',
+        ]);
+
+        $response = $this->get("/appointments/{$appointment->id}");
+
+        $response->assertOk();
+        $response->assertSee('Patient History');
+        $response->assertSee('Open Patient History');
+        $response->assertSee('Start Medical Record');
+        $response->assertSee('Start Prescription');
+    }
+
     public function test_appointments_can_be_searched_by_reason(): void
     {
         $this->actingAsSuperAdmin();

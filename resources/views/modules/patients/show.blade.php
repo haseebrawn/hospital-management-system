@@ -12,6 +12,10 @@
                 <div class="card-subtitle">Patient profile</div>
             </div>
             <div style="display:flex; gap: 10px; flex-wrap:wrap;">
+                <a href="{{ route('patients.history', $patient) }}"
+                    style="padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); background:#fff; text-decoration:none; color:inherit; font-size:13px;">
+                    Medical History
+                </a>
                 <a href="{{ route('patients.edit', $patient) }}"
                     style="padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); background:#fff; text-decoration:none; color:inherit; font-size:13px;">
                     Edit
