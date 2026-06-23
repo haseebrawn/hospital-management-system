@@ -66,6 +66,47 @@
             </div>
         </div>
 
+        <div style="margin-top:16px; padding:12px; border:1px solid var(--border-color); border-radius:14px;">
+            <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                <div style="font-weight:700;">Payment Progress</div>
+                <div style="font-size:12px; color:var(--text-muted);">{{ $paymentSummary['payment_count'] }} payment(s) recorded</div>
+            </div>
+            <div style="margin-top:10px; height:10px; border-radius:999px; background:#e5e7eb; overflow:hidden;">
+                <div style="width: {{ $paymentSummary['progress'] }}%; height:100%; background: linear-gradient(90deg, var(--primary), #10b981);"></div>
+            </div>
+            <div style="margin-top:10px; display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:12px;">
+                <div>
+                    <div style="font-size:12px; color:var(--text-muted);">Paid</div>
+                    <div style="font-weight:700;">{{ number_format($paymentSummary['paid_amount'], 2) }}</div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:var(--text-muted);">Due</div>
+                    <div style="font-weight:700;">{{ number_format($paymentSummary['balance_due'], 2) }}</div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:var(--text-muted);">Latest Payment</div>
+                    <div style="font-weight:700;">{{ $paymentSummary['latest_payment']['method'] ?? '-' }}</div>
+                </div>
+            </div>
+            @if (! empty($paymentSummary['latest_payment']))
+                <div style="margin-top:12px; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; background:rgba(37,99,235,0.04);">
+                    <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                        <div style="font-weight:700;">Latest payment: {{ number_format($paymentSummary['latest_payment']['amount'], 2) }}</div>
+                        <div style="font-size:12px; color:var(--text-muted);">{{ $paymentSummary['latest_payment']['received_at'] }}</div>
+                    </div>
+                    <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+                        Received by {{ $paymentSummary['latest_payment']['received_by'] }}
+                        @if ($paymentSummary['latest_payment']['reference'])
+                            · Ref: {{ $paymentSummary['latest_payment']['reference'] }}
+                        @endif
+                    </div>
+                    @if ($paymentSummary['latest_payment']['notes'])
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">{{ $paymentSummary['latest_payment']['notes'] }}</div>
+                    @endif
+                </div>
+            @endif
+        </div>
+
         <div style="margin-top: 16px; overflow:auto;">
             <table class="dash-table" style="min-width: 1200px;">
                 <thead>
@@ -100,6 +141,23 @@
             </table>
         </div>
 
+        @if (! empty($sourceChain))
+            <div style="margin-top:16px; padding:12px; border:1px solid var(--border-color); border-radius:14px;">
+                <div style="font-weight:700; margin-bottom:8px;">Source Chain</div>
+                <div style="display:grid; gap:10px;">
+                    @foreach ($sourceChain as $source)
+                        <div style="padding:10px 12px; border:1px solid var(--border-color); border-radius:12px;">
+                            <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                                <div style="font-weight:700;">{{ $source['label'] }} {{ $source['reference'] }}</div>
+                                <div style="font-size:12px; color:var(--text-muted);">{{ $source['service'] }}</div>
+                            </div>
+                            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">{{ $source['name'] }}</div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         <div style="margin-top: 16px; display:grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items:start;">
             <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
                 <div style="font-weight:700; margin-bottom:8px;">Payments</div>
@@ -129,6 +187,9 @@
             <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
                 <div style="font-weight:700; margin-bottom:8px;">Record Payment</div>
                 @if ($billing->status !== 'cancelled' && $billing->balance_due > 0)
+                    <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">
+                        Recording a partial payment will update the paid amount, balance, and invoice status automatically.
+                    </div>
                     <form method="POST" action="{{ route('billing.payments.store', $billing) }}">
                         @csrf
                         <div style="display:grid; gap:10px;">

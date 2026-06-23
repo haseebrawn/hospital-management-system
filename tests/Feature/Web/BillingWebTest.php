@@ -125,6 +125,45 @@ class BillingWebTest extends TestCase
         $response->assertSee((string) $patient->id);
     }
 
+    public function test_invoice_show_displays_source_chain(): void
+    {
+        $this->actingAsAccountant();
+
+        Role::firstOrCreate(['name' => 'doctor', 'guard_name' => 'api']);
+
+        $department = Department::factory()->create();
+        $doctor = User::factory()->create(['department_id' => $department->id]);
+        $doctor->assignRole('doctor');
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+        $billing = Billing::factory()->create([
+            'patient_id' => $patient->id,
+            'created_by' => auth()->id(),
+            'total_amount' => 0,
+            'status' => 'pending',
+            'paid_amount' => 0,
+            'balance_due' => 0,
+        ]);
+
+        BillingItem::factory()->create([
+            'billing_id' => $billing->id,
+            'service_name' => 'Consultation',
+            'quantity' => 1,
+            'price' => 0,
+            'type' => 'appointment',
+            'source_type' => 'appointment',
+            'source_id' => 99,
+            'source_name' => 'Follow-up consultation',
+        ]);
+
+        $response = $this->get("/billing/{$billing->id}");
+
+        $response->assertOk();
+        $response->assertSee('Source Chain');
+        $response->assertSee('Appointment #99');
+        $response->assertSee('Follow-up consultation');
+        $response->assertSee('Consultation');
+    }
+
     public function test_invoice_can_receive_partial_payment_from_web(): void
     {
         $user = $this->actingAsAccountant();
@@ -171,6 +210,50 @@ class BillingWebTest extends TestCase
             'payment_method' => 'cash',
             'reference' => 'RCPT-1001',
         ]);
+    }
+
+    public function test_invoice_show_displays_payment_summary_for_partial_payments(): void
+    {
+        $user = $this->actingAsAccountant();
+
+        $department = Department::factory()->create();
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+
+        $billing = Billing::factory()->create([
+            'patient_id' => $patient->id,
+            'created_by' => $user->id,
+            'total_amount' => 100,
+            'status' => 'partial',
+            'paid_amount' => 40,
+            'balance_due' => 60,
+        ]);
+
+        BillingItem::factory()->create([
+            'billing_id' => $billing->id,
+            'service_name' => 'Consultation',
+            'quantity' => 1,
+            'price' => 100,
+            'type' => 'appointment',
+        ]);
+
+        BillingPayment::factory()->create([
+            'billing_id' => $billing->id,
+            'received_by' => $user->id,
+            'amount' => 40,
+            'payment_method' => 'cash',
+            'reference' => 'PART-001',
+            'notes' => 'Partial payment',
+        ]);
+
+        $response = $this->get("/billing/{$billing->id}");
+
+        $response->assertOk();
+        $response->assertSee('Payment Progress');
+        $response->assertSee('40.00');
+        $response->assertSee('60.00');
+        $response->assertSee('Latest payment');
+        $response->assertSee('PART-001');
+        $response->assertSee('Partial payment');
     }
 
     public function test_invoice_can_be_marked_paid_from_web(): void
@@ -252,6 +335,88 @@ class BillingWebTest extends TestCase
         $response->assertOk();
         $response->assertSee($billing->invoice_number);
         $response->assertSee('Receipt');
+    }
+
+    public function test_invoice_receipt_displays_source_chain(): void
+    {
+        $this->actingAsAccountant();
+
+        $department = Department::factory()->create();
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+
+        $billing = Billing::factory()->create([
+            'patient_id' => $patient->id,
+            'total_amount' => 0,
+            'status' => 'pending',
+            'paid_amount' => 0,
+            'balance_due' => 0,
+        ]);
+
+        BillingItem::factory()->create([
+            'billing_id' => $billing->id,
+            'service_name' => 'Lab CBC',
+            'quantity' => 1,
+            'price' => 0,
+            'type' => 'lab',
+            'source_type' => 'lab_test',
+            'source_id' => 55,
+            'source_name' => 'CBC Panel',
+        ]);
+
+        $response = $this->get("/billing/{$billing->id}/receipt");
+
+        $response->assertOk();
+        $response->assertSee('Source Chain');
+        $response->assertSee('Lab Test #55');
+        $response->assertSee('CBC Panel');
+        $response->assertSee('Lab CBC');
+    }
+
+    public function test_invoice_receipt_displays_payment_snapshot(): void
+    {
+        $user = $this->actingAsAccountant();
+
+        $department = Department::factory()->create();
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+
+        $billing = Billing::factory()->create([
+            'patient_id' => $patient->id,
+            'created_by' => $user->id,
+            'total_amount' => 100,
+            'status' => 'partial',
+            'paid_amount' => 25,
+            'balance_due' => 75,
+        ]);
+
+        BillingItem::factory()->create([
+            'billing_id' => $billing->id,
+            'service_name' => 'X-Ray',
+            'quantity' => 1,
+            'price' => 100,
+            'type' => 'lab',
+            'source_type' => 'lab_test',
+            'source_id' => 42,
+            'source_name' => 'Chest X-Ray',
+        ]);
+
+        BillingPayment::factory()->create([
+            'billing_id' => $billing->id,
+            'received_by' => $user->id,
+            'amount' => 25,
+            'payment_method' => 'card',
+            'reference' => 'CARD-009',
+            'notes' => 'First installment',
+        ]);
+
+        $response = $this->get("/billing/{$billing->id}/receipt");
+
+        $response->assertOk();
+        $response->assertSee('Payment Snapshot');
+        $response->assertSee('25.00');
+        $response->assertSee('75.00');
+        $response->assertSee('CARD-009');
+        $response->assertSee('First installment');
+        $response->assertSee('Card');
     }
 
     public function test_invoice_can_be_cancelled_from_web(): void

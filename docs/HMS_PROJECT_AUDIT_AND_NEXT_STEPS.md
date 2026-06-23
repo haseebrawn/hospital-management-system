@@ -1148,11 +1148,14 @@ Phase C step 4 status:
 - Doctors/admins can start a prescription from an appointment.
 - Doctors/admins/lab users can start a lab request from an appointment.
 - Appointment details now include a patient history shortcut plus a compact care workflow panel.
+- Appointment details now show a check-in → record → prescription → lab → billing timeline.
 - Medical record, prescription, and lab test create forms prefill patient/doctor/appointment context.
 - Medical record forms now show linked appointment, patient, doctor, reason, and notes context more clearly.
 - Prescription forms now show linked appointment, patient, doctor, reason, and notes context more clearly.
 - Lab test forms now show linked appointment, patient, doctor, reason, and notes context more clearly.
 - Billing forms now show linked appointment context and prefill the first invoice line when available.
+- Billing detail and receipt pages now show a source chain for invoice items.
+- Billing detail and receipt pages now show payment progress and latest payment snapshot.
 - Medical record details now provide next-step actions for prescription and lab request.
 - Patient medical history page now shows appointments, medical records, and prescriptions in one view.
 

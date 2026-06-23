@@ -3,9 +3,14 @@
 namespace Tests\Feature\Web;
 
 use App\Models\Appointment;
+use App\Models\Billing;
+use App\Models\BillingItem;
 use App\Models\Department;
 use App\Models\DoctorAvailability;
+use App\Models\LabTest;
+use App\Models\MedicalRecord;
 use App\Models\Patient;
+use App\Models\Prescription;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -277,6 +282,74 @@ class AppointmentsWebTest extends TestCase
         $response->assertSee('Open Patient History');
         $response->assertSee('Start Medical Record');
         $response->assertSee('Start Prescription');
+    }
+
+    public function test_appointment_show_displays_workflow_timeline(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $department = Department::factory()->create();
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+        $appointment = Appointment::factory()->create([
+            'department_id' => $department->id,
+            'patient_id' => $patient->id,
+            'status' => 'approved',
+        ]);
+
+        $appointment->forceFill(['checked_in_at' => now()])->save();
+
+        MedicalRecord::factory()->create([
+            'patient_id' => $patient->id,
+            'appointment_id' => $appointment->id,
+            'doctor_id' => User::factory()->create(['department_id' => $department->id])->id,
+            'diagnosis' => 'Timeline diagnosis',
+        ]);
+
+        Prescription::factory()->create([
+            'patient_id' => $patient->id,
+            'appointment_id' => $appointment->id,
+            'doctor_id' => User::factory()->create(['department_id' => $department->id])->id,
+            'description' => 'Timeline prescription',
+        ]);
+
+        LabTest::factory()->create([
+            'patient_id' => $patient->id,
+            'appointment_id' => $appointment->id,
+            'doctor_id' => null,
+            'lab_technician_id' => User::factory()->create(['department_id' => $department->id])->id,
+            'test_type' => 'Timeline CBC',
+            'status' => 'pending',
+        ]);
+
+        $billing = Billing::factory()->create([
+            'patient_id' => $patient->id,
+            'status' => 'pending',
+            'total_amount' => 0,
+            'paid_amount' => 0,
+            'balance_due' => 0,
+        ]);
+
+        BillingItem::factory()->create([
+            'billing_id' => $billing->id,
+            'service_name' => 'Appointment consultation',
+            'quantity' => 1,
+            'price' => 0,
+            'type' => 'appointment',
+            'source_type' => 'appointment',
+            'source_id' => $appointment->id,
+            'source_name' => 'Timeline visit',
+        ]);
+
+        $response = $this->get("/appointments/{$appointment->id}");
+
+        $response->assertOk();
+        $response->assertSee('Workflow Timeline');
+        $response->assertSee('Check In');
+        $response->assertSee('Medical Record');
+        $response->assertSee('Prescription');
+        $response->assertSee('Lab Test');
+        $response->assertSee('Billing');
+        $response->assertSee('Done');
     }
 
     public function test_appointments_can_be_searched_by_reason(): void

@@ -94,6 +94,31 @@
                 </div>
             </div>
 
+            <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px; grid-column:1 / -1;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                    <div style="font-size:12px; color:var(--text-muted);">Workflow Timeline</div>
+                    <div style="font-size:12px; color:var(--text-muted);">Check-in → Record → Prescription → Lab → Billing</div>
+                </div>
+                <div style="margin-top:12px; display:grid; gap:10px;">
+                    @foreach ($workflowTimeline as $step)
+                        <div style="display:grid; grid-template-columns: 24px 1fr; gap:12px; align-items:start;">
+                            <div style="width:24px; height:24px; border-radius:999px; display:grid; place-items:center; font-size:12px; font-weight:800; color:{{ $step['done'] ? '#059669' : '#94a3b8' }}; background:{{ $step['done'] ? 'rgba(5,150,105,0.12)' : 'rgba(148,163,184,0.12)' }};">
+                                {{ $step['done'] ? '✓' : '•' }}
+                            </div>
+                            <div style="padding:10px 12px; border:1px solid {{ $step['done'] ? 'rgba(5,150,105,0.25)' : 'var(--border-color)' }}; border-radius:12px; background:{{ $step['done'] ? 'rgba(5,150,105,0.04)' : '#fff' }};">
+                                <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                                    <div style="font-weight:700;">{{ $step['label'] }}</div>
+                                    <div style="font-size:12px; color:{{ $step['done'] ? '#059669' : 'var(--text-muted)' }}; text-transform:uppercase;">
+                                        {{ $step['done'] ? 'Done' : 'Pending' }}
+                                    </div>
+                                </div>
+                                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">{{ $step['subtitle'] }}</div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
             <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
                 <div style="font-size:12px; color: var(--text-muted);">Patient</div>
                 <div style="font-weight:600; margin-top:4px;">

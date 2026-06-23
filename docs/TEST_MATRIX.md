@@ -18,6 +18,7 @@ Run all feature tests:
 - Appointments web UI: `tests/Feature/Web/AppointmentsWebTest.php`
   - patient history shortcut
   - care workflow panel
+  - workflow timeline
 - Medical records web UI: `tests/Feature/Web/MedicalRecordsWebTest.php`
   - appointment workflow prefill
   - linked appointment context
@@ -33,8 +34,10 @@ Run all feature tests:
   - invoice creation
   - appointment workflow prefill
   - partial payment recording
+  - payment summary display
   - full payment quick action
   - printable receipt page
+  - source chain display
 
 ## Phase 4 — HR + Shifts + Wards/Beds
 

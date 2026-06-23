@@ -157,8 +157,10 @@ class BillingController extends Controller
     public function show(Billing $billing)
     {
         $billing->load(['patient', 'items', 'creator', 'approver', 'payments.receiver']);
+        $sourceChain = $this->buildSourceChain($billing);
+        $paymentSummary = $this->buildPaymentSummary($billing);
 
-        return view('modules.billing.show', compact('billing'));
+        return view('modules.billing.show', compact('billing', 'sourceChain', 'paymentSummary'));
     }
 
     public function pay(Billing $billing, HospitalNotificationService $notifications)
@@ -235,8 +237,10 @@ class BillingController extends Controller
     public function receipt(Billing $billing)
     {
         $billing->load(['patient', 'items', 'payments.receiver', 'creator', 'approver']);
+        $sourceChain = $this->buildSourceChain($billing);
+        $paymentSummary = $this->buildPaymentSummary($billing);
 
-        return view('modules.billing.receipt', compact('billing'));
+        return view('modules.billing.receipt', compact('billing', 'sourceChain', 'paymentSummary'));
     }
 
     public function cancel(Billing $billing, HospitalNotificationService $notifications)
@@ -309,5 +313,49 @@ class BillingController extends Controller
                 'approved_by' => $status === 'paid' ? $receivedBy : $billing->approved_by,
             ]);
         });
+    }
+
+    private function buildSourceChain(Billing $billing): array
+    {
+        return $billing->items
+            ->filter(fn (BillingItem $item) => filled($item->source_type) || filled($item->source_id) || filled($item->source_name))
+            ->map(function (BillingItem $item) {
+                $sourceLabel = ucwords(str_replace('_', ' ', (string) $item->source_type));
+                $sourceName = $item->source_name ?: $item->service_name;
+
+                return [
+                    'label' => $sourceLabel !== '' ? $sourceLabel : 'Source',
+                    'reference' => $item->source_id ? '#'.$item->source_id : '-',
+                    'name' => $sourceName ?: '-',
+                    'service' => $item->service_name,
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    private function buildPaymentSummary(Billing $billing): array
+    {
+        $latestPayment = $billing->payments->sortByDesc('created_at')->first();
+        $paidAmount = (float) $billing->paid_amount;
+        $totalAmount = (float) $billing->total_amount;
+        $balanceDue = (float) $billing->balance_due;
+        $progress = $totalAmount > 0 ? min(100, round(($paidAmount / $totalAmount) * 100, 1)) : 0;
+
+        return [
+            'paid_amount' => $paidAmount,
+            'total_amount' => $totalAmount,
+            'balance_due' => $balanceDue,
+            'progress' => $progress,
+            'payment_count' => $billing->payments->count(),
+            'latest_payment' => $latestPayment ? [
+                'amount' => (float) $latestPayment->amount,
+                'method' => $latestPayment->payment_method,
+                'reference' => $latestPayment->reference,
+                'notes' => $latestPayment->notes,
+                'received_at' => optional($latestPayment->created_at)->format('Y-m-d H:i'),
+                'received_by' => optional($latestPayment->receiver)->name ?? '-',
+            ] : null,
+        ];
     }
 }

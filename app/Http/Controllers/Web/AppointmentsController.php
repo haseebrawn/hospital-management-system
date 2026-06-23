@@ -7,6 +7,9 @@ use App\Http\Requests\Web\AppointmentStoreRequest;
 use App\Http\Requests\Web\AppointmentUpdateRequest;
 use App\Models\Appointment;
 use App\Models\Department;
+use App\Models\BillingItem;
+use App\Models\LabTest;
+use App\Models\Prescription;
 use App\Models\Patient;
 use App\Models\User;
 use App\Services\HospitalNotificationService;
@@ -80,8 +83,9 @@ class AppointmentsController extends Controller
     public function show(Appointment $appointment)
     {
         $appointment->load(['patient', 'doctor', 'department']);
+        $workflowTimeline = $this->buildWorkflowTimeline($appointment);
 
-        return view('modules.appointments.show', compact('appointment'));
+        return view('modules.appointments.show', compact('appointment', 'workflowTimeline'));
     }
 
     public function edit(Appointment $appointment)
@@ -175,5 +179,62 @@ class AppointmentsController extends Controller
 
         $notifications->notifyRoles(['super_admin', 'admin', 'receptionist', 'nurse'], $payload, $request->user());
         $notifications->notifyUsers([$appointment->doctor], $payload);
+    }
+
+    private function buildWorkflowTimeline(Appointment $appointment): array
+    {
+        $appointmentId = $appointment->id;
+        $patientName = trim((string) (($appointment->patient->first_name ?? '') . ' ' . ($appointment->patient->last_name ?? '')));
+
+        $hasMedicalRecord = $appointment->medicalRecords()->exists();
+        $hasPrescription = Prescription::query()->where('appointment_id', $appointmentId)->exists();
+        $hasLabTest = LabTest::query()->where('appointment_id', $appointmentId)->exists();
+        $hasBilling = BillingItem::query()
+            ->where('source_type', 'appointment')
+            ->where('source_id', $appointmentId)
+            ->exists();
+
+        return [
+            [
+                'key' => 'check_in',
+                'label' => 'Check In',
+                'done' => (bool) $appointment->checked_in_at,
+                'subtitle' => $appointment->checked_in_at
+                    ? 'Checked in at ' . optional($appointment->checked_in_at)->format('Y-m-d H:i')
+                    : 'Waiting to be checked in',
+            ],
+            [
+                'key' => 'medical_record',
+                'label' => 'Medical Record',
+                'done' => $hasMedicalRecord,
+                'subtitle' => $hasMedicalRecord
+                    ? "Clinical note prepared for {$patientName}"
+                    : 'No medical record yet',
+            ],
+            [
+                'key' => 'prescription',
+                'label' => 'Prescription',
+                'done' => $hasPrescription,
+                'subtitle' => $hasPrescription
+                    ? 'Prescription created for this visit'
+                    : 'No prescription yet',
+            ],
+            [
+                'key' => 'lab',
+                'label' => 'Lab Test',
+                'done' => $hasLabTest,
+                'subtitle' => $hasLabTest
+                    ? 'Lab request linked to this appointment'
+                    : 'No lab test request yet',
+            ],
+            [
+                'key' => 'billing',
+                'label' => 'Billing',
+                'done' => $hasBilling,
+                'subtitle' => $hasBilling
+                    ? 'Invoice created from appointment services'
+                    : 'No billing record linked yet',
+            ],
+        ];
     }
 }
