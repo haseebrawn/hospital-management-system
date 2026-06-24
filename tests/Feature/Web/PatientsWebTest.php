@@ -4,7 +4,10 @@ namespace Tests\Feature\Web;
 
 use App\Models\Department;
 use App\Models\Appointment;
+use App\Models\Billing;
+use App\Models\BillingItem;
 use App\Models\MedicalRecord;
+use App\Models\LabTest;
 use App\Models\Prescription;
 use App\Models\Patient;
 use App\Models\Medicine;
@@ -82,10 +85,13 @@ class PatientsWebTest extends TestCase
         $this->actingAsSuperAdmin();
 
         Role::firstOrCreate(['name' => 'doctor', 'guard_name' => 'api']);
+        Role::firstOrCreate(['name' => 'lab_technician', 'guard_name' => 'api']);
         $department = Department::factory()->create();
         $patient = Patient::factory()->create(['department_id' => $department->id]);
         $doctor = User::factory()->create(['department_id' => $department->id]);
         $doctor->assignRole('doctor');
+        $labTechnician = User::factory()->create(['department_id' => $department->id]);
+        $labTechnician->assignRole('lab_technician');
         $appointment = Appointment::factory()->create([
             'patient_id' => $patient->id,
             'doctor_id' => $doctor->id,
@@ -122,6 +128,83 @@ class PatientsWebTest extends TestCase
         $response->assertSee('Medical History');
         $response->assertSee('Viral fever');
         $response->assertSee('Rest and fluids');
+    }
+
+    public function test_patient_history_shows_appointment_workflow_timeline(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        Role::firstOrCreate(['name' => 'doctor', 'guard_name' => 'api']);
+        Role::firstOrCreate(['name' => 'lab_technician', 'guard_name' => 'api']);
+        $department = Department::factory()->create();
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+        $doctor = User::factory()->create(['department_id' => $department->id]);
+        $doctor->assignRole('doctor');
+        $labTechnician = User::factory()->create(['department_id' => $department->id]);
+        $labTechnician->assignRole('lab_technician');
+        $appointment = Appointment::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $department->id,
+            'status' => 'completed',
+            'checked_in_at' => now(),
+        ]);
+
+        MedicalRecord::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'appointment_id' => $appointment->id,
+            'chief_complaint' => 'Fever',
+            'diagnosis' => 'Viral fever',
+        ]);
+
+        Prescription::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'appointment_id' => $appointment->id,
+            'status' => 'pending',
+            'description' => 'Rest and fluids',
+        ]);
+
+        LabTest::factory()->create([
+            'patient_id' => $patient->id,
+            'appointment_id' => $appointment->id,
+            'doctor_id' => $doctor->id,
+            'lab_technician_id' => $labTechnician->id,
+            'test_type' => 'Blood Test',
+            'status' => 'completed',
+        ]);
+
+        $billing = Billing::factory()->create([
+            'patient_id' => $patient->id,
+            'created_by' => $doctor->id,
+            'total_amount' => 250,
+            'paid_amount' => 250,
+            'balance_due' => 0,
+            'status' => 'paid',
+        ]);
+
+        BillingItem::factory()->create([
+            'billing_id' => $billing->id,
+            'service_name' => 'Appointment fee',
+            'quantity' => 1,
+            'price' => 250,
+            'type' => 'appointment',
+            'source_type' => 'appointment',
+            'source_id' => $appointment->id,
+            'source_name' => 'General checkup',
+        ]);
+
+        $response = $this->get("/patients/{$patient->id}/history");
+
+        $response->assertOk();
+        $response->assertSee('Each appointment shows the same care workflow timeline.');
+        $response->assertSee('Check In');
+        $response->assertSee('Medical Record');
+        $response->assertSee('Prescription');
+        $response->assertSee('Lab Test');
+        $response->assertSee('Billing');
+        $response->assertSee('Done');
     }
 
     public function test_patient_can_be_created_with_custom_unique_mrn(): void

@@ -111,9 +111,15 @@
             </div>
 
             <div style="padding:14px; border:1px solid var(--border-color); border-radius:14px;">
-                <div style="font-weight:800; margin-bottom:12px;">Recent Appointments</div>
+                <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+                    <div>
+                        <div style="font-weight:800;">Recent Appointments</div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Each appointment shows the same care workflow timeline.</div>
+                    </div>
+                    <div style="font-size:12px; color:var(--text-muted);">Check-in → Record → Prescription → Lab → Billing</div>
+                </div>
                 <div style="overflow:auto;">
-                    <table class="dash-table" style="min-width:900px;">
+                    <table class="dash-table" style="min-width:1100px;">
                         <thead>
                             <tr>
                                 <th>Date</th>
@@ -121,6 +127,7 @@
                                 <th>Doctor</th>
                                 <th>Reason</th>
                                 <th>Status</th>
+                                <th>Workflow</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -132,11 +139,22 @@
                                     <td>{{ optional($appointment->doctor)->name ?? '-' }}</td>
                                     <td>{{ \Illuminate\Support\Str::limit($appointment->reason ?: '-', 50) }}</td>
                                     <td style="text-transform:capitalize;">{{ $appointment->status }}</td>
+                                    <td>
+                                        <div style="display:flex; flex-wrap:wrap; gap:6px; max-width:420px;">
+                                            @foreach ($appointment->workflowTimeline ?? [] as $step)
+                                                <span style="display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px; font-size:12px; border:1px solid {{ $step['done'] ? 'rgba(34,197,94,0.28)' : 'rgba(148,163,184,0.28)' }}; background:{{ $step['done'] ? 'rgba(34,197,94,0.08)' : 'rgba(248,250,252,0.95)' }}; color:{{ $step['done'] ? '#166534' : '#64748b' }};">
+                                                    <span style="width:8px; height:8px; border-radius:999px; background:{{ $step['done'] ? '#22c55e' : '#cbd5e1' }};"></span>
+                                                    {{ $step['label'] }}
+                                                    <span style="font-size:11px; opacity:.85;">{{ $step['done'] ? 'Done' : 'Pending' }}</span>
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    </td>
                                     <td><a href="{{ route('appointments.show', $appointment) }}" style="color:var(--primary); text-decoration:none;">View</a></td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" style="padding:16px;">No appointments found.</td>
+                                    <td colspan="7" style="padding:16px;">No appointments found.</td>
                                 </tr>
                             @endforelse
                         </tbody>

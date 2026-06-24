@@ -66,4 +66,19 @@ class Appointment extends Model
     {
         return $this->hasMany(MedicalRecord::class);
     }
+
+    public function prescriptions()
+    {
+        return $this->hasMany(Prescription::class);
+    }
+
+    public function labTests()
+    {
+        return $this->hasMany(LabTest::class);
+    }
+
+    public function billingItems()
+    {
+        return $this->hasMany(BillingItem::class, 'source_id')->where('source_type', 'appointment');
+    }
 }

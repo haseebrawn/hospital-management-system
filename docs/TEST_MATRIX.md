@@ -15,6 +15,7 @@ Run all feature tests:
 
 - Patients web UI: `tests/Feature/Web/PatientsWebTest.php`
   - patient history page
+  - appointment workflow timeline per history row
 - Appointments web UI: `tests/Feature/Web/AppointmentsWebTest.php`
   - patient history shortcut
   - care workflow panel
