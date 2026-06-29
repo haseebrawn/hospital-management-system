@@ -3,9 +3,13 @@
 namespace Tests\Feature\Web;
 
 use App\Models\Appointment;
+use App\Models\Billing;
+use App\Models\BillingItem;
 use App\Models\Department;
 use App\Models\LabTest;
+use App\Models\MedicalRecord;
 use App\Models\Patient;
+use App\Models\Prescription;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
@@ -33,6 +37,79 @@ class LabTestsWebTest extends TestCase
         $this->actingAsLabTech();
 
         $this->get('/lab-tests')->assertOk()->assertSee('Lab Tests');
+    }
+
+    public function test_lab_tests_index_shows_mini_workflow_preview(): void
+    {
+        $tech = $this->actingAsLabTech();
+        Role::firstOrCreate(['name' => 'doctor', 'guard_name' => 'api']);
+
+        $department = Department::factory()->create();
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+        $doctor = User::factory()->create(['department_id' => $department->id]);
+        $doctor->assignRole('doctor');
+
+        $appointment = Appointment::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $department->id,
+            'status' => 'completed',
+            'checked_in_at' => now(),
+        ]);
+
+        MedicalRecord::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'appointment_id' => $appointment->id,
+            'diagnosis' => 'Workflow diagnosis',
+        ]);
+
+        Prescription::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'appointment_id' => $appointment->id,
+            'description' => 'Workflow prescription',
+        ]);
+
+        $labTest = LabTest::factory()->create([
+            'patient_id' => $patient->id,
+            'appointment_id' => $appointment->id,
+            'doctor_id' => $doctor->id,
+            'lab_technician_id' => $tech->id,
+            'status' => 'completed',
+            'test_type' => 'CBC',
+        ]);
+
+        $billing = Billing::factory()->create([
+            'patient_id' => $patient->id,
+            'created_by' => $doctor->id,
+            'status' => 'pending',
+            'total_amount' => 100,
+            'paid_amount' => 0,
+            'balance_due' => 100,
+        ]);
+
+        BillingItem::factory()->create([
+            'billing_id' => $billing->id,
+            'service_name' => 'Consultation fee',
+            'quantity' => 1,
+            'price' => 100,
+            'type' => 'appointment',
+            'source_type' => 'appointment',
+            'source_id' => $appointment->id,
+            'source_name' => 'Consultation visit',
+        ]);
+
+        $response = $this->get('/lab-tests');
+
+        $response->assertOk();
+        $response->assertSee('Workflow');
+        $response->assertSee('Open appointment');
+        $response->assertSee('Check In');
+        $response->assertSee('Medical Record');
+        $response->assertSee('Prescription');
+        $response->assertSee('Lab Test');
+        $response->assertSee('Billing');
     }
 
     public function test_lab_test_can_be_created_from_web(): void

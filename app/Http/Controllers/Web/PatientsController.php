@@ -21,7 +21,7 @@ class PatientsController extends Controller
         $search = trim((string) $request->query('q', ''));
 
         $patients = Patient::query()
-            ->with('department')
+            ->with(['department', 'latestAppointment.doctor'])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('mrn', 'like', "%{$search}%")
@@ -33,6 +33,14 @@ class PatientsController extends Controller
             ->orderByDesc('id')
             ->paginate(15)
             ->withQueryString();
+
+        $patients->getCollection()->transform(function (Patient $patient) {
+            if ($patient->latestAppointment) {
+                $patient->latestAppointment->workflowTimeline = $this->buildWorkflowTimeline($patient->latestAppointment);
+            }
+
+            return $patient;
+        });
 
         return view('modules.patients.index', compact('patients', 'search'));
     }
@@ -66,7 +74,19 @@ class PatientsController extends Controller
     {
         $patient->load('department');
 
-        return view('modules.patients.show', compact('patient'));
+        $latestAppointment = Appointment::query()
+            ->with('doctor')
+            ->withCount(['medicalRecords', 'prescriptions', 'labTests', 'billingItems'])
+            ->where('patient_id', $patient->id)
+            ->latest('date')
+            ->latest('time')
+            ->first();
+
+        if ($latestAppointment) {
+            $latestAppointment->workflowTimeline = $this->buildWorkflowTimeline($latestAppointment);
+        }
+
+        return view('modules.patients.show', compact('patient', 'latestAppointment'));
     }
 
     public function history(Request $request, Patient $patient)

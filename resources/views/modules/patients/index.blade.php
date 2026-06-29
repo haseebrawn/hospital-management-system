@@ -41,6 +41,7 @@
                         <th>Phone</th>
                         <th>Gender</th>
                         <th>Department</th>
+                        <th>Workflow</th>
                         <th style="text-align:right;">Actions</th>
                     </tr>
                 </thead>
@@ -57,6 +58,26 @@
                             <td class="u-nowrap">{{ $patient->contact_number }}</td>
                             <td class="u-nowrap" style="text-transform:capitalize;">{{ $patient->gender }}</td>
                             <td>{{ optional($patient->department)->name ?? '-' }}</td>
+                            <td>
+                                @if ($patient->latestAppointment)
+                                    <div style="display:flex; flex-direction:column; gap:6px;">
+                                        <div style="font-size:12px; color:var(--text-muted);">
+                                            {{ $patient->latestAppointment->date }} {{ substr((string) $patient->latestAppointment->time, 0, 5) }}
+                                        </div>
+                                        <div style="display:flex; flex-wrap:wrap; gap:6px; max-width: 340px;">
+                                            @foreach ($patient->latestAppointment->workflowTimeline ?? [] as $step)
+                                                <span style="display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; font-size:11px; border:1px solid {{ $step['done'] ? 'rgba(34,197,94,0.24)' : 'rgba(148,163,184,0.24)' }}; background:{{ $step['done'] ? 'rgba(34,197,94,0.08)' : 'rgba(248,250,252,0.95)' }}; color:{{ $step['done'] ? '#166534' : '#64748b' }};">
+                                                    <span style="width:7px; height:7px; border-radius:999px; background:{{ $step['done'] ? '#22c55e' : '#cbd5e1' }};"></span>
+                                                    {{ $step['label'] }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                        <a href="{{ route('patients.history', $patient) }}" style="font-size:12px; color:var(--primary); text-decoration:none;">Open history</a>
+                                    </div>
+                                @else
+                                    <span style="font-size:12px; color:var(--text-muted);">No appointments yet</span>
+                                @endif
+                            </td>
                             <td style="text-align:right;">
                                 <a href="{{ route('patients.edit', $patient) }}"
                                     style="font-size:13px; color: var(--primary); text-decoration:none; margin-right:10px;">
@@ -75,7 +96,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" style="padding: 16px;">No patients found.</td>
+                            <td colspan="8" style="padding: 16px;">No patients found.</td>
                         </tr>
                     @endforelse
                 </tbody>

@@ -43,6 +43,85 @@ class PatientsWebTest extends TestCase
         $response->assertSee('Patients');
     }
 
+    public function test_patients_index_shows_latest_workflow_preview(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        Role::firstOrCreate(['name' => 'doctor', 'guard_name' => 'api']);
+        Role::firstOrCreate(['name' => 'lab_technician', 'guard_name' => 'api']);
+
+        $department = Department::factory()->create();
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+        $doctor = User::factory()->create(['department_id' => $department->id]);
+        $doctor->assignRole('doctor');
+        $labTechnician = User::factory()->create(['department_id' => $department->id]);
+        $labTechnician->assignRole('lab_technician');
+
+        $appointment = Appointment::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $department->id,
+            'status' => 'completed',
+            'checked_in_at' => now(),
+        ]);
+
+        MedicalRecord::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'appointment_id' => $appointment->id,
+            'chief_complaint' => 'Headache',
+            'diagnosis' => 'Migraine',
+        ]);
+
+        Prescription::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'appointment_id' => $appointment->id,
+            'status' => 'pending',
+            'description' => 'Rest and fluids',
+        ]);
+
+        LabTest::factory()->create([
+            'patient_id' => $patient->id,
+            'appointment_id' => $appointment->id,
+            'doctor_id' => $doctor->id,
+            'lab_technician_id' => $labTechnician->id,
+            'test_type' => 'CBC',
+            'status' => 'completed',
+        ]);
+
+        $billing = Billing::factory()->create([
+            'patient_id' => $patient->id,
+            'created_by' => $doctor->id,
+            'total_amount' => 100,
+            'paid_amount' => 100,
+            'balance_due' => 0,
+            'status' => 'paid',
+        ]);
+
+        BillingItem::factory()->create([
+            'billing_id' => $billing->id,
+            'service_name' => 'Consultation',
+            'quantity' => 1,
+            'price' => 100,
+            'type' => 'appointment',
+            'source_type' => 'appointment',
+            'source_id' => $appointment->id,
+            'source_name' => 'Consultation visit',
+        ]);
+
+        $response = $this->get('/patients');
+
+        $response->assertOk();
+        $response->assertSee('Workflow');
+        $response->assertSee('Open history');
+        $response->assertSee('Check In');
+        $response->assertSee('Medical Record');
+        $response->assertSee('Prescription');
+        $response->assertSee('Lab Test');
+        $response->assertSee('Billing');
+    }
+
     public function test_patient_can_be_created_from_web(): void
     {
         $this->actingAsSuperAdmin();
@@ -71,13 +150,28 @@ class PatientsWebTest extends TestCase
     {
         $this->actingAsSuperAdmin();
 
-        $patient = Patient::factory()->create();
+        $department = Department::factory()->create();
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+        $doctor = User::factory()->create(['department_id' => $department->id]);
+        Role::firstOrCreate(['name' => 'doctor', 'guard_name' => 'api']);
+        $doctor->assignRole('doctor');
+        $appointment = Appointment::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $department->id,
+            'status' => 'approved',
+            'checked_in_at' => now(),
+        ]);
 
         $response = $this->get("/patients/{$patient->id}");
 
         $response->assertOk();
         $response->assertSee($patient->first_name);
         $response->assertSee($patient->mrn);
+        $response->assertSee('Care Workflow Preview');
+        $response->assertSee('Open Full History');
+        $response->assertSee('Latest Visit');
+        $response->assertSee($appointment->date);
     }
 
     public function test_patient_history_page_loads(): void

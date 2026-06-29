@@ -56,6 +56,54 @@
             </div>
         </div>
 
+        <div style="margin-top: 16px; padding: 14px; border:1px solid var(--border-color); border-radius:14px;">
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                <div>
+                    <div style="font-weight:800;">Care Workflow Preview</div>
+                    <div style="font-size:12px; color: var(--text-muted); margin-top:4px;">Latest appointment snapshot with the same timeline used in patient history.</div>
+                </div>
+                <a href="{{ route('patients.history', $patient) }}"
+                    style="padding:8px 12px; border-radius:10px; background:var(--primary); color:#fff; text-decoration:none; font-size:13px;">
+                    Open Full History
+                </a>
+            </div>
+
+            @if ($latestAppointment)
+                <div style="margin-top: 14px; display:grid; grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 12px;">
+                    <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
+                        <div style="font-size:12px; color:var(--text-muted);">Latest Visit</div>
+                        <div style="font-weight:700; margin-top:4px;">{{ $latestAppointment->date }} {{ substr((string) $latestAppointment->time, 0, 5) }}</div>
+                    </div>
+                    <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
+                        <div style="font-size:12px; color:var(--text-muted);">Doctor</div>
+                        <div style="font-weight:700; margin-top:4px;">{{ optional($latestAppointment->doctor)->name ?? '-' }}</div>
+                    </div>
+                    <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
+                        <div style="font-size:12px; color:var(--text-muted);">Visit Status</div>
+                        <div style="font-weight:700; margin-top:4px; text-transform:capitalize;">{{ $latestAppointment->visit_status }}</div>
+                    </div>
+                    <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
+                        <div style="font-size:12px; color:var(--text-muted);">Workflow</div>
+                        <div style="font-weight:700; margin-top:4px;">{{ collect($latestAppointment->workflowTimeline ?? [])->where('done', true)->count() }} / 5 completed</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 12px; display:flex; flex-wrap:wrap; gap:6px;">
+                    @foreach ($latestAppointment->workflowTimeline ?? [] as $step)
+                        <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; font-size:12px; border:1px solid {{ $step['done'] ? 'rgba(34,197,94,0.28)' : 'rgba(148,163,184,0.28)' }}; background:{{ $step['done'] ? 'rgba(34,197,94,0.08)' : 'rgba(248,250,252,0.95)' }}; color:{{ $step['done'] ? '#166534' : '#64748b' }};">
+                            <span style="width:8px; height:8px; border-radius:999px; background:{{ $step['done'] ? '#22c55e' : '#cbd5e1' }};"></span>
+                            {{ $step['label'] }}
+                            <span style="font-size:11px; opacity:.85;">{{ $step['done'] ? 'Done' : 'Pending' }}</span>
+                        </span>
+                    @endforeach
+                </div>
+            @else
+                <div style="margin-top: 12px; padding: 12px; border:1px dashed var(--border-color); border-radius:12px; color: var(--text-muted); font-size:13px;">
+                    No appointment history yet. Open patient history to start the clinical workflow.
+                </div>
+            @endif
+        </div>
+
         <div style="margin-top: 16px;">
             <a href="{{ route('patients.index') }}" style="font-size:13px; color: var(--primary); text-decoration:none;">
                 ← Back to patients

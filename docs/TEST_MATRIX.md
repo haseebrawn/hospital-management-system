@@ -17,6 +17,7 @@ Run all feature tests:
   - patient history page
   - appointment workflow timeline per history row
 - Appointments web UI: `tests/Feature/Web/AppointmentsWebTest.php`
+  - appointments list workflow preview
   - patient history shortcut
   - care workflow panel
   - workflow timeline
@@ -28,6 +29,7 @@ Run all feature tests:
 
 - Lab tests web UI: `tests/Feature/Web/LabTestsWebTest.php`
   - appointment workflow prefill
+  - lab list workflow preview
 - Medicines web UI: `tests/Feature/Web/MedicinesWebTest.php`
 - Prescriptions web UI: `tests/Feature/Web/PrescriptionsWebTest.php`
   - appointment workflow prefill

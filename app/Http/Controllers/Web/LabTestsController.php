@@ -20,7 +20,14 @@ class LabTestsController extends Controller
         $status = trim((string) $request->query('status', ''));
 
         $tests = LabTest::query()
-            ->with(['appointment.patient', 'patient', 'doctor', 'technician'])
+            ->with([
+                'appointment' => function ($query) {
+                    $query->with(['patient', 'doctor'])->withCount(['medicalRecords', 'prescriptions', 'labTests', 'billingItems']);
+                },
+                'patient',
+                'doctor',
+                'technician',
+            ])
             ->when($status !== '', fn ($q) => $q->where('status', $status))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
@@ -35,6 +42,14 @@ class LabTestsController extends Controller
             ->orderByDesc('id')
             ->paginate(15)
             ->withQueryString();
+
+        $tests->getCollection()->transform(function (LabTest $test) {
+            if ($test->appointment) {
+                $test->appointment->workflowTimeline = $this->buildWorkflowTimeline($test->appointment);
+            }
+
+            return $test;
+        });
 
         $statusOptions = ['pending', 'in_process', 'completed'];
 
@@ -161,5 +176,36 @@ class LabTestsController extends Controller
             ->orderByDesc('time')
             ->limit(300)
             ->get();
+    }
+
+    private function buildWorkflowTimeline(Appointment $appointment): array
+    {
+        $medicalRecordsCount = (int) ($appointment->medical_records_count ?? 0);
+        $prescriptionsCount = (int) ($appointment->prescriptions_count ?? 0);
+        $labTestsCount = (int) ($appointment->lab_tests_count ?? 0);
+        $billingItemsCount = (int) ($appointment->billing_items_count ?? 0);
+
+        return [
+            [
+                'label' => 'Check In',
+                'done' => (bool) $appointment->checked_in_at,
+            ],
+            [
+                'label' => 'Medical Record',
+                'done' => $medicalRecordsCount > 0,
+            ],
+            [
+                'label' => 'Prescription',
+                'done' => $prescriptionsCount > 0,
+            ],
+            [
+                'label' => 'Lab Test',
+                'done' => $labTestsCount > 0,
+            ],
+            [
+                'label' => 'Billing',
+                'done' => $billingItemsCount > 0,
+            ],
+        ];
     }
 }

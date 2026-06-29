@@ -24,6 +24,7 @@ class AppointmentsController extends Controller
 
         $appointments = Appointment::query()
             ->with(['patient', 'doctor', 'department'])
+            ->withCount(['medicalRecords', 'prescriptions', 'labTests', 'billingItems'])
             ->when($status !== '', fn ($q) => $q->where('status', $status))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($searchQuery) use ($search) {
@@ -40,6 +41,12 @@ class AppointmentsController extends Controller
             ->orderByDesc('time')
             ->paginate(15)
             ->withQueryString();
+
+        $appointments->getCollection()->transform(function (Appointment $appointment) {
+            $appointment->workflowTimeline = $this->buildWorkflowTimeline($appointment);
+
+            return $appointment;
+        });
 
         $statusOptions = ['pending', 'approved', 'completed', 'cancelled'];
 
