@@ -40,6 +40,53 @@ class BillingWebTest extends TestCase
         $response->assertSee('Billing');
     }
 
+    public function test_billing_index_shows_mini_workflow_preview(): void
+    {
+        $user = $this->actingAsAccountant();
+
+        $department = Department::factory()->create();
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+
+        $billing = Billing::factory()->create([
+            'patient_id' => $patient->id,
+            'created_by' => $user->id,
+            'total_amount' => 100,
+            'status' => 'partial',
+            'paid_amount' => 40,
+            'balance_due' => 60,
+        ]);
+
+        BillingItem::factory()->create([
+            'billing_id' => $billing->id,
+            'service_name' => 'Consultation fee',
+            'quantity' => 1,
+            'price' => 100,
+            'type' => 'appointment',
+            'source_type' => 'appointment',
+            'source_id' => 1,
+            'source_name' => 'Consultation visit',
+        ]);
+
+        BillingPayment::factory()->create([
+            'billing_id' => $billing->id,
+            'received_by' => $user->id,
+            'amount' => 40,
+            'payment_method' => 'cash',
+            'reference' => 'PART-001',
+            'notes' => 'Partial payment',
+        ]);
+
+        $response = $this->get('/billing');
+
+        $response->assertOk();
+        $response->assertSee('Workflow');
+        $response->assertSee('Invoice Created');
+        $response->assertSee('Source Linked');
+        $response->assertSee('Payment Recorded');
+        $response->assertSee('Balance Cleared');
+        $response->assertSee('Receipt Ready');
+    }
+
     public function test_invoice_can_be_created_from_web(): void
     {
         $user = $this->actingAsAccountant();

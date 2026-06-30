@@ -35,6 +35,7 @@ Run all feature tests:
   - appointment workflow prefill
 - Billing web UI: `tests/Feature/Web/BillingWebTest.php`
   - invoice creation
+  - billing list workflow preview
   - appointment workflow prefill
   - partial payment recording
   - payment summary display

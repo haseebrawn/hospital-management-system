@@ -1152,6 +1152,7 @@ Phase C step 4 status:
 - Patient history now shows the same care workflow timeline per appointment row.
 - Appointment list now shows the same mini workflow preview per row.
 - Lab test list now shows the same mini workflow preview per linked appointment.
+- Billing list now shows an invoice workflow preview per row.
 - Medical record, prescription, and lab test create forms prefill patient/doctor/appointment context.
 - Medical record forms now show linked appointment, patient, doctor, reason, and notes context more clearly.
 - Prescription forms now show linked appointment, patient, doctor, reason, and notes context more clearly.

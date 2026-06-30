@@ -39,7 +39,7 @@
         </div>
 
         <div style="margin-top: 16px; overflow:auto;">
-            <table class="dash-table" style="min-width: 1200px;">
+            <table class="dash-table" style="min-width: 1400px;">
                 <thead>
                     <tr>
                         <th class="u-nowrap">Invoice #</th>
@@ -52,6 +52,7 @@
                         <th>Status</th>
                         <th>Created By</th>
                         <th>Created</th>
+                        <th>Workflow</th>
                         <th style="text-align:right;">Actions</th>
                     </tr>
                 </thead>
@@ -72,6 +73,16 @@
                             <td class="u-nowrap" style="text-transform:capitalize;">{{ $inv->status }}</td>
                             <td>{{ optional($inv->creator)->name ?? '-' }}</td>
                             <td class="u-nowrap">{{ optional($inv->created_at)->format('Y-m-d H:i') }}</td>
+                            <td>
+                                <div style="display:flex; flex-wrap:wrap; gap:6px; max-width: 420px;">
+                                    @foreach ($inv->workflowTimeline ?? [] as $step)
+                                        <span style="display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; font-size:11px; border:1px solid {{ $step['done'] ? 'rgba(34,197,94,0.24)' : 'rgba(148,163,184,0.24)' }}; background:{{ $step['done'] ? 'rgba(34,197,94,0.08)' : 'rgba(248,250,252,0.95)' }}; color:{{ $step['done'] ? '#166534' : '#64748b' }};">
+                                            <span style="width:7px; height:7px; border-radius:999px; background:{{ $step['done'] ? '#22c55e' : '#cbd5e1' }};"></span>
+                                            {{ $step['label'] }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            </td>
                             <td style="text-align:right;">
                                 <a href="{{ route('billing.show', $inv) }}"
                                     style="font-size:13px; color: var(--primary); text-decoration:none; margin-right:10px;">
@@ -90,7 +101,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="11" style="padding: 16px;">No invoices found.</td>
+                            <td colspan="12" style="padding: 16px;">No invoices found.</td>
                         </tr>
                     @endforelse
                 </tbody>

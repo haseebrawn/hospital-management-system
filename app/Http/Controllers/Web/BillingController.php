@@ -23,7 +23,7 @@ class BillingController extends Controller
         $status = trim((string) $request->query('status', ''));
 
         $billings = Billing::query()
-            ->with(['patient', 'creator', 'approver'])
+            ->with(['patient', 'creator', 'approver', 'items', 'payments'])
             ->when($status !== '', fn ($query) => $query->where('status', $status))
             ->when($search !== '', function ($query) use ($search) {
                 $query->whereHas('patient', function ($patientQuery) use ($search) {
@@ -35,6 +35,12 @@ class BillingController extends Controller
             ->orderByDesc('id')
             ->paginate(15)
             ->withQueryString();
+
+        $billings->getCollection()->transform(function (Billing $billing) {
+            $billing->workflowTimeline = $this->buildBillingWorkflowTimeline($billing);
+
+            return $billing;
+        });
 
         $statusOptions = ['pending', 'partial', 'paid', 'cancelled'];
 
@@ -356,6 +362,39 @@ class BillingController extends Controller
                 'received_at' => optional($latestPayment->created_at)->format('Y-m-d H:i'),
                 'received_by' => optional($latestPayment->receiver)->name ?? '-',
             ] : null,
+        ];
+    }
+
+    private function buildBillingWorkflowTimeline(Billing $billing): array
+    {
+        $hasLinkedSource = $billing->items->contains(function (BillingItem $item) {
+            return filled($item->source_type) || filled($item->source_id) || filled($item->source_name);
+        });
+
+        $paymentCount = $billing->payments->count();
+        $isPartiallyOrFullyPaid = in_array($billing->status, ['partial', 'paid'], true);
+
+        return [
+            [
+                'label' => 'Invoice Created',
+                'done' => true,
+            ],
+            [
+                'label' => 'Source Linked',
+                'done' => $hasLinkedSource,
+            ],
+            [
+                'label' => 'Payment Recorded',
+                'done' => $paymentCount > 0,
+            ],
+            [
+                'label' => 'Balance Cleared',
+                'done' => $billing->status === 'paid',
+            ],
+            [
+                'label' => 'Receipt Ready',
+                'done' => $isPartiallyOrFullyPaid || $paymentCount > 0,
+            ],
         ];
     }
 }
