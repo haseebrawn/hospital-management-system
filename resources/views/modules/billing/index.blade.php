@@ -74,10 +74,11 @@
                             <td>{{ optional($inv->creator)->name ?? '-' }}</td>
                             <td class="u-nowrap">{{ optional($inv->created_at)->format('Y-m-d H:i') }}</td>
                             <td>
-                                <div style="display:flex; flex-wrap:wrap; gap:6px; max-width: 420px;">
+                                <div class="workflow-chip-row" style="max-width: 420px;">
                                     @foreach ($inv->workflowTimeline ?? [] as $step)
-                                        <span style="display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; font-size:11px; border:1px solid {{ $step['done'] ? 'rgba(34,197,94,0.24)' : 'rgba(148,163,184,0.24)' }}; background:{{ $step['done'] ? 'rgba(34,197,94,0.08)' : 'rgba(248,250,252,0.95)' }}; color:{{ $step['done'] ? '#166534' : '#64748b' }};">
-                                            <span style="width:7px; height:7px; border-radius:999px; background:{{ $step['done'] ? '#22c55e' : '#cbd5e1' }};"></span>
+                                        <span class="workflow-chip"
+                                            style="--workflow-chip-border: {{ $step['done'] ? 'rgba(34,197,94,0.24)' : 'rgba(148,163,184,0.24)' }}; --workflow-chip-bg: {{ $step['done'] ? 'rgba(34,197,94,0.08)' : 'rgba(248,250,252,0.95)' }}; --workflow-chip-color: {{ $step['done'] ? '#166534' : '#64748b' }}; --workflow-chip-dot: {{ $step['done'] ? '#22c55e' : '#cbd5e1' }};">
+                                            <span class="workflow-chip__dot"></span>
                                             {{ $step['label'] }}
                                         </span>
                                     @endforeach

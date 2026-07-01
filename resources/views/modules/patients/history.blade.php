@@ -114,9 +114,9 @@
                 <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
                     <div>
                         <div style="font-weight:800;">Recent Appointments</div>
-                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Each appointment shows the same care workflow timeline.</div>
-                    </div>
-                    <div style="font-size:12px; color:var(--text-muted);">Check-in → Record → Prescription → Lab → Billing</div>
+                                        <div class="workflow-chip__meta" style="margin-top:4px;">Each appointment shows the same care workflow timeline.</div>
+                                    </div>
+                    <div class="workflow-chip__meta">Check-in → Record → Prescription → Lab → Billing</div>
                 </div>
                 <div style="overflow:auto;">
                     <table class="dash-table" style="min-width:1100px;">
@@ -140,10 +140,11 @@
                                     <td>{{ \Illuminate\Support\Str::limit($appointment->reason ?: '-', 50) }}</td>
                                     <td style="text-transform:capitalize;">{{ $appointment->status }}</td>
                                     <td>
-                                        <div style="display:flex; flex-wrap:wrap; gap:6px; max-width:420px;">
+                                        <div class="workflow-chip-row" style="max-width: 420px;">
                                             @foreach ($appointment->workflowTimeline ?? [] as $step)
-                                                <span style="display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px; font-size:12px; border:1px solid {{ $step['done'] ? 'rgba(34,197,94,0.28)' : 'rgba(148,163,184,0.28)' }}; background:{{ $step['done'] ? 'rgba(34,197,94,0.08)' : 'rgba(248,250,252,0.95)' }}; color:{{ $step['done'] ? '#166534' : '#64748b' }};">
-                                                    <span style="width:8px; height:8px; border-radius:999px; background:{{ $step['done'] ? '#22c55e' : '#cbd5e1' }};"></span>
+                                                <span class="workflow-chip"
+                                                    style="padding: 5px 10px; font-size: 12px; --workflow-chip-border: {{ $step['done'] ? 'rgba(34,197,94,0.28)' : 'rgba(148,163,184,0.28)' }}; --workflow-chip-bg: {{ $step['done'] ? 'rgba(34,197,94,0.08)' : 'rgba(248,250,252,0.95)' }}; --workflow-chip-color: {{ $step['done'] ? '#166534' : '#64748b' }}; --workflow-chip-dot: {{ $step['done'] ? '#22c55e' : '#cbd5e1' }};">
+                                                    <span class="workflow-chip__dot" style="width:8px; height:8px;"></span>
                                                     {{ $step['label'] }}
                                                     <span style="font-size:11px; opacity:.85;">{{ $step['done'] ? 'Done' : 'Pending' }}</span>
                                                 </span>

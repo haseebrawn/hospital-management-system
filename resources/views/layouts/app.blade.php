@@ -674,6 +674,40 @@
             font-weight: 600;
         }
 
+        .workflow-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            max-width: 420px;
+        }
+
+        .workflow-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid var(--workflow-chip-border, rgba(148, 163, 184, 0.24));
+            background: var(--workflow-chip-bg, rgba(248, 250, 252, 0.95));
+            color: var(--workflow-chip-color, #64748b);
+            font-size: 11px;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .workflow-chip__dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: var(--workflow-chip-dot, #cbd5e1);
+            flex: 0 0 auto;
+        }
+
+        .workflow-chip__meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
         .u-nowrap {
             white-space: nowrap;
         }

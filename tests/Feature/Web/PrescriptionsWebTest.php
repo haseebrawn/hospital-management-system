@@ -3,8 +3,12 @@
 namespace Tests\Feature\Web;
 
 use App\Models\Appointment;
+use App\Models\Billing;
+use App\Models\BillingItem;
 use App\Models\Department;
+use App\Models\LabTest;
 use App\Models\Medicine;
+use App\Models\MedicalRecord;
 use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\User;
@@ -50,6 +54,81 @@ class PrescriptionsWebTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Prescriptions');
+    }
+
+    public function test_prescriptions_index_shows_compact_workflow_preview(): void
+    {
+        $this->actingAsSuperAdmin();
+        Role::firstOrCreate(['name' => 'lab_technician', 'guard_name' => 'api']);
+
+        $department = Department::factory()->create();
+        $doctor = User::factory()->create(['department_id' => $department->id]);
+        $doctor->assignRole('doctor');
+        $labTechnician = User::factory()->create(['department_id' => $department->id]);
+        $labTechnician->assignRole('lab_technician');
+        $patient = Patient::factory()->create(['department_id' => $department->id]);
+        $appointment = Appointment::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $department->id,
+            'status' => 'completed',
+            'checked_in_at' => now(),
+        ]);
+
+        MedicalRecord::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'appointment_id' => $appointment->id,
+            'diagnosis' => 'Workflow diagnosis',
+        ]);
+
+        LabTest::factory()->create([
+            'patient_id' => $patient->id,
+            'appointment_id' => $appointment->id,
+            'doctor_id' => $doctor->id,
+            'lab_technician_id' => $labTechnician->id,
+            'status' => 'completed',
+            'test_type' => 'CBC',
+        ]);
+
+        $billing = Billing::factory()->create([
+            'patient_id' => $patient->id,
+            'created_by' => $doctor->id,
+            'total_amount' => 100,
+            'paid_amount' => 0,
+            'balance_due' => 100,
+            'status' => 'pending',
+        ]);
+
+        BillingItem::factory()->create([
+            'billing_id' => $billing->id,
+            'service_name' => 'Consultation fee',
+            'quantity' => 1,
+            'price' => 100,
+            'type' => 'appointment',
+            'source_type' => 'appointment',
+            'source_id' => $appointment->id,
+            'source_name' => 'Consultation visit',
+        ]);
+
+        Prescription::factory()->create([
+            'appointment_id' => $appointment->id,
+            'doctor_id' => $doctor->id,
+            'patient_id' => $patient->id,
+            'description' => 'Workflow prescription',
+            'status' => 'pending',
+        ]);
+
+        $response = $this->get('/prescriptions');
+
+        $response->assertOk();
+        $response->assertSee('Workflow');
+        $response->assertSee('Open appointment');
+        $response->assertSee('Check In');
+        $response->assertSee('Medical Record');
+        $response->assertSee('Prescription');
+        $response->assertSee('Lab Test');
+        $response->assertSee('Billing');
     }
 
     public function test_prescription_can_be_created_from_web(): void

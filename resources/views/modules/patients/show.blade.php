@@ -90,8 +90,9 @@
 
                 <div style="margin-top: 12px; display:flex; flex-wrap:wrap; gap:6px;">
                     @foreach ($latestAppointment->workflowTimeline ?? [] as $step)
-                        <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; font-size:12px; border:1px solid {{ $step['done'] ? 'rgba(34,197,94,0.28)' : 'rgba(148,163,184,0.28)' }}; background:{{ $step['done'] ? 'rgba(34,197,94,0.08)' : 'rgba(248,250,252,0.95)' }}; color:{{ $step['done'] ? '#166534' : '#64748b' }};">
-                            <span style="width:8px; height:8px; border-radius:999px; background:{{ $step['done'] ? '#22c55e' : '#cbd5e1' }};"></span>
+                        <span class="workflow-chip"
+                            style="padding: 5px 9px; font-size: 12px; --workflow-chip-border: {{ $step['done'] ? 'rgba(34,197,94,0.28)' : 'rgba(148,163,184,0.28)' }}; --workflow-chip-bg: {{ $step['done'] ? 'rgba(34,197,94,0.08)' : 'rgba(248,250,252,0.95)' }}; --workflow-chip-color: {{ $step['done'] ? '#166534' : '#64748b' }}; --workflow-chip-dot: {{ $step['done'] ? '#22c55e' : '#cbd5e1' }};">
+                            <span class="workflow-chip__dot" style="width:8px; height:8px;"></span>
                             {{ $step['label'] }}
                             <span style="font-size:11px; opacity:.85;">{{ $step['done'] ? 'Done' : 'Pending' }}</span>
                         </span>

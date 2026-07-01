@@ -412,6 +412,7 @@ Implemented:
 - Medicine quantity sold dashboard card.
 - Medicine sales amount dashboard card.
 - Top-selling medicines in report.
+- Medicine list now shows a compact status preview for availability, stock, reorder, and expiry.
 
 Roles:
 
@@ -1117,6 +1118,7 @@ Phase C step 1 status:
 - Prescription Blade module added.
 - Prescription list/create/show/edit/delete pages added.
 - Prescription status column added for pending/dispensed/cancelled workflow.
+- Prescription list now shows a compact workflow preview for the linked appointment.
 - Doctor users see only their own prescriptions.
 - Department admins see department patient prescriptions.
 - Super admin can manage all prescriptions.

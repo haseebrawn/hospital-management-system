@@ -31,7 +31,9 @@ Run all feature tests:
   - appointment workflow prefill
   - lab list workflow preview
 - Medicines web UI: `tests/Feature/Web/MedicinesWebTest.php`
+  - medicine list status preview
 - Prescriptions web UI: `tests/Feature/Web/PrescriptionsWebTest.php`
+  - prescription list workflow preview
   - appointment workflow prefill
 - Billing web UI: `tests/Feature/Web/BillingWebTest.php`
   - invoice creation

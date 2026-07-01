@@ -24,7 +24,14 @@ class PrescriptionsController extends Controller
         $user = $request->user();
 
         $prescriptions = Prescription::query()
-            ->with(['appointment', 'doctor', 'patient', 'items'])
+            ->with([
+                'appointment' => function ($query) {
+                    $query->with(['patient', 'doctor'])->withCount(['medicalRecords', 'prescriptions', 'labTests', 'billingItems']);
+                },
+                'doctor',
+                'patient',
+                'items',
+            ])
             ->when($user->hasRole('doctor') && ! $user->hasAnyRole(['super_admin', 'admin']), fn ($query) => $query->where('doctor_id', $user->id))
             ->when($user->hasRole('admin') && ! $user->hasRole('super_admin'), function ($query) use ($user) {
                 $query->whereHas('patient', fn ($patientQuery) => $patientQuery->where('department_id', $user->department_id));
@@ -46,6 +53,14 @@ class PrescriptionsController extends Controller
             ->latest()
             ->paginate(15)
             ->withQueryString();
+
+        $prescriptions->getCollection()->transform(function (Prescription $prescription) {
+            if ($prescription->appointment) {
+                $prescription->appointment->workflowTimeline = $this->buildAppointmentWorkflowTimeline($prescription->appointment);
+            }
+
+            return $prescription;
+        });
 
         $statusOptions = $this->statusOptions;
 
@@ -282,5 +297,36 @@ class PrescriptionsController extends Controller
 
         $notifications->notifyRoles(['super_admin', 'admin', 'pharmacist'], $payload, $request->user());
         $notifications->notifyUsers([$prescription->doctor], $payload);
+    }
+
+    private function buildAppointmentWorkflowTimeline(Appointment $appointment): array
+    {
+        $medicalRecordsCount = (int) ($appointment->medical_records_count ?? 0);
+        $prescriptionsCount = (int) ($appointment->prescriptions_count ?? 0);
+        $labTestsCount = (int) ($appointment->lab_tests_count ?? 0);
+        $billingItemsCount = (int) ($appointment->billing_items_count ?? 0);
+
+        return [
+            [
+                'label' => 'Check In',
+                'done' => (bool) $appointment->checked_in_at,
+            ],
+            [
+                'label' => 'Medical Record',
+                'done' => $medicalRecordsCount > 0,
+            ],
+            [
+                'label' => 'Prescription',
+                'done' => $prescriptionsCount > 0,
+            ],
+            [
+                'label' => 'Lab Test',
+                'done' => $labTestsCount > 0,
+            ],
+            [
+                'label' => 'Billing',
+                'done' => $billingItemsCount > 0,
+            ],
+        ];
     }
 }

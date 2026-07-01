@@ -10,6 +10,7 @@ use App\Services\HospitalNotificationService;
 use App\Services\PharmacyAlertService;
 use App\Services\PharmacyDispenseService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class MedicinesController extends Controller
 {
@@ -26,6 +27,12 @@ class MedicinesController extends Controller
             ->orderBy('name')
             ->paginate(15)
             ->withQueryString();
+
+        $medicines->getCollection()->transform(function (Medicine $medicine) {
+            $medicine->statusPreview = $this->buildMedicineStatusPreview($medicine);
+
+            return $medicine;
+        });
 
         $statusOptions = ['available', 'unavailable'];
         $alerts = $pharmacyAlertService->collectAlerts();
@@ -115,5 +122,35 @@ class MedicinesController extends Controller
         return redirect()
             ->route('medicines.index')
             ->with('status', 'Medicine deleted successfully.');
+    }
+
+    private function buildMedicineStatusPreview(Medicine $medicine): array
+    {
+        $expiryDate = filled($medicine->expiry_date) ? Carbon::parse($medicine->expiry_date) : null;
+        $reorderLevel = (int) ($medicine->reorder_level ?? 10);
+        $stock = (int) $medicine->stock;
+
+        return [
+            [
+                'label' => 'Availability',
+                'value' => ucfirst((string) $medicine->status),
+                'done' => $medicine->status === 'available',
+            ],
+            [
+                'label' => 'Stock',
+                'value' => (string) $stock,
+                'done' => $stock > 0,
+            ],
+            [
+                'label' => 'Reorder',
+                'value' => $stock > $reorderLevel ? 'Safe' : 'Low',
+                'done' => $stock > $reorderLevel,
+            ],
+            [
+                'label' => 'Expiry',
+                'value' => $expiryDate ? $expiryDate->format('Y-m-d') : '-',
+                'done' => ! $expiryDate || $expiryDate->isFuture(),
+            ],
+        ];
     }
 }

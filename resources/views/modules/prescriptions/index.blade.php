@@ -39,7 +39,7 @@
         </div>
 
         <div style="margin-top:16px; overflow:auto;">
-            <table class="dash-table" style="min-width:1040px;">
+            <table class="dash-table" style="min-width:1260px;">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -49,6 +49,7 @@
                         <th>Medicines</th>
                         <th>Status</th>
                         <th>Created</th>
+                        <th>Workflow</th>
                         <th style="text-align:right;">Actions</th>
                     </tr>
                 </thead>
@@ -73,6 +74,27 @@
                             </td>
                             <td style="text-transform:capitalize; font-weight:700;">{{ $prescription->status }}</td>
                             <td>{{ optional($prescription->created_at)->format('Y-m-d H:i') }}</td>
+                            <td>
+                                @if ($prescription->appointment)
+                                    <div style="display:flex; flex-direction:column; gap:6px;">
+                                        <div class="workflow-chip__meta">
+                                            Appt #{{ $prescription->appointment->id }} · {{ $prescription->appointment->date }}
+                                        </div>
+                                        <div class="workflow-chip-row" style="max-width: 420px;">
+                                            @foreach ($prescription->appointment->workflowTimeline ?? [] as $step)
+                                                <span class="workflow-chip"
+                                                    style="--workflow-chip-border: {{ $step['done'] ? 'rgba(34,197,94,0.24)' : 'rgba(148,163,184,0.24)' }}; --workflow-chip-bg: {{ $step['done'] ? 'rgba(34,197,94,0.08)' : 'rgba(248,250,252,0.95)' }}; --workflow-chip-color: {{ $step['done'] ? '#166534' : '#64748b' }}; --workflow-chip-dot: {{ $step['done'] ? '#22c55e' : '#cbd5e1' }};">
+                                                    <span class="workflow-chip__dot"></span>
+                                                    {{ $step['label'] }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                        <a href="{{ route('appointments.show', $prescription->appointment) }}" style="font-size:12px; color:var(--primary); text-decoration:none;">Open appointment</a>
+                                    </div>
+                                @else
+                                    <span style="font-size:12px; color:var(--text-muted);">No linked appointment</span>
+                                @endif
+                            </td>
                             <td style="text-align:right;">
                                 <a href="{{ route('prescriptions.edit', $prescription) }}"
                                     style="font-size:13px; color:var(--primary); text-decoration:none; margin-right:10px;">
@@ -91,7 +113,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" style="padding:16px;">No prescriptions found.</td>
+                            <td colspan="9" style="padding:16px;">No prescriptions found.</td>
                         </tr>
                     @endforelse
                 </tbody>

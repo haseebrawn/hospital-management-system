@@ -36,6 +36,30 @@ class MedicinesWebTest extends TestCase
         $response->assertSee('Medicines');
     }
 
+    public function test_medicines_index_shows_status_preview(): void
+    {
+        $this->actingAsPharmacist();
+
+        Medicine::factory()->create([
+            'name' => 'Preview Medicine',
+            'stock' => 4,
+            'reorder_level' => 8,
+            'price' => 15.50,
+            'expiry_date' => now()->addDays(14)->toDateString(),
+            'status' => 'available',
+        ]);
+
+        $response = $this->get('/pharmacy/medicines');
+
+        $response->assertOk();
+        $response->assertSee('Preview');
+        $response->assertSee('Availability');
+        $response->assertSee('Stock');
+        $response->assertSee('Reorder');
+        $response->assertSee('Expiry');
+        $response->assertSee('Preview Medicine');
+    }
+
     public function test_medicine_can_be_created_from_web(): void
     {
         $this->actingAsPharmacist();

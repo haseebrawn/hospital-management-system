@@ -85,7 +85,7 @@
         </div>
 
         <div style="margin-top: 16px; overflow:auto;">
-            <table class="dash-table" style="min-width: 1040px;">
+            <table class="dash-table" style="min-width: 1260px;">
                 <thead>
                     <tr>
                         <th class="u-nowrap">ID</th>
@@ -95,6 +95,7 @@
                         <th>Price</th>
                         <th>Expiry</th>
                         <th>Status</th>
+                        <th>Preview</th>
                         <th style="text-align:right;">Actions</th>
                     </tr>
                 </thead>
@@ -112,6 +113,17 @@
                             <td class="u-nowrap">{{ number_format((float) $med->price, 2) }}</td>
                             <td class="u-nowrap">{{ $med->expiry_date ?? '-' }}</td>
                             <td class="u-nowrap" style="text-transform:capitalize;">{{ $med->status }}</td>
+                            <td>
+                                        <div class="workflow-chip-row" style="max-width: 420px;">
+                                            @foreach ($med->statusPreview ?? [] as $step)
+                                                <span class="workflow-chip"
+                                                    style="--workflow-chip-border: {{ $step['done'] ? 'rgba(34,197,94,0.24)' : 'rgba(148,163,184,0.24)' }}; --workflow-chip-bg: {{ $step['done'] ? 'rgba(34,197,94,0.08)' : 'rgba(248,250,252,0.95)' }}; --workflow-chip-color: {{ $step['done'] ? '#166534' : '#64748b' }}; --workflow-chip-dot: {{ $step['done'] ? '#22c55e' : '#cbd5e1' }};">
+                                                    <span class="workflow-chip__dot"></span>
+                                                    {{ $step['label'] }}: {{ $step['value'] }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                            </td>
                             <td style="text-align:right;">
                                 <a href="{{ route('medicines.edit', $med) }}"
                                     style="font-size:13px; color: var(--primary); text-decoration:none; margin-right:10px;">
@@ -130,7 +142,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" style="padding: 16px;">No medicines found.</td>
+                            <td colspan="9" style="padding: 16px;">No medicines found.</td>
                         </tr>
                     @endforelse
                 </tbody>
