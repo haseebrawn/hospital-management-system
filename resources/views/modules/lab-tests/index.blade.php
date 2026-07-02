@@ -48,20 +48,20 @@
             <table class="dash-table" style="min-width: 1260px;">
                 <thead>
                     <tr>
-                        <th class="u-nowrap">ID</th>
-                        <th>Test Type</th>
-                        <th>Patient Name</th>
-                        <th>Doctor</th>
-                        <th>Technician</th>
-                        <th>Status</th>
-                        <th>Workflow</th>
-                        <th style="text-align:right;">Actions</th>
+                        <th class="u-nowrap table-col-id">ID</th>
+                        <th class="table-col-name">Test Type</th>
+                        <th class="table-col-name">Patient Name</th>
+                        <th class="table-col-name">Doctor</th>
+                        <th class="table-col-name">Technician</th>
+                        <th class="table-col-status">Status</th>
+                        <th class="table-col-workflow">Workflow</th>
+                        <th class="table-col-actions" style="text-align:right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($tests as $test)
                         <tr>
-                            <td class="u-nowrap">{{ $test->id }}</td>
+                            <td class="u-nowrap table-col-id">{{ $test->id }}</td>
                             <td style="font-weight:600;">
                                 <a href="{{ route('lab-tests.show', $test) }}" style="color:inherit; text-decoration:none;">
                                     {{ $test->test_type }}
@@ -92,7 +92,7 @@
                                     <span style="font-size:12px; color:var(--text-muted);">No linked appointment</span>
                                 @endif
                             </td>
-                            <td style="text-align:right;">
+                            <td class="table-col-actions" style="text-align:right;">
                                 <a href="{{ route('lab-tests.edit', $test) }}"
                                     style="font-size:13px; color: var(--primary); text-decoration:none; margin-right:10px;">
                                     Edit

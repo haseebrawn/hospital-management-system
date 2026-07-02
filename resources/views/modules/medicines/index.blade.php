@@ -88,31 +88,31 @@
             <table class="dash-table" style="min-width: 1260px;">
                 <thead>
                     <tr>
-                        <th class="u-nowrap">ID</th>
-                        <th>Name</th>
-                        <th>Stock</th>
-                        <th>Reorder</th>
-                        <th>Price</th>
-                        <th>Expiry</th>
-                        <th>Status</th>
-                        <th>Preview</th>
-                        <th style="text-align:right;">Actions</th>
+                        <th class="u-nowrap table-col-id">ID</th>
+                        <th class="table-col-name">Name</th>
+                        <th class="table-col-money">Stock</th>
+                        <th class="table-col-money">Reorder</th>
+                        <th class="table-col-money">Price</th>
+                        <th class="table-col-date">Expiry</th>
+                        <th class="table-col-status">Status</th>
+                        <th class="table-col-workflow">Preview</th>
+                        <th class="table-col-actions" style="text-align:right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($medicines as $med)
                         <tr>
-                            <td class="u-nowrap">{{ $med->id }}</td>
+                            <td class="u-nowrap table-col-id">{{ $med->id }}</td>
                             <td style="font-weight:600;">
                                 <a href="{{ route('medicines.show', $med) }}" style="color:inherit; text-decoration:none;">
                                     {{ $med->name }}
                                 </a>
                             </td>
-                            <td class="u-nowrap">{{ $med->stock }}</td>
-                            <td class="u-nowrap">{{ $med->reorder_level ?? 10 }}</td>
-                            <td class="u-nowrap">{{ number_format((float) $med->price, 2) }}</td>
-                            <td class="u-nowrap">{{ $med->expiry_date ?? '-' }}</td>
-                            <td class="u-nowrap" style="text-transform:capitalize;">{{ $med->status }}</td>
+                            <td class="u-nowrap table-col-money">{{ $med->stock }}</td>
+                            <td class="u-nowrap table-col-money">{{ $med->reorder_level ?? 10 }}</td>
+                            <td class="u-nowrap table-col-money">{{ number_format((float) $med->price, 2) }}</td>
+                            <td class="u-nowrap table-col-date">{{ $med->expiry_date ?? '-' }}</td>
+                            <td class="u-nowrap table-col-status" style="text-transform:capitalize;">{{ $med->status }}</td>
                             <td>
                                         <div class="workflow-chip-row" style="max-width: 420px;">
                                             @foreach ($med->statusPreview ?? [] as $step)
@@ -124,7 +124,7 @@
                                             @endforeach
                                         </div>
                             </td>
-                            <td style="text-align:right;">
+                            <td class="table-col-actions" style="text-align:right;">
                                 <a href="{{ route('medicines.edit', $med) }}"
                                     style="font-size:13px; color: var(--primary); text-decoration:none; margin-right:10px;">
                                     Edit

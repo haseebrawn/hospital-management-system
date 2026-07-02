@@ -42,37 +42,37 @@
             <table class="dash-table" style="min-width: 1400px;">
                 <thead>
                     <tr>
-                        <th class="u-nowrap">Invoice #</th>
-                        <th class="u-nowrap">ID</th>
-                        <th>Patient Name</th>
+                        <th class="u-nowrap table-col-name">Invoice #</th>
+                        <th class="u-nowrap table-col-id">ID</th>
+                        <th class="table-col-name">Patient Name</th>
                         <th class="u-nowrap">Phone</th>
-                        <th>Total</th>
-                        <th>Paid</th>
-                        <th>Balance</th>
-                        <th>Status</th>
-                        <th>Created By</th>
-                        <th>Created</th>
-                        <th>Workflow</th>
-                        <th style="text-align:right;">Actions</th>
+                        <th class="table-col-money">Total</th>
+                        <th class="table-col-money">Paid</th>
+                        <th class="table-col-money">Balance</th>
+                        <th class="table-col-status">Status</th>
+                        <th class="table-col-name">Created By</th>
+                        <th class="table-col-date">Created</th>
+                        <th class="table-col-workflow">Workflow</th>
+                        <th class="table-col-actions" style="text-align:right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($billings as $inv)
                         <tr>
-                            <td class="u-nowrap" style="font-weight:700;">{{ $inv->invoice_number ?? '-' }}</td>
-                            <td class="u-nowrap">{{ $inv->id }}</td>
+                            <td class="u-nowrap table-col-name" style="font-weight:700;">{{ $inv->invoice_number ?? '-' }}</td>
+                            <td class="u-nowrap table-col-id">{{ $inv->id }}</td>
                             <td style="font-weight:600;">
                                 <a href="{{ route('billing.show', $inv) }}" style="color:inherit; text-decoration:none;">
                                     {{ optional($inv->patient)->first_name }} {{ optional($inv->patient)->last_name }}
                                 </a>
                             </td>
                             <td class="u-nowrap">{{ optional($inv->patient)->contact_number ?? '-' }}</td>
-                            <td class="u-nowrap">{{ number_format((float) $inv->total_amount, 2) }}</td>
-                            <td class="u-nowrap">{{ number_format((float) $inv->paid_amount, 2) }}</td>
-                            <td class="u-nowrap">{{ number_format((float) $inv->balance_due, 2) }}</td>
-                            <td class="u-nowrap" style="text-transform:capitalize;">{{ $inv->status }}</td>
+                            <td class="u-nowrap table-col-money">{{ number_format((float) $inv->total_amount, 2) }}</td>
+                            <td class="u-nowrap table-col-money">{{ number_format((float) $inv->paid_amount, 2) }}</td>
+                            <td class="u-nowrap table-col-money">{{ number_format((float) $inv->balance_due, 2) }}</td>
+                            <td class="u-nowrap table-col-status" style="text-transform:capitalize;">{{ $inv->status }}</td>
                             <td>{{ optional($inv->creator)->name ?? '-' }}</td>
-                            <td class="u-nowrap">{{ optional($inv->created_at)->format('Y-m-d H:i') }}</td>
+                            <td class="u-nowrap table-col-date">{{ optional($inv->created_at)->format('Y-m-d H:i') }}</td>
                             <td>
                                 <div class="workflow-chip-row" style="max-width: 420px;">
                                     @foreach ($inv->workflowTimeline ?? [] as $step)
@@ -84,7 +84,7 @@
                                     @endforeach
                                 </div>
                             </td>
-                            <td style="text-align:right;">
+                            <td class="table-col-actions" style="text-align:right;">
                                 <a href="{{ route('billing.show', $inv) }}"
                                     style="font-size:13px; color: var(--primary); text-decoration:none; margin-right:10px;">
                                     View

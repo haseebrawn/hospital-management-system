@@ -42,21 +42,21 @@
             <table class="dash-table" style="min-width:1260px;">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Patient</th>
-                        <th>Doctor</th>
-                        <th>Instructions</th>
-                        <th>Medicines</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                        <th>Workflow</th>
-                        <th style="text-align:right;">Actions</th>
+                        <th class="table-col-id">ID</th>
+                        <th class="table-col-name">Patient</th>
+                        <th class="table-col-name">Doctor</th>
+                        <th class="table-col-name">Instructions</th>
+                        <th class="table-col-name">Medicines</th>
+                        <th class="table-col-status">Status</th>
+                        <th class="table-col-date">Created</th>
+                        <th class="table-col-workflow">Workflow</th>
+                        <th class="table-col-actions" style="text-align:right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($prescriptions as $prescription)
                         <tr>
-                            <td>{{ $prescription->id }}</td>
+                            <td class="table-col-id">{{ $prescription->id }}</td>
                             <td style="font-weight:700;">
                                 <a href="{{ route('prescriptions.show', $prescription) }}" style="color:inherit; text-decoration:none;">
                                     {{ optional($prescription->patient)->mrn ?? '-' }} —
@@ -72,8 +72,8 @@
                                     {{ \Illuminate\Support\Str::limit($prescription->medicines ?: '-', 45) }}
                                 @endif
                             </td>
-                            <td style="text-transform:capitalize; font-weight:700;">{{ $prescription->status }}</td>
-                            <td>{{ optional($prescription->created_at)->format('Y-m-d H:i') }}</td>
+                            <td class="table-col-status" style="text-transform:capitalize; font-weight:700;">{{ $prescription->status }}</td>
+                            <td class="table-col-date">{{ optional($prescription->created_at)->format('Y-m-d H:i') }}</td>
                             <td>
                                 @if ($prescription->appointment)
                                     <div style="display:flex; flex-direction:column; gap:6px;">
@@ -95,7 +95,7 @@
                                     <span style="font-size:12px; color:var(--text-muted);">No linked appointment</span>
                                 @endif
                             </td>
-                            <td style="text-align:right;">
+                            <td class="table-col-actions" style="text-align:right;">
                                 <a href="{{ route('prescriptions.edit', $prescription) }}"
                                     style="font-size:13px; color:var(--primary); text-decoration:none; margin-right:10px;">
                                     Edit

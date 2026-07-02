@@ -662,7 +662,7 @@
 
         .dash-table th,
         .dash-table td {
-            padding: 10px 8px;
+            padding: 12px 10px;
             border-bottom: 1px solid rgba(229, 231, 235, 0.95);
             text-align: left;
             vertical-align: top;
@@ -710,6 +710,38 @@
 
         .u-nowrap {
             white-space: nowrap;
+        }
+
+        .table-col-id {
+            width: 72px;
+        }
+
+        .table-col-date {
+            width: 118px;
+        }
+
+        .table-col-time {
+            width: 84px;
+        }
+
+        .table-col-name {
+            min-width: 180px;
+        }
+
+        .table-col-status {
+            width: 120px;
+        }
+
+        .table-col-money {
+            width: 110px;
+        }
+
+        .table-col-workflow {
+            min-width: 260px;
+        }
+
+        .table-col-actions {
+            width: 170px;
         }
 
         @media (max-width: 640px) {

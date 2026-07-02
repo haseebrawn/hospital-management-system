@@ -35,21 +35,21 @@
             <table class="dash-table" style="min-width: 920px;">
                 <thead>
                     <tr>
-                        <th class="u-nowrap">ID</th>
-                        <th class="u-nowrap">MRN</th>
-                        <th>Patient Name</th>
-                        <th>Phone</th>
-                        <th>Gender</th>
-                        <th>Department</th>
-                        <th>Workflow</th>
-                        <th style="text-align:right;">Actions</th>
+                        <th class="u-nowrap table-col-id">ID</th>
+                        <th class="u-nowrap table-col-id">MRN</th>
+                        <th class="table-col-name">Patient Name</th>
+                        <th class="u-nowrap">Phone</th>
+                        <th class="table-col-status">Gender</th>
+                        <th class="table-col-name">Department</th>
+                        <th class="table-col-workflow">Workflow</th>
+                        <th class="table-col-actions" style="text-align:right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($patients as $patient)
                         <tr>
-                            <td class="u-nowrap">{{ $patient->id }}</td>
-                            <td class="u-nowrap" style="font-weight:700;">{{ $patient->mrn ?? '-' }}</td>
+                            <td class="u-nowrap table-col-id">{{ $patient->id }}</td>
+                            <td class="u-nowrap table-col-id" style="font-weight:700;">{{ $patient->mrn ?? '-' }}</td>
                             <td style="font-weight:600;">
                                 <a href="{{ route('patients.show', $patient) }}" style="color:inherit; text-decoration:none;">
                                     {{ $patient->first_name }} {{ $patient->last_name }}
@@ -79,7 +79,7 @@
                                     <span style="font-size:12px; color:var(--text-muted);">No appointments yet</span>
                                 @endif
                             </td>
-                            <td style="text-align:right;">
+                            <td class="table-col-actions" style="text-align:right;">
                                 <a href="{{ route('patients.edit', $patient) }}"
                                     style="font-size:13px; color: var(--primary); text-decoration:none; margin-right:10px;">
                                     Edit

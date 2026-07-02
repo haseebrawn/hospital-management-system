@@ -48,24 +48,24 @@
             <table class="dash-table" style="min-width: 1220px;">
                 <thead>
                     <tr>
-                        <th class="u-nowrap">ID</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Patient Name</th>
+                        <th class="u-nowrap table-col-id">ID</th>
+                        <th class="table-col-date">Date</th>
+                        <th class="table-col-time">Time</th>
+                        <th class="table-col-name">Patient Name</th>
                         <th>Reason</th>
-                        <th>Doctor</th>
-                        <th>Department</th>
-                        <th>Status</th>
-                        <th>Workflow</th>
-                        <th style="text-align:right;">Actions</th>
+                        <th class="table-col-name">Doctor</th>
+                        <th class="table-col-name">Department</th>
+                        <th class="table-col-status">Status</th>
+                        <th class="table-col-workflow">Workflow</th>
+                        <th class="table-col-actions" style="text-align:right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($appointments as $appt)
                         <tr>
-                            <td class="u-nowrap">{{ $appt->id }}</td>
-                            <td class="u-nowrap">{{ $appt->date }}</td>
-                            <td class="u-nowrap">{{ substr((string) $appt->time, 0, 5) }}</td>
+                            <td class="u-nowrap table-col-id">{{ $appt->id }}</td>
+                            <td class="u-nowrap table-col-date">{{ $appt->date }}</td>
+                            <td class="u-nowrap table-col-time">{{ substr((string) $appt->time, 0, 5) }}</td>
                             <td style="font-weight:600;">
                                 <a href="{{ route('appointments.show', $appt) }}" style="color:inherit; text-decoration:none;">
                                     {{ optional($appt->patient)->first_name }} {{ optional($appt->patient)->last_name }}
@@ -91,7 +91,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td style="text-align:right;">
+                            <td class="table-col-actions" style="text-align:right;">
                                 @if ($appt->canCheckIn())
                                     <form method="POST" action="{{ route('appointments.check-in', $appt) }}" style="display:inline;">
                                         @csrf

@@ -4,6 +4,12 @@
 
 @section('content')
 <style>
+    .dashboard-page {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
     .dash-header {
         display: flex;
         align-items: flex-end;
@@ -28,12 +34,11 @@
         display: grid;
         grid-template-columns: repeat(4, minmax(180px, 1fr));
         gap: 14px;
-        margin-bottom: 18px;
     }
 
     .dash-stat {
-        border-radius: 16px;
-        padding: 16px 16px;
+        border-radius: 18px;
+        padding: 18px 18px;
         color: #ffffff;
         border: 1px solid rgba(255, 255, 255, 0.16);
         box-shadow: 0 18px 45px rgba(2, 6, 23, 0.12);
@@ -101,11 +106,11 @@
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
     }
 
     .dash-card__title {
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 700;
         margin: 0;
     }
@@ -250,7 +255,7 @@
     }
 
     .dash-appointment {
-        margin-top: 16px;
+        margin-top: 0;
     }
 
     .dash-notify {
@@ -337,7 +342,7 @@
 
         .dash-stat {
             min-height: auto;
-            padding: 12px;
+            padding: 14px;
         }
 
         .dash-chart {
@@ -422,6 +427,7 @@
     } */
 </style>
 
+<div class="dashboard-page">
 <div class="dash-header">
     <div>
         <h2 class="dash-title">Dashboard</h2>
@@ -442,7 +448,7 @@
 @endphp
 
 @if (auth()->user()?->hasAnyRole(['super_admin', 'admin']))
-    <div class="card" style="margin-bottom:18px;">
+    <div class="card">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
             <div>
                 <div class="card-title">Admin Dashboard</div>
@@ -728,6 +734,8 @@
     </div>
 </div>
 @endif
+
+</div>
 
 <script>
     (function() {
