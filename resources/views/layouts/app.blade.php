@@ -47,15 +47,15 @@
         }
 
         .topbar {
-            height: 60px;
-            padding: 0 24px 0px 10px;
+            height: 62px;
+            padding: 0 22px 0 12px;
             background: rgba(255, 255, 255, 0.78);
             border-bottom: 1px solid rgba(148, 163, 184, 0.25);
             backdrop-filter: blur(10px);
             display: grid;
             grid-template-columns: auto 1fr auto;
             align-items: center;
-            gap: 20px;
+            gap: 18px;
             position: sticky;
             top: 0;
             z-index: 40;
@@ -70,7 +70,7 @@
         .search-box {
             position: relative;
             width: 100%;
-            max-width: 400px;
+            max-width: 460px;
         }
 
         /* Input */
@@ -199,12 +199,12 @@
 
         .notification-dropdown {
             position: absolute;
-            right: 52px;
-            top: 48px;
-            width: 340px;
-            max-width: calc(100vw - 24px);
+            right: 48px;
+            top: 50px;
+            width: 360px;
+            max-width: calc(100vw - 20px);
             background: var(--card-bg);
-            border-radius: 16px;
+            border-radius: 18px;
             border: 1px solid rgba(229, 231, 235, 0.95);
             box-shadow: 0 22px 55px rgba(15, 23, 42, 0.16);
             overflow: hidden;
@@ -220,8 +220,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            padding: 14px 14px 10px;
+            gap: 10px;
+            padding: 13px 16px 11px;
             border-bottom: 1px solid rgba(229, 231, 235, 0.9);
         }
 
@@ -240,7 +240,7 @@
         }
 
         .notification-list {
-            max-height: 360px;
+            max-height: 380px;
             overflow: auto;
             display: grid;
         }
@@ -248,8 +248,8 @@
         .notification-item {
             display: grid;
             grid-template-columns: 34px 1fr;
-            gap: 10px;
-            padding: 12px 14px;
+            gap: 12px;
+            padding: 13px 16px;
             text-decoration: none;
             color: var(--text-main);
             border-bottom: 1px solid rgba(229, 231, 235, 0.72);
@@ -267,7 +267,7 @@
         .notification-item__icon {
             width: 34px;
             height: 34px;
-            border-radius: 12px;
+            border-radius: 13px;
             display: grid;
             place-items: center;
             color: #2563eb;
@@ -278,17 +278,17 @@
         .notification-item__title {
             font-size: 13px;
             font-weight: 700;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
         }
 
         .notification-item__message {
             font-size: 12px;
             color: var(--text-muted);
-            line-height: 1.45;
+            line-height: 1.5;
         }
 
         .notification-empty {
-            padding: 18px 14px;
+            padding: 20px 16px;
             color: var(--text-muted);
             font-size: 13px;
             text-align: center;
@@ -341,7 +341,7 @@
             position: relative;
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
         }
 
         .profile-name {
@@ -495,7 +495,7 @@
         }
 
         .app-sidebar__header {
-            padding: 18px 16px 12px;
+            padding: 18px 16px 10px;
         }
 
         .app-sidebar__brand {
@@ -522,10 +522,10 @@
         }
 
         .app-sidebar__nav {
-            padding: 10px 10px 14px;
+            padding: 8px 10px 12px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
         .app-sidebar__item {
@@ -533,9 +533,9 @@
             color: rgba(255, 255, 255, 0.85);
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: 12px;
+            gap: 11px;
+            padding: 11px 12px;
+            border-radius: 13px;
             font-size: 13px;
             line-height: 1;
             transition: background 160ms ease, color 160ms ease;
@@ -581,15 +581,15 @@
 
         .app-sidebar__footer {
             margin-top: auto;
-            padding: 14px 12px 16px;
+            padding: 12px 12px 16px;
         }
 
         .app-sidebar__user {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             padding: 10px 10px;
-            border-radius: 14px;
+            border-radius: 15px;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.12);
         }
@@ -629,7 +629,7 @@
         /* Page content area */
         .app-page {
             flex: 1;
-            padding: 24px 24px 32px;
+            padding: 22px 22px 30px;
             min-width: 0;
         }
 
