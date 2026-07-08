@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="card">
-        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap: 12px; flex-wrap:wrap;">
+        <div class="page-header">
             <div>
                 <div class="card-title">{{ $billing->invoice_number ?? ('Invoice #' . $billing->id) }}</div>
                 <div class="card-subtitle">
@@ -14,9 +14,8 @@
                     · Balance: <span style="font-weight:800;">{{ number_format((float) $billing->balance_due, 2) }}</span>
                 </div>
             </div>
-            <div style="display:flex; gap: 10px; flex-wrap:wrap;">
-                <a href="{{ route('billing.receipt', $billing) }}"
-                    style="padding:8px 12px; border-radius:10px; border:1px solid rgba(37,99,235,0.30); background:rgba(37,99,235,0.08); color:#2563eb; text-decoration:none; font-size:13px; font-weight:700;">
+            <div class="page-header__actions">
+                <a href="{{ route('billing.receipt', $billing) }}" class="page-button page-button--soft">
                     Printable Receipt
                 </a>
                 @if ($billing->balance_due > 0 && $billing->status !== 'cancelled')
@@ -25,7 +24,7 @@
                         @method('PUT')
                         <button type="submit"
                             onclick="return confirm('Mark the remaining balance as paid?')"
-                            style="padding:8px 12px; border-radius:10px; border:none; background:#10b981; color:#fff; cursor:pointer; font-size:13px;">
+                            class="page-button" style="border:none; background:#10b981; color:#fff; cursor:pointer; font-weight:700;">
                             Mark Paid
                         </button>
                     </form>
@@ -35,40 +34,40 @@
                     @method('DELETE')
                     <button type="submit"
                         onclick="return confirm('Delete this invoice?')"
-                        style="padding:8px 12px; border-radius:10px; border:1px solid rgba(239,68,68,0.35); background: transparent; color:#dc2626; cursor:pointer; font-size:13px;">
+                        class="page-button" style="border:1px solid rgba(239,68,68,0.35); background: transparent; color:#dc2626; cursor:pointer; font-weight:700;">
                         Delete
                     </button>
                 </form>
             </div>
         </div>
 
-        <div style="margin-top: 14px; display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-            <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
-                <div style="font-size:12px; color: var(--text-muted);">Patient</div>
-                <div style="font-weight:600; margin-top:4px;">
+        <div style="margin-top: 14px;" class="page-grid-2">
+            <div class="info-card">
+                <div class="info-card__label">Patient</div>
+                <div class="info-card__value">
                     {{ optional($billing->patient)->first_name }} {{ optional($billing->patient)->last_name }}
                 </div>
-                <div style="font-size:12px; color: var(--text-muted); margin-top:2px;">
+                <div class="section-panel__muted" style="margin-top:2px;">
                     {{ optional($billing->patient)->contact_number }}
                 </div>
             </div>
-            <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
-                <div style="font-size:12px; color: var(--text-muted);">Payment Summary</div>
-                <div style="font-weight:600; margin-top:4px;">
+            <div class="info-card">
+                <div class="info-card__label">Payment Summary</div>
+                <div class="info-card__value">
                     Method: {{ $billing->payment_method ?: '-' }}
                 </div>
-                <div style="font-size:12px; color: var(--text-muted); margin-top:2px;">
+                <div class="section-panel__muted" style="margin-top:2px;">
                     Created By: {{ optional($billing->creator)->name ?? '-' }}
                 </div>
-                <div style="font-size:12px; color: var(--text-muted); margin-top:2px;">
+                <div class="section-panel__muted" style="margin-top:2px;">
                     Approved By: {{ optional($billing->approver)->name ?? '-' }}
                 </div>
             </div>
         </div>
 
-        <div style="margin-top:16px; padding:12px; border:1px solid var(--border-color); border-radius:14px;">
+        <div style="margin-top:16px;" class="section-panel">
             <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                <div style="font-weight:700;">Payment Progress</div>
+                <div class="section-panel__title">Payment Progress</div>
                 <div style="font-size:12px; color:var(--text-muted);">{{ $paymentSummary['payment_count'] }} payment(s) recorded</div>
             </div>
             <div style="margin-top:10px; height:10px; border-radius:999px; background:#e5e7eb; overflow:hidden;">

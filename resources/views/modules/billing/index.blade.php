@@ -4,13 +4,13 @@
 
 @section('content')
     <div class="card">
-        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap: 12px; flex-wrap:wrap;">
+        <div class="page-header">
             <div>
                 <div class="card-title">Billing</div>
                 <div class="card-subtitle">Create invoices and manage payments.</div>
             </div>
 
-            <div style="display:flex; gap: 10px; align-items:center; flex-wrap:wrap;">
+            <div class="page-header__actions">
                 <form method="GET" action="{{ route('billing.index') }}" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                     <input name="q" value="{{ $search ?? '' }}" placeholder="Search patient name / phone"
                         style="padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:13px; min-width:240px;">
@@ -25,16 +25,10 @@
                         @endforeach
                     </select>
 
-                    <button type="submit"
-                        style="padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); background:#fff; cursor:pointer;">
-                        Filter
-                    </button>
+                    <button type="submit" class="page-button page-button--neutral">Filter</button>
                 </form>
 
-                <a href="{{ route('billing.create') }}"
-                    style="padding:8px 12px; border-radius:10px; background: var(--primary); color:#fff; text-decoration:none; font-size:13px;">
-                    + New Invoice
-                </a>
+                <a href="{{ route('billing.create') }}" class="page-button page-button--primary">+ New Invoice</a>
             </div>
         </div>
 

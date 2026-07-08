@@ -4,20 +4,18 @@
 
 @section('content')
     <div class="card">
-        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap: 12px; flex-wrap:wrap;">
+        <div class="page-header">
             <div>
                 <div class="card-title">
                     {{ $patient->first_name }} {{ $patient->last_name }}
                 </div>
                 <div class="card-subtitle">Patient profile</div>
             </div>
-            <div style="display:flex; gap: 10px; flex-wrap:wrap;">
-                <a href="{{ route('patients.history', $patient) }}"
-                    style="padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); background:#fff; text-decoration:none; color:inherit; font-size:13px;">
+            <div class="page-header__actions">
+                <a href="{{ route('patients.history', $patient) }}" class="page-button page-button--neutral">
                     Medical History
                 </a>
-                <a href="{{ route('patients.edit', $patient) }}"
-                    style="padding:8px 12px; border-radius:10px; border:1px solid var(--border-color); background:#fff; text-decoration:none; color:inherit; font-size:13px;">
+                <a href="{{ route('patients.edit', $patient) }}" class="page-button page-button--neutral">
                     Edit
                 </a>
                 <form method="POST" action="{{ route('patients.destroy', $patient) }}">
@@ -25,66 +23,67 @@
                     @method('DELETE')
                     <button type="submit"
                         onclick="return confirm('Delete this patient?')"
-                        style="padding:8px 12px; border-radius:10px; border:1px solid rgba(239,68,68,0.35); background: rgba(239,68,68,0.08); color:#dc2626; cursor:pointer; font-size:13px;">
+                        class="page-button"
+                        style="border:1px solid rgba(239,68,68,0.35); background: rgba(239,68,68,0.08); color:#dc2626; cursor:pointer; font-weight:700;">
                         Delete
                     </button>
                 </form>
             </div>
         </div>
 
-        <div style="margin-top: 14px; display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-            <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
-                <div style="font-size:12px; color: var(--text-muted);">MRN / Registration No.</div>
-                <div style="font-weight:600; margin-top:4px;">{{ $patient->mrn ?? '-' }}</div>
+        <div style="margin-top: 14px;" class="page-grid-2">
+            <div class="info-card">
+                <div class="info-card__label">MRN / Registration No.</div>
+                <div class="info-card__value">{{ $patient->mrn ?? '-' }}</div>
             </div>
 
-            <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
-                <div style="font-size:12px; color: var(--text-muted);">Contact</div>
-                <div style="font-weight:600; margin-top:4px;">{{ $patient->contact_number }}</div>
+            <div class="info-card">
+                <div class="info-card__label">Contact</div>
+                <div class="info-card__value">{{ $patient->contact_number }}</div>
             </div>
-            <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
-                <div style="font-size:12px; color: var(--text-muted);">Gender</div>
-                <div style="font-weight:600; margin-top:4px; text-transform:capitalize;">{{ $patient->gender }}</div>
+            <div class="info-card">
+                <div class="info-card__label">Gender</div>
+                <div class="info-card__value" style="text-transform:capitalize;">{{ $patient->gender }}</div>
             </div>
-            <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
-                <div style="font-size:12px; color: var(--text-muted);">Department</div>
-                <div style="font-weight:600; margin-top:4px;">{{ optional($patient->department)->name ?? '-' }}</div>
+            <div class="info-card">
+                <div class="info-card__label">Department</div>
+                <div class="info-card__value">{{ optional($patient->department)->name ?? '-' }}</div>
             </div>
-            <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
-                <div style="font-size:12px; color: var(--text-muted);">Address</div>
-                <div style="font-weight:600; margin-top:4px;">{{ $patient->address ?: '-' }}</div>
+            <div class="info-card">
+                <div class="info-card__label">Address</div>
+                <div class="info-card__value">{{ $patient->address ?: '-' }}</div>
             </div>
         </div>
 
-        <div style="margin-top: 16px; padding: 14px; border:1px solid var(--border-color); border-radius:14px;">
-            <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div style="margin-top: 16px;" class="section-panel">
+            <div class="page-header">
                 <div>
-                    <div style="font-weight:800;">Care Workflow Preview</div>
-                    <div style="font-size:12px; color: var(--text-muted); margin-top:4px;">Latest appointment snapshot with the same timeline used in patient history.</div>
+                    <div class="section-panel__title">Care Workflow Preview</div>
+                    <div class="section-panel__muted" style="margin-top:4px;">Latest appointment snapshot with the same timeline used in patient history.</div>
                 </div>
                 <a href="{{ route('patients.history', $patient) }}"
-                    style="padding:8px 12px; border-radius:10px; background:var(--primary); color:#fff; text-decoration:none; font-size:13px;">
+                    class="page-button page-button--primary">
                     Open Full History
                 </a>
             </div>
 
             @if ($latestAppointment)
-                <div style="margin-top: 14px; display:grid; grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 12px;">
-                    <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
-                        <div style="font-size:12px; color:var(--text-muted);">Latest Visit</div>
-                        <div style="font-weight:700; margin-top:4px;">{{ $latestAppointment->date }} {{ substr((string) $latestAppointment->time, 0, 5) }}</div>
+                <div style="margin-top: 14px;" class="page-grid-2">
+                    <div class="info-card">
+                        <div class="info-card__label">Latest Visit</div>
+                        <div class="info-card__value">{{ $latestAppointment->date }} {{ substr((string) $latestAppointment->time, 0, 5) }}</div>
                     </div>
-                    <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
-                        <div style="font-size:12px; color:var(--text-muted);">Doctor</div>
-                        <div style="font-weight:700; margin-top:4px;">{{ optional($latestAppointment->doctor)->name ?? '-' }}</div>
+                    <div class="info-card">
+                        <div class="info-card__label">Doctor</div>
+                        <div class="info-card__value">{{ optional($latestAppointment->doctor)->name ?? '-' }}</div>
                     </div>
-                    <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
-                        <div style="font-size:12px; color:var(--text-muted);">Visit Status</div>
-                        <div style="font-weight:700; margin-top:4px; text-transform:capitalize;">{{ $latestAppointment->visit_status }}</div>
+                    <div class="info-card">
+                        <div class="info-card__label">Visit Status</div>
+                        <div class="info-card__value" style="text-transform:capitalize;">{{ $latestAppointment->visit_status }}</div>
                     </div>
-                    <div style="padding:12px; border:1px solid var(--border-color); border-radius:14px;">
-                        <div style="font-size:12px; color:var(--text-muted);">Workflow</div>
-                        <div style="font-weight:700; margin-top:4px;">{{ collect($latestAppointment->workflowTimeline ?? [])->where('done', true)->count() }} / 5 completed</div>
+                    <div class="info-card">
+                        <div class="info-card__label">Workflow</div>
+                        <div class="info-card__value">{{ collect($latestAppointment->workflowTimeline ?? [])->where('done', true)->count() }} / 5 completed</div>
                     </div>
                 </div>
 
@@ -99,7 +98,7 @@
                     @endforeach
                 </div>
             @else
-                <div style="margin-top: 12px; padding: 12px; border:1px dashed var(--border-color); border-radius:12px; color: var(--text-muted); font-size:13px;">
+                <div style="margin-top: 12px; padding: 12px; border:1px dashed var(--border-color); border-radius:12px; color: var(--text-muted); font-size:13px; background:#fff;">
                     No appointment history yet. Open patient history to start the clinical workflow.
                 </div>
             @endif

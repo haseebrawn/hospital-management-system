@@ -76,7 +76,7 @@
         /* Input */
         .search-input {
             width: 100%;
-            padding: 8px 14px 8px 35px;
+            padding: 9px 14px 9px 36px;
             /* left space for icon */
             border-radius: 999px;
             border: 1px solid var(--border-color);
@@ -92,7 +92,7 @@
         /* Icon */
         .search-icon {
             position: absolute;
-            left: 12px;
+            left: 13px;
             top: 50%;
             transform: translateY(-50%);
             font-size: 13px;
@@ -101,14 +101,14 @@
 
         .search-results {
             position: absolute;
-            top: calc(100% + 10px);
+            top: calc(100% + 8px);
             left: 0;
             right: 0;
             z-index: 60;
             display: none;
             overflow: hidden;
             border: 1px solid var(--border-color);
-            border-radius: 18px;
+            border-radius: 20px;
             background: rgba(255, 255, 255, 0.96);
             box-shadow: 0 20px 45px rgba(15, 23, 42, 0.16);
             backdrop-filter: blur(14px);
@@ -122,8 +122,8 @@
         .search-result-state {
             display: grid;
             grid-template-columns: 34px 1fr;
-            gap: 10px;
-            padding: 12px 14px;
+            gap: 12px;
+            padding: 13px 16px;
             color: var(--text-dark);
             text-decoration: none;
             border-bottom: 1px solid rgba(226, 232, 240, 0.8);
@@ -141,7 +141,7 @@
         .search-result-icon {
             width: 34px;
             height: 34px;
-            border-radius: 12px;
+            border-radius: 13px;
             display: grid;
             place-items: center;
             color: var(--primary);
@@ -150,14 +150,16 @@
 
         .search-result-title {
             display: block;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 800;
+            margin-bottom: 3px;
         }
 
         .search-result-subtitle,
         .search-result-state {
             font-size: 12px;
             color: var(--text-muted);
+            line-height: 1.45;
         }
 
         .notification-icon {
@@ -341,7 +343,7 @@
             position: relative;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
         }
 
         .profile-name {
@@ -354,6 +356,7 @@
             background: transparent;
             padding: 0;
             cursor: pointer;
+            display: inline-flex;
         }
 
         /* EMAIL INPUT (RIGHT SIDE) */
@@ -403,13 +406,13 @@
         .profile-dropdown {
             position: absolute;
             right: 0;
-            top: 46px;
-            width: 200px;
+            top: 48px;
+            width: 220px;
             background: var(--card-bg);
-            border-radius: 12px;
+            border-radius: 14px;
             border: 1px solid rgba(229, 231, 235, 0.9);
             box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
-            padding: 10px 12px 12px;
+            padding: 12px 14px 14px;
             display: none;
         }
 
@@ -420,13 +423,13 @@
         .dropdown-header {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .dropdown-avatar {
-            width: 28px;
-            height: 28px;
+            width: 30px;
+            height: 30px;
             border-radius: 999px;
             background: linear-gradient(135deg, #34d399, #059669);
             display: flex;
@@ -439,33 +442,34 @@
 
         .dropdown-name {
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 700;
         }
 
         .dropdown-role {
             font-size: 11px;
             color: var(--text-muted);
+            margin-top: 2px;
         }
 
         .dropdown-divider {
             height: 1px;
             background-color: #e5e7eb;
-            margin: 8px 0;
+            margin: 10px 0;
         }
 
         .dropdown-item {
             font-size: 12px;
             color: var(--text-muted);
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .btn-logout {
             width: 100%;
             border: none;
             border-radius: 999px;
-            padding: 8px 0;
+            padding: 9px 0;
             font-size: 12px;
-            font-weight: 500;
+            font-weight: 700;
             cursor: pointer;
             background: #fee2e2;
             color: #b91c1c;
@@ -476,7 +480,7 @@
         .app-frame {
             flex: 1;
             display: flex;
-            min-height: calc(100vh - 60px);
+            min-height: calc(100vh - 62px);
         }
 
         /* Sidebar */
@@ -489,8 +493,8 @@
             display: flex;
             flex-direction: column;
             position: sticky;
-            top: 60px;
-            height: calc(100vh - 60px);
+            top: 62px;
+            height: calc(100vh - 62px);
             overflow: auto;
         }
 
@@ -501,12 +505,12 @@
         .app-sidebar__brand {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .app-sidebar__brand-icon {
-            width: 34px;
-            height: 34px;
+            width: 36px;
+            height: 36px;
             border-radius: 12px;
             background: rgba(255, 255, 255, 0.14);
             display: flex;
@@ -533,8 +537,8 @@
             color: rgba(255, 255, 255, 0.85);
             display: flex;
             align-items: center;
-            gap: 11px;
-            padding: 11px 12px;
+            gap: 12px;
+            padding: 11px 13px;
             border-radius: 13px;
             font-size: 13px;
             line-height: 1;
@@ -560,7 +564,7 @@
         }
 
         .app-sidebar__icon {
-            width: 22px;
+            width: 24px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -581,22 +585,22 @@
 
         .app-sidebar__footer {
             margin-top: auto;
-            padding: 12px 12px 16px;
+            padding: 12px 12px 14px;
         }
 
         .app-sidebar__user {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px 10px;
+            gap: 11px;
+            padding: 10px 11px;
             border-radius: 15px;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.12);
         }
 
         .app-sidebar__user-avatar {
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             border-radius: 14px;
             background: linear-gradient(135deg, #60a5fa, #2563eb);
             display: flex;
@@ -651,6 +655,124 @@
             font-size: 13px;
             color: var(--text-muted);
             margin-bottom: 18px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .page-header__actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .page-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            text-decoration: none;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .page-button--primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .page-button--soft {
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            background: rgba(37, 99, 235, 0.08);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .page-button--neutral {
+            border: 1px solid var(--border-color);
+            background: #fff;
+            color: inherit;
+        }
+
+        .page-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .info-card {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            background: #fff;
+        }
+
+        .info-card__label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .info-card__value {
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .section-panel {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            background: #fff;
+        }
+
+        .section-panel__title {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .section-panel__muted {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .report-tile {
+            text-decoration: none;
+            color: inherit;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 14px;
+            background: #fff;
+            transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+        }
+
+        .report-tile:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+            border-color: rgba(37, 99, 235, 0.25);
+        }
+
+        .report-tile__title {
+            font-weight: 800;
+        }
+
+        .report-tile__desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
         }
 
         /* Tables (used across modules) */
@@ -907,7 +1029,7 @@
                 globalSearchResults.innerHTML = `
                     <div class="search-result-state">
                         <span class="search-result-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
-                        <span>${escapeHtml(message)}</span>
+                        <span style="padding-top:2px;">${escapeHtml(message)}</span>
                     </div>
                 `;
                 globalSearchResults.classList.add('visible');
